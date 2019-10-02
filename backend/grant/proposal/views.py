@@ -12,8 +12,6 @@ from grant.email.send import send_email
 from grant.milestone.models import Milestone
 from grant.parser import body, query, paginated_fields
 from grant.rfp.models import RFP
-from grant.settings import PROPOSAL_STAKING_AMOUNT
-from grant.task.jobs import ProposalDeadline
 from grant.user.models import User
 from grant.utils import pagination
 from grant.utils.auth import (
@@ -25,7 +23,7 @@ from grant.utils.auth import (
     internal_webhook
 )
 from grant.utils.enums import Category
-from grant.utils.enums import ProposalStatus, ProposalStage, ContributionStatus
+from grant.utils.enums import ProposalStatus, ProposalStage
 from grant.utils.exceptions import ValidationException
 from grant.utils.misc import is_email, make_url, from_zat, make_explore_url
 from .models import (
@@ -34,12 +32,9 @@ from .models import (
     proposal_schema,
     ProposalUpdate,
     proposal_update_schema,
-    ProposalContribution,
-    proposal_contribution_schema,
     proposal_team,
     ProposalTeamInvite,
     proposal_team_invite_schema,
-    proposal_proposal_contributions_schema,
     db,
 )
 
@@ -223,7 +218,6 @@ def get_proposal_drafts():
     "content": fields.Str(required=True),
     "target": fields.Str(required=True),
     "payoutAddress": fields.Str(required=True),
-    "deadlineDuration": fields.Int(required=True),
     "milestones": fields.List(fields.Dict(), required=True),
     "rfpOptIn": fields.Bool(required=False, missing=None),
 })
@@ -256,8 +250,8 @@ def update_proposal(milestones, proposal_id, rfp_opt_in, **kwargs):
 def unlink_proposal_from_rfp(proposal_id):
     g.current_proposal.rfp_id = None
     # this will zero matching and bounty
-    g.current_proposal.update_rfp_opt_in(False)
-    g.current_proposal.rfp_opt_in = None
+    g.current_proposal.update_rfp_opt_in(False) 
+    g.current_proposal.rfp_opt_in = None 
     db.session.add(g.current_proposal)
     db.session.commit()
     return proposal_schema.dump(g.current_proposal), 200
@@ -271,7 +265,6 @@ def delete_proposal(proposal_id):
         ProposalStatus.PENDING,
         ProposalStatus.APPROVED,
         ProposalStatus.REJECTED,
-        ProposalStatus.STAKING,
     ]
     status = g.current_proposal.status
     if status not in deleteable_statuses:
@@ -293,17 +286,6 @@ def submit_for_approval_proposal(proposal_id):
     return proposal_schema.dump(g.current_proposal), 200
 
 
-@blueprint.route("/<proposal_id>/stake", methods=["GET"])
-@requires_team_member_auth
-def get_proposal_stake(proposal_id):
-    if g.current_proposal.status != ProposalStatus.STAKING:
-        return {"message": "ok"}, 400
-    contribution = g.current_proposal.get_staking_contribution(g.current_user.id)
-    if contribution:
-        return proposal_contribution_schema.dump(contribution)
-    return {"message": "ok"}, 404
-
-
 @blueprint.route("/<proposal_id>/publish", methods=["PUT"])
 @requires_team_member_auth
 def publish_proposal(proposal_id):
@@ -313,8 +295,6 @@ def publish_proposal(proposal_id):
         return {"message": "{}".format(str(e))}, 400
     db.session.add(g.current_proposal)
 
-    task = ProposalDeadline(g.current_proposal)
-    task.make_task()
 
     db.session.commit()
     return proposal_schema.dump(g.current_proposal), 200
@@ -359,13 +339,7 @@ def post_proposal_update(proposal_id, title, content):
     db.session.add(update)
     db.session.commit()
 
-    # Send email to all contributors
-    for u in g.current_proposal.contributors:
-        send_email(u.email_address, 'contribution_update', {
-            'proposal': g.current_proposal,
-            'proposal_update': update,
-            'update_url': make_url(f'/proposals/{proposal_id}?tab=updates&update={update.id}'),
-        })
+    # TODO: send email for followers/likers/starrers?
 
     dumped_update = proposal_update_schema.dump(update)
     return dumped_update, 201
@@ -430,175 +404,12 @@ def delete_proposal_team_invite(proposal_id, id_or_address):
     return {"message": "ok"}, 202
 
 
-@blueprint.route("/<proposal_id>/contributions", methods=["GET"])
-def get_proposal_contributions(proposal_id):
-    proposal = Proposal.query.filter_by(id=proposal_id).first()
-    if not proposal:
-        return {"message": "No proposal matching id"}, 404
-
-    top_contributions = ProposalContribution.query.filter_by(
-        proposal_id=proposal_id,
-        status=ContributionStatus.CONFIRMED,
-        staking=False,
-    ).order_by(
-        ProposalContribution.amount.desc()
-    ).limit(
-        5
-    ).all()
-    latest_contributions = ProposalContribution.query.filter_by(
-        proposal_id=proposal_id,
-        status=ContributionStatus.CONFIRMED,
-        staking=False,
-    ).order_by(
-        ProposalContribution.date_created.desc()
-    ).limit(
-        5
-    ).all()
-
-    return {
-        'top': proposal_proposal_contributions_schema.dump(top_contributions),
-        'latest': proposal_proposal_contributions_schema.dump(latest_contributions),
-    }
-
-
-@blueprint.route("/<proposal_id>/contributions/<contribution_id>", methods=["GET"])
-def get_proposal_contribution(proposal_id, contribution_id):
-    proposal = Proposal.query.filter_by(id=proposal_id).first()
-    if not proposal:
-        return {"message": "No proposal matching id"}, 404
-
-    contribution = ProposalContribution.query.filter_by(id=contribution_id).first()
-    if not contribution:
-        return {"message": "No contribution matching id"}, 404
-
-    return proposal_contribution_schema.dump(contribution)
-
-
-@blueprint.route("/<proposal_id>/contributions", methods=["POST"])
-@limiter.limit("30/day;10/hour;2/minute")
-@body({
-    "amount": fields.Str(required=True, validate=lambda p: 0.0001 <= float(p) <= 1000000),
-    "private": fields.Bool(required=False, missing=True)
-})
-def post_proposal_contribution(proposal_id, amount, private):
-    proposal = Proposal.query.filter_by(id=proposal_id).first()
-    if not proposal:
-        return {"message": "No proposal matching id"}, 404
-
-    code = 200
-    user = get_authed_user()
-    contribution = None
-
-    if user:
-        contribution = ProposalContribution \
-            .get_existing_contribution(user.id, proposal_id, amount, private)
-
-    if not contribution:
-        code = 201
-        contribution = proposal.create_contribution(
-            amount=amount,
-            private=private,
-            user_id=user.id if user else None,
-        )
-
-    dumped_contribution = proposal_contribution_schema.dump(contribution)
-    return dumped_contribution, code
-
-
-# Can't use <proposal_id> since webhook doesn't know proposal id
-@blueprint.route("/contribution/<contribution_id>/confirm", methods=["POST"])
-@internal_webhook
-@body({
-    "to": fields.Str(required=True),
-    "amount": fields.Str(required=True),
-    "txid": fields.Str(required=True),
-})
-def post_contribution_confirmation(contribution_id, to, amount, txid):
-    contribution = ProposalContribution.query.filter_by(
-        id=contribution_id).first()
-
-    if not contribution:
-        msg = f'Unknown contribution {contribution_id} confirmed with txid {txid}, amount {amount}'
-        capture_message(msg)
-        current_app.logger.warn(msg)
-        return {"message": "No contribution matching id"}, 404
-
-    if contribution.status == ContributionStatus.CONFIRMED:
-        # Duplicates can happen, just return ok
-        return {"message": "ok"}, 200
-
-    # Convert to whole zcash coins from zats
-    zec_amount = str(from_zat(int(amount)))
-
-    contribution.confirm(tx_id=txid, amount=zec_amount)
-    db.session.add(contribution)
-    db.session.flush()
-
-    if contribution.proposal.status == ProposalStatus.STAKING:
-        contribution.proposal.set_pending_when_ready()
-
-        # email progress of staking, partial or complete
-        send_email(contribution.user.email_address, 'staking_contribution_confirmed', {
-            'contribution': contribution,
-            'proposal': contribution.proposal,
-            'tx_explorer_url': make_explore_url(txid),
-            'fully_staked': contribution.proposal.is_staked,
-            'stake_target': str(PROPOSAL_STAKING_AMOUNT.normalize()),
-        })
-
-    else:
-        # Send to the user
-        if contribution.user:
-            send_email(contribution.user.email_address, 'contribution_confirmed', {
-                'contribution': contribution,
-                'proposal': contribution.proposal,
-                'tx_explorer_url': make_explore_url(txid),
-            })
-
-        # Send to the full proposal gang
-        for member in contribution.proposal.team:
-            send_email(member.email_address, 'proposal_contribution', {
-                'proposal': contribution.proposal,
-                'contribution': contribution,
-                'contributor': contribution.user,
-                'funded': contribution.proposal.funded,
-                'proposal_url': make_url(f'/proposals/{contribution.proposal.id}'),
-                'contributor_url': make_url(f'/profile/{contribution.user.id}') if contribution.user else '',
-            })
-
-    # on funding target reached.
-    contribution.proposal.set_funded_when_ready()
-
-    db.session.commit()
-    return {"message": "ok"}, 200
-
-
-@blueprint.route("/contribution/<contribution_id>", methods=["DELETE"])
-@requires_auth
-def delete_proposal_contribution(contribution_id):
-    contribution = ProposalContribution.query.filter_by(
-        id=contribution_id).first()
-    if not contribution:
-        return {"message": "No contribution matching id"}, 404
-
-    if contribution.status == ContributionStatus.CONFIRMED:
-        return {"message": "Cannot delete confirmed contributions"}, 400
-
-    if contribution.user_id != g.current_user.id:
-        return {"message": "Must be the user of the contribution to delete it"}, 403
-
-    contribution.status = ContributionStatus.DELETED
-    db.session.add(contribution)
-    db.session.commit()
-    return {"message": "ok"}, 202
 
 
 # request MS payout
 @blueprint.route("/<proposal_id>/milestone/<milestone_id>/request", methods=["PUT"])
 @requires_team_member_auth
 def request_milestone_payout(proposal_id, milestone_id):
-    if not g.current_proposal.is_funded:
-        return {"message": "Proposal is not fully funded"}, 400
     for ms in g.current_proposal.milestones:
         if ms.id == int(milestone_id):
             ms.request_payout(g.current_user.id)
@@ -618,10 +429,9 @@ def request_milestone_payout(proposal_id, milestone_id):
 @blueprint.route("/<proposal_id>/milestone/<milestone_id>/accept", methods=["PUT"])
 @requires_arbiter_auth
 def accept_milestone_payout_request(proposal_id, milestone_id):
-    if not g.current_proposal.is_funded:
-        return {"message": "Proposal is not fully funded"}, 400
     for ms in g.current_proposal.milestones:
-        if ms.id == int(milestone_id):
+        if ms.id == int(milestone_id)
+            # TODO: should g.current_user.id be removed?
             ms.accept_request(g.current_user.id)
             db.session.add(ms)
             db.session.commit()
@@ -645,10 +455,9 @@ def accept_milestone_payout_request(proposal_id, milestone_id):
     "reason": fields.Str(required=True, validate=validate.Length(min=2, max=200)),
 })
 def reject_milestone_payout_request(proposal_id, milestone_id, reason):
-    if not g.current_proposal.is_funded:
-        return {"message": "Proposal is not fully funded"}, 400
     for ms in g.current_proposal.milestones:
         if ms.id == int(milestone_id):
+            # TODO: should g.current_user.id be removed?
             ms.reject_request(g.current_user.id, reason)
             db.session.add(ms)
             db.session.commit()

@@ -47,11 +47,6 @@ export default [
     description: 'Sent when an admin rejects your submitted proposal',
   },
   {
-    id: 'proposal_contribution',
-    title: 'Proposal received contribution',
-    description: 'Sent when an a user contributes and it’s been confirmed on-chain',
-  },
-  {
     id: 'proposal_comment',
     title: 'Proposal comment',
     description:
@@ -68,37 +63,6 @@ export default [
     title: 'Proposal canceled',
     description:
       'Sent to the proposal team when an admin cancels the proposal after funding',
-  },
-  {
-    id: 'contribution_confirmed',
-    title: 'Contribution confirmed',
-    description: 'Sent after a contribution can be confirmed on chain',
-  },
-  {
-    id: 'contribution_update',
-    title: 'Contributed proposal update',
-    description: 'Sent when a proposal you contributed to posts an update',
-  },
-  {
-    id: 'contribution_refunded',
-    title: 'Contribution refunded',
-    description: 'Sent when an admin refunds a contribution',
-  },
-  {
-    id: 'contribution_proposal_failed',
-    title: 'Contribution proposal failed',
-    description:
-      'Sent to contributors when the deadline is reached and the proposal didn’t get fully funded',
-  },
-  {
-    id: 'contribution_proposal_canceled',
-    title: 'Contribution proposal canceled',
-    description: 'Sent to contributors when an admin cancels the proposal after funding',
-  },
-  {
-    id: 'contribution_expired',
-    title: 'Contribution expired',
-    description: 'Sent 24 hours after a contribution is made with no confirmation',
   },
   {
     id: 'comment_reply',

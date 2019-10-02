@@ -21,13 +21,6 @@ class FakeProposal(object):
     current_milestone = FakeMilestone()
 
 
-class FakeContribution(object):
-    id = 123
-    amount = '12.5'
-    proposal_id = 123
-    user_id = 123
-
-
 class FakeUpdate(object):
     id = 123
     title = 'Example update'
@@ -38,7 +31,6 @@ class FakeUpdate(object):
 user = FakeUser()
 proposal = FakeProposal()
 milestone = FakeMilestone()
-contribution = FakeContribution()
 update = FakeUpdate()
 
 example_email_args = {
@@ -77,16 +69,6 @@ example_email_args = {
         'proposal_url': 'http://someproposal.com',
         'admin_note': 'We think that you’ve asked for too much money for the project you’ve proposed, and for such an inexperienced team. Feel free to change your target amount, or elaborate on why you need so much money, and try applying again.',
     },
-    'proposal_contribution': {
-        'proposal': proposal,
-        'contribution': contribution,
-        'contributor': user,
-        # 'contributor': None,
-        'funded': '50',
-        'proposal_url': 'http://someproposal.com',
-        'contributor_url': 'http://someuser.com',
-        # 'contributor_url': None,
-    },
     'proposal_comment': {
         'author': user,
         'proposal': proposal,
@@ -99,40 +81,6 @@ example_email_args = {
     'proposal_canceled': {
         'proposal': proposal,
         'support_url': 'http://linktosupport.com',
-    },
-    'contribution_confirmed': {
-        'proposal': proposal,
-        'contribution': contribution,
-        'tx_explorer_url': 'http://someblockexplorer.com/tx/271857129857192579125',
-    },
-    'contribution_update': {
-        'proposal': proposal,
-        'proposal_update': update,
-        'update_url': 'http://someupdate.com',
-    },
-    'contribution_refunded': {
-        'proposal': proposal,
-        'contribution': contribution,
-        'tx_explorer_url': 'http://someblockexplorer.com/tx/271857129857192579125',
-    },
-    'contribution_proposal_failed': {
-        'proposal': proposal,
-        'contribution': contribution,
-        'refund_address': 'ztqdzvnK2SE27FCWg69EdissCBn7twnfd1XWLrftiZaT4rSFCkp7eQGQDSWXBF43sM5cyA4c8qyVjBP9Cf4zTcFJxf71ve8',
-        'account_settings_url': 'http://accountsettingsurl.com/',
-    },
-    'contribution_proposal_canceled': {
-        'proposal': proposal,
-        'contribution': contribution,
-        'refund_address': 'ztqdzvnK2SE27FCWg69EdissCBn7twnfd1XWLrftiZaT4rSFCkp7eQGQDSWXBF43sM5cyA4c8qyVjBP9Cf4zTcFJxf71ve8',
-        'account_settings_url': 'http://accountsettingsurl.com/',
-    },
-    'contribution_expired': {
-        'proposal': proposal,
-        'contribution': contribution,
-        'contact_url': 'http://somecontacturl.com',
-        'profile_url': 'http://someprofile.com',
-        'proposal_url': 'http://someproposal.com',
     },
     'comment_reply': {
         'author': user,

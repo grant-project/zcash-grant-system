@@ -21,7 +21,6 @@ export function formatUserForPost(user: User) {
 
 export function formatUserFromGet(user: UserState) {
   const bnUserProp = (p: any) => {
-    p.funded = toZat(p.funded);
     p.target = toZat(p.target);
     return p;
   };
@@ -35,10 +34,6 @@ export function formatUserFromGet(user: UserState) {
     });
   }
   user.proposals = user.proposals.map(bnUserProp);
-  user.contributions = user.contributions.map(c => {
-    c.amount = toZat((c.amount as any) as string);
-    return c;
-  });
   return user;
 }
 // NOTE: sync with pagination.py ProposalPagination.SORT_MAP
@@ -85,11 +80,6 @@ export function formatProposalFromGet(p: any): Proposal {
   const proposal = { ...p } as Proposal;
   proposal.proposalUrlId = generateSlugUrl(proposal.proposalId, proposal.title);
   proposal.target = toZat(p.target);
-  proposal.funded = toZat(p.funded);
-  proposal.contributionBounty = toZat(p.contributionBounty);
-  proposal.percentFunded = proposal.target.isZero()
-    ? 0
-    : proposal.funded.div(proposal.target.divn(100)).toNumber();
   if (proposal.milestones) {
     const msToFe = (m: any) => ({
       ...m,
@@ -143,12 +133,6 @@ export function massageSerializedState(state: AppState) {
       (state.proposal.detail.target as any) as string,
       16,
     );
-    state.proposal.detail.funded = new BN(
-      (state.proposal.detail.funded as any) as string,
-      16,
-    );
-    state.proposal.detail.contributionBounty = new BN((state.proposal.detail
-      .contributionBounty as any) as string);
     state.proposal.detail.milestones = state.proposal.detail.milestones.map(m => ({
       ...m,
       amount: new BN((m.amount as any) as string, 16),
@@ -164,8 +148,6 @@ export function massageSerializedState(state: AppState) {
   state.proposal.page.items = state.proposal.page.items.map(p => ({
     ...p,
     target: new BN((p.target as any) as string, 16),
-    funded: new BN((p.funded as any) as string, 16),
-    contributionBounty: new BN((p.contributionMatching as any) as string, 16),
     milestones: p.milestones.map(m => ({
       ...m,
       amount: new BN((m.amount as any) as string, 16),
@@ -173,16 +155,11 @@ export function massageSerializedState(state: AppState) {
   }));
   // users
   const bnUserProp = (p: UserProposal) => {
-    p.funded = new BN(p.funded, 16);
     p.target = new BN(p.target, 16);
     return p;
   };
   Object.values(state.users.map).forEach(user => {
     user.proposals = user.proposals.map(bnUserProp);
-    user.contributions = user.contributions.map(c => {
-      c.amount = new BN(c.amount, 16);
-      return c;
-    });
     user.comments = user.comments.map(c => {
       c.proposal = bnUserProp(c.proposal);
       return c;

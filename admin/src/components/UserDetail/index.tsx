@@ -16,8 +16,8 @@ import {
 } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import store from 'src/store';
-import { Proposal, Comment, Contribution } from 'src/types';
-import { formatDateSeconds, formatDateMs } from 'util/time';
+import { Proposal, Comment } from 'src/types';
+import { formatDateMs } from 'util/time';
 import { Link } from 'react-router-dom';
 import Back from 'components/Back';
 import './index.less';
@@ -195,7 +195,7 @@ class UserDetailNaked extends React.Component<Props, State> {
                 u.avatar && <a href={u.avatar.imageUrl}>{u.avatar.imageUrl}</a>,
               )}
             </Card>
-            <Collapse defaultActiveKey={['proposals', 'contributions']}>
+            <Collapse defaultActiveKey={['proposals']}>
               {/* PROPOSALS */}
               <Collapse.Panel
                 key="proposals"
@@ -215,38 +215,6 @@ class UserDetailNaked extends React.Component<Props, State> {
                       <List.Item.Meta
                         title={p.title || '(no title)'}
                         description={p.brief || '(no brief)'}
-                      />
-                    </List.Item>
-                  )}
-                />
-              </Collapse.Panel>
-
-              {/* CONTRIBUTIONS */}
-              <Collapse.Panel
-                key="contributions"
-                header={`contributions (${u.contributions.length})`}
-              >
-                <List
-                  size="small"
-                  dataSource={u.contributions}
-                  renderItem={(c: Contribution) => (
-                    <List.Item>
-                      <List.Item.Meta
-                        title={
-                          <div>
-                            <b>{c.amount}</b>
-                            ZEC to{' '}
-                            <Link to={`/proposals/${c.proposal.proposalId}`}>
-                              {c.proposal.title}
-                            </Link>{' '}
-                            on {formatDateSeconds(c.dateCreated)}
-                          </div>
-                        }
-                        description={
-                          <>
-                            id: {c.id}, status: {c.status}
-                          </>
-                        }
                       />
                     </List.Item>
                   )}

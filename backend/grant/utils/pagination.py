@@ -2,11 +2,11 @@ import abc
 from sqlalchemy import or_, and_
 
 from grant.comment.models import Comment, comments_schema
-from grant.proposal.models import db, ma, Proposal, ProposalContribution, ProposalArbiter, proposal_contributions_schema
+from grant.proposal.models import db, ma, Proposal, ProposalArbiter
 from grant.comment.models import Comment, comments_schema
 from grant.user.models import User, UserSettings, users_schema
 from grant.milestone.models import Milestone
-from .enums import ProposalStatus, ProposalStage, Category, ContributionStatus, ProposalArbiterStatus, MilestoneStage
+from .enums import ProposalStatus, ProposalStage, Category, ProposalArbiterStatus, MilestoneStage
 
 
 def extract_filters(sw, strings):
@@ -124,86 +124,6 @@ class ProposalPagination(Pagination):
         }
 
 
-class ContributionPagination(Pagination):
-    def __init__(self):
-        self.FILTERS = [f'STATUS_{s}' for s in ContributionStatus.list()]
-        self.FILTERS.extend(['REFUNDABLE', 'DONATION'])
-        self.PAGE_SIZE = 9
-        self.SORT_MAP = {
-            'CREATED:DESC': ProposalContribution.date_created.desc(),
-            'CREATED:ASC': ProposalContribution.date_created,
-            'AMOUNT:DESC': ProposalContribution.amount.desc(),
-            'AMOUNT:ASC': ProposalContribution.amount,
-        }
-
-    def paginate(
-        self,
-        schema: ma.Schema=proposal_contributions_schema,
-        query: db.Query=None,
-        page: int=1,
-        filters: list=None,
-        search: str=None,
-        sort: str='PUBLISHED:DESC',
-    ):
-        query = query or ProposalContribution.query
-        sort = sort or 'CREATED:DESC'
-
-        # FILTER
-        if filters:
-            self.validate_filters(filters)
-            status_filters = extract_filters('STATUS_', filters)
-
-            if status_filters:
-                query = query.filter(ProposalContribution.status.in_(status_filters))
-
-            if 'REFUNDABLE' in filters:
-                query = query.filter(ProposalContribution.refund_tx_id == None) \
-                    .filter(ProposalContribution.staking == False) \
-                    .filter(ProposalContribution.status == ContributionStatus.CONFIRMED) \
-                    .join(Proposal) \
-                    .filter(or_(
-                        Proposal.stage == ProposalStage.FAILED,
-                        Proposal.stage == ProposalStage.CANCELED,
-                    )) \
-                    .join(ProposalContribution.user) \
-                    .join(UserSettings) \
-                    .filter(UserSettings.refund_address != None)
-
-            if 'DONATION' in filters:
-                query = query.filter(ProposalContribution.refund_tx_id == None) \
-                    .filter(ProposalContribution.status == ContributionStatus.CONFIRMED) \
-                    .join(Proposal) \
-                    .filter(or_(
-                        Proposal.stage == ProposalStage.FAILED,
-                        Proposal.stage == ProposalStage.CANCELED,
-                    )) \
-                    .join(ProposalContribution.user, isouter=True) \
-                    .join(UserSettings, isouter=True) \
-                    .filter(UserSettings.refund_address == None)
-
-        # SORT (see self.SORT_MAP)
-        if sort:
-            self.validate_sort(sort)
-            query = query.order_by(self.SORT_MAP[sort])
-
-        # SEARCH can match txids or amounts
-        if search:
-            query = query.filter(or_(
-                ProposalContribution.amount.ilike(f'%{search}%'),
-                ProposalContribution.tx_id.ilike(f'%{search}%'),
-            ))
-
-        res = query.paginate(page, self.PAGE_SIZE, False)
-        return {
-            'page': res.page,
-            'total': res.total,
-            'page_size': self.PAGE_SIZE,
-            'items': schema.dump(res.items),
-            'filters': filters,
-            'search': search,
-            'sort': sort
-        }
-
 
 class UserPagination(Pagination):
     def __init__(self):
@@ -317,6 +237,5 @@ class CommentPagination(Pagination):
 
 # expose pagination methods here
 proposal = ProposalPagination().paginate
-contribution = ContributionPagination().paginate
 comment = CommentPagination().paginate
 user = UserPagination().paginate

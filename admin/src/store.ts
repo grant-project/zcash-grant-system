@@ -4,8 +4,6 @@ import axios, { AxiosError } from 'axios';
 import {
   User,
   Proposal,
-  Contribution,
-  ContributionArgs,
   RFP,
   RFPArgs,
   EmailExample,
@@ -184,26 +182,6 @@ async function deleteRFP(id: number) {
   await api.delete(`/admin/rfps/${id}`);
 }
 
-async function getContributions(params: PageQuery) {
-  const { data } = await api.get('/admin/contributions', { params });
-  return data;
-}
-
-async function getContribution(id: number) {
-  const { data } = await api.get(`/admin/contributions/${id}`);
-  return data;
-}
-
-async function createContribution(args: ContributionArgs) {
-  const { data } = await api.post('/admin/contributions', args);
-  return data;
-}
-
-async function editContribution(id: number, args: ContributionArgs) {
-  const { data } = await api.put(`/admin/contributions/${id}`, args);
-  return data;
-}
-
 // STORE
 const app = store({
   /*** DATA ***/
@@ -221,7 +199,6 @@ const app = store({
     proposalPendingCount: 0,
     proposalNoArbiterCount: 0,
     proposalMilestonePayoutsCount: 0,
-    contributionRefundableCount: 0,
   },
 
   financialsFetched: false,
@@ -231,16 +208,6 @@ const app = store({
       total: '0',
       matching: '0',
       bounty: '0',
-    },
-    contributions: {
-      total: '0',
-      gross: '0',
-      staking: '0',
-      funding: '0',
-      funded: '0',
-      refunding: '0',
-      refunded: '0',
-      donations: '0',
     },
     payouts: {
       total: '0',
@@ -296,15 +263,6 @@ const app = store({
   rfpSaved: false,
   rfpDeleting: false,
   rfpDeleted: false,
-
-  contributions: {
-    page: createDefaultPageData<Contribution>('CREATED:DESC'),
-  },
-
-  contributionDetail: null as null | Contribution,
-  contributionDetailFetching: false,
-  contributionSaving: false,
-  contributionSaved: false,
 
   emailExamples: {} as { [type: string]: EmailExample },
 
@@ -666,54 +624,6 @@ const app = store({
       handleApiError(e);
     }
     app.rfpDeleting = false;
-  },
-
-  // Contributions
-
-  async fetchContributions() {
-    return await pageFetch(app.contributions, getContributions);
-  },
-
-  setContributionPageQuery(params: Partial<PageQuery>) {
-    setPageParams(app.contributions, params);
-  },
-
-  resetContributionPageQuery() {
-    resetPageParams(app.contributions);
-  },
-
-  async fetchContributionDetail(id: number) {
-    app.contributionDetailFetching = true;
-    try {
-      app.contributionDetail = await getContribution(id);
-    } catch (e) {
-      handleApiError(e);
-    }
-    app.contributionDetailFetching = false;
-  },
-
-  async editContribution(id: number, args: ContributionArgs) {
-    app.contributionSaving = true;
-    app.contributionSaved = false;
-    try {
-      await editContribution(id, args);
-      app.contributionSaved = true;
-    } catch (e) {
-      handleApiError(e);
-    }
-    app.contributionSaving = false;
-  },
-
-  async createContribution(args: ContributionArgs) {
-    app.contributionSaving = true;
-    app.contributionSaved = false;
-    try {
-      await createContribution(args);
-      app.contributionSaved = true;
-    } catch (e) {
-      handleApiError(e);
-    }
-    app.contributionSaving = false;
   },
 });
 

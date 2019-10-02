@@ -10,7 +10,6 @@ from grant.milestone.models import Milestone
 from grant.proposal.models import (
     Proposal,
     ProposalArbiter,
-    ProposalContribution,
 )
 from grant.user.models import User, admin_user_schema
 
@@ -18,7 +17,6 @@ from grant.utils.enums import (
     ProposalStatus,
     ProposalStage,
     Category,
-    ContributionStatus,
 )
 
 last_email = None
@@ -137,14 +135,3 @@ def setup():
 def get_email():
     return last_email
 
-
-@blueprint.route("/contribution/confirm", methods=["GET"])
-def confirm_contributions():
-    contributions = ProposalContribution.query \
-        .filter(ProposalContribution.status == ContributionStatus.PENDING).all()
-    for c in contributions:
-        c.confirm('fakefundedtxid1', '23.456')
-        db.session.add(c)
-        c.proposal.set_funded_when_ready()
-    db.session.commit()
-    return {}

@@ -3,7 +3,6 @@ import {
   User,
   UserProposal,
   UserComment,
-  UserContribution,
   TeamInviteWithProposal,
   UserProposalArbiter,
 } from 'types';
@@ -23,7 +22,6 @@ export interface UserState extends User {
   pendingProposals: UserProposal[];
   arbitrated: UserProposalArbiter[];
   proposals: UserProposal[];
-  contributions: UserContribution[];
   comments: UserComment[];
   isFetchingInvites: boolean;
   hasFetchedInvites: boolean;
@@ -55,7 +53,6 @@ export const INITIAL_USER_STATE: UserState = {
   pendingProposals: [],
   arbitrated: [],
   proposals: [],
-  contributions: [],
   comments: [],
   isFetchingInvites: false,
   hasFetchedInvites: false,
@@ -158,13 +155,6 @@ export default (state = INITIAL_STATE, action: any) => {
       return updateTeamInvite(state, payload.userId, payload.inviteId, {
         isResponding: false,
         respondError: errorMessage,
-      });
-    // delete contribution
-    case types.DELETE_CONTRIBUTION:
-      return updateUserState(state, payload.userId, {
-        contributions: state.map[payload.userId].contributions.filter(
-          c => c.id !== payload.contributionId,
-        ),
       });
     // proposal delete
     case types.USER_DELETE_PROPOSAL_FULFILLED:

@@ -1,3 +1,5 @@
+// TODO: fix/update or delete
+
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Provider } from 'react-redux';
@@ -57,12 +59,12 @@ const cases: { [index: string]: any } = {
     funded: 5,
     milestoneOverrides: [msPaid, { stage: PAID }, msWaiting],
   }),
-  ['second - no vote']: generateProposal({
-    amount: 5,
-    funded: 5,
-    milestoneOverrides: [msPaid, { stage: ACCEPTED }, msWaiting],
-    contributorOverrides: [{ milestoneNoVotes: [false, true, false] }],
-  }),
+  // ['second - no vote']: generateProposal({
+  //   amount: 5,
+  //   funded: 5,
+  //   milestoneOverrides: [msPaid, { stage: ACCEPTED }, msWaiting],
+  //   contributorOverrides: [{ milestoneNoVotes: [false, true, false] }],
+  // }),
   ['second - rejected']: generateProposal({
     amount: 5,
     funded: 5,
@@ -85,12 +87,12 @@ const cases: { [index: string]: any } = {
     funded: 5,
     milestoneOverrides: [msPaid, msPaid, { stage: PAID }],
   }),
-  ['final - no vote']: generateProposal({
-    amount: 5,
-    funded: 5,
-    milestoneOverrides: [msPaid, msPaid, { stage: ACCEPTED }],
-    contributorOverrides: [{ milestoneNoVotes: [false, true, false] }],
-  }),
+  // ['final - no vote']: generateProposal({
+  //   amount: 5,
+  //   funded: 5,
+  //   milestoneOverrides: [msPaid, msPaid, { stage: ACCEPTED }],
+  //   contributorOverrides: [{ milestoneNoVotes: [false, true, false] }],
+  // }),
   ['final - rejected']: generateProposal({
     amount: 5,
     funded: 5,

@@ -1,7 +1,6 @@
 import {
   PROPOSAL_STATUS,
   RFP_STATUS,
-  CONTRIBUTION_STATUS,
   PROPOSAL_ARBITER_STATUS,
   MILESTONE_STAGE,
   PROPOSAL_STAGE,
@@ -85,12 +84,6 @@ export const PROPOSAL_STATUSES: Array<StatusSoT<PROPOSAL_STATUS>> = [
     tagColor: '#eb4118',
     hint:
       'Admin has rejected this proposal. User may adjust it and resubmit for approval.',
-  },
-  {
-    id: PROPOSAL_STATUS.STAKING,
-    tagDisplay: 'Staking',
-    tagColor: '#722ed1',
-    hint: 'This proposal is awaiting a staking contribution.',
   },
 ];
 
@@ -184,27 +177,6 @@ export const RFP_STATUSES: Array<StatusSoT<RFP_STATUS>> = [
   },
 ];
 
-export const CONTRIBUTION_STATUSES: Array<StatusSoT<CONTRIBUTION_STATUS>> = [
-  {
-    id: CONTRIBUTION_STATUS.PENDING,
-    tagDisplay: 'Pending',
-    tagColor: '#ffaa00',
-    hint: 'Contribution is currently waiting to be sent and confirmed on chain',
-  },
-  {
-    id: CONTRIBUTION_STATUS.CONFIRMED,
-    tagDisplay: 'Confirmed',
-    tagColor: '#108ee9',
-    hint: 'Contribution was confirmed on chain with multiple block confirmations',
-  },
-  {
-    id: CONTRIBUTION_STATUS.DELETED,
-    tagDisplay: 'Deleted',
-    tagColor: '#eb4118',
-    hint:
-      'User deleted the contribution before it was sent, or after it didn’t confirm after 24 hours',
-  },
-];
 
 export function getStatusById<E>(statuses: Array<StatusSoT<E>>, id: E) {
   const result = statuses.find(s => s.id === id);

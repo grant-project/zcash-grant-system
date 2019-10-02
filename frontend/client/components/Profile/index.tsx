@@ -16,15 +16,12 @@ import ProfileUser from './ProfileUser';
 import ProfileEdit from './ProfileEdit';
 import ProfilePendingList from './ProfilePendingList';
 import ProfileProposal from './ProfileProposal';
-import ProfileContribution from './ProfileContribution';
 import ProfileComment from './ProfileComment';
 import ProfileInvite from './ProfileInvite';
 import Placeholder from 'components/Placeholder';
 import Loader from 'components/Loader';
 import ExceptionPage from 'components/ExceptionPage';
-import ContributionModal from 'components/ContributionModal';
 import LinkableTabs from 'components/LinkableTabs';
-import { UserContribution } from 'types';
 import ProfileArbitrated from './ProfileArbitrated';
 import './style.less';
 
@@ -40,15 +37,7 @@ interface DispatchProps {
 
 type Props = RouteComponentProps<any> & StateProps & DispatchProps;
 
-interface State {
-  activeContribution: UserContribution | null;
-}
-
-class Profile extends React.Component<Props, State> {
-  state: State = {
-    activeContribution: null,
-  };
-
+class Profile extends React.Component<Props> {
   componentDidMount() {
     this.fetchData();
   }
@@ -64,7 +53,6 @@ class Profile extends React.Component<Props, State> {
 
   render() {
     const { authUser, match, location } = this.props;
-    const { activeContribution } = this.state;
     const userLookupParam = match.params.id;
 
     if (!userLookupParam) {
@@ -87,19 +75,11 @@ class Profile extends React.Component<Props, State> {
       return <ExceptionPage code="404" desc="No user could be found" />;
     }
 
-    const {
-      proposals,
-      pendingProposals,
-      contributions,
-      comments,
-      invites,
-      arbitrated,
-    } = user;
+    const { proposals, pendingProposals, comments, invites, arbitrated } = user;
 
     const isLoading = user.isFetching;
     const nonePending = pendingProposals.length === 0;
     const noneCreated = proposals.length === 0;
-    const noneFunded = contributions.length === 0;
     const noneCommented = comments.length === 0;
     const noneArbitrated = arbitrated.length === 0;
     const noneInvites = user.hasFetchedInvites && invites.length === 0;
@@ -156,25 +136,6 @@ class Profile extends React.Component<Props, State> {
                 ))}
               </div>
             </Tabs.TabPane>
-            <Tabs.TabPane tab={TabTitle('Funded', contributions.length)} key="funded">
-              <div>
-                {noneFunded && (
-                  <Placeholder
-                    loading={isLoading}
-                    title="No proposals funded"
-                    subtitle="There have not been any proposals funded."
-                  />
-                )}
-                {contributions.map(c => (
-                  <ProfileContribution
-                    key={c.id}
-                    userId={user.userid}
-                    contribution={c}
-                    showSendInstructions={this.openContributionModal}
-                  />
-                ))}
-              </div>
-            </Tabs.TabPane>
             <Tabs.TabPane tab={TabTitle('Comments', comments.length)} key="comments">
               <div>
                 {noneCommented && (
@@ -228,16 +189,6 @@ class Profile extends React.Component<Props, State> {
             )}
           </LinkableTabs>
         </div>
-
-        <ContributionModal
-          isVisible={!!activeContribution}
-          proposalId={
-            activeContribution ? activeContribution.proposal.proposalId : undefined
-          }
-          contributionId={activeContribution ? activeContribution.id : undefined}
-          hasNoButtons
-          handleClose={this.closeContributionModal}
-        />
       </div>
     );
   }
@@ -250,10 +201,6 @@ class Profile extends React.Component<Props, State> {
       this.props.fetchUserInvites(userLookupId);
     }
   }
-
-  private openContributionModal = (c: UserContribution) =>
-    this.setState({ activeContribution: c });
-  private closeContributionModal = () => this.setState({ activeContribution: null });
 }
 
 const TabTitle = (disp: string, count: number) => (

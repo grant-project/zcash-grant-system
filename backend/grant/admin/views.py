@@ -16,12 +16,8 @@ from grant.parser import body, query, paginated_fields
 from grant.proposal.models import (
     Proposal,
     ProposalArbiter,
-    ProposalContribution,
     proposals_schema,
     proposal_schema,
-    user_proposal_contributions_schema,
-    admin_proposal_contribution_schema,
-    admin_proposal_contributions_schema,
 )
 from grant.rfp.models import RFP, admin_rfp_schema, admin_rfps_schema
 from grant.user.models import User, UserSettings, admin_users_schema, admin_user_schema
@@ -30,7 +26,6 @@ from grant.utils.enums import Category
 from grant.utils.enums import (
     ProposalStatus,
     ProposalStage,
-    ContributionStatus,
     ProposalArbiterStatus,
     MilestoneStage,
     RFPStatus,
@@ -152,27 +147,13 @@ def stats():
         .filter(Proposal.stage != ProposalStage.CANCELED) \
         .filter(Milestone.stage == MilestoneStage.ACCEPTED) \
         .scalar()
-    # Count contributions on proposals that didn't get funded for users who have specified a refund address
-    contribution_refundable_count = db.session.query(func.count(ProposalContribution.id)) \
-        .filter(ProposalContribution.refund_tx_id == None) \
-        .filter(ProposalContribution.staking == False) \
-        .filter(ProposalContribution.status == ContributionStatus.CONFIRMED) \
-        .join(Proposal) \
-        .filter(or_(
-            Proposal.stage == ProposalStage.FAILED,
-            Proposal.stage == ProposalStage.CANCELED,
-        )) \
-        .join(ProposalContribution.user) \
-        .join(UserSettings) \
-        .filter(UserSettings.refund_address != None) \
-        .scalar()
+
     return {
         "userCount": user_count,
         "proposalCount": proposal_count,
         "proposalPendingCount": proposal_pending_count,
         "proposalNoArbiterCount": proposal_no_arbiter_count,
         "proposalMilestonePayoutsCount": proposal_milestone_payouts_count,
-        "contributionRefundableCount": contribution_refundable_count,
     }
 
 
@@ -217,9 +198,6 @@ def get_user(id):
         user['proposals'] = proposals_schema.dump(user_proposals)
         user_comments = Comment.get_by_user(user_db)
         user['comments'] = user_comments_schema.dump(user_comments)
-        contributions = ProposalContribution.get_by_userid(user_db.id)
-        contributions_dump = user_proposal_contributions_schema.dump(contributions)
-        user["contributions"] = contributions_dump
         return user
     return {"message": f"Could not find user with id {id}"}, 404
 
@@ -353,21 +331,12 @@ def delete_proposal(id):
 
 
 @blueprint.route('/proposals/<id>', methods=['PUT'])
-@body({
-    "contributionMatching": fields.Int(required=False, missing=None),
-    "contributionBounty": fields.Str(required=False, missing=None)
-})
+@body({})
 @admin.admin_auth_required
-def update_proposal(id, contribution_matching, contribution_bounty):
+def update_proposal(id):
     proposal = Proposal.query.filter(Proposal.id == id).first()
     if not proposal:
         return {"message": f"Could not find proposal with id {id}"}, 404
-
-    if contribution_matching is not None:
-        proposal.set_contribution_matching(contribution_matching)
-
-    if contribution_bounty is not None:
-        proposal.set_contribution_bounty(contribution_bounty)
 
     db.session.add(proposal)
     db.session.commit()
@@ -434,6 +403,7 @@ def paid_milestone_payout_request(id, mid, tx_id):
                     'proposal': proposal,
                     'milestone': ms,
                     'amount': amount,
+                    # TODO: should tx_explorer_url be deleted?
                     'tx_explorer_url': make_explore_url(tx_id),
                     'proposal_milestones_url': make_url(f'/proposals/{proposal.id}?tab=milestones'),
                 })
@@ -547,126 +517,6 @@ def delete_rfp(rfp_id):
     return {"message": "ok"}, 200
 
 
-# Contributions
-
-
-@blueprint.route('/contributions', methods=['GET'])
-@query(paginated_fields)
-@admin.admin_auth_required
-def get_contributions(page, filters, search, sort):
-    filters_workaround = request.args.getlist('filters[]')
-    page = pagination.contribution(
-        page=page,
-        schema=admin_proposal_contributions_schema,
-        filters=filters_workaround,
-        search=search,
-        sort=sort,
-    )
-    return page
-
-
-@blueprint.route('/contributions', methods=['POST'])
-@body({
-    "proposalId": fields.Int(required=True),
-    "userId": fields.Int(required=True),
-    "status": fields.Str(required=True, validate=validate.OneOf(choices=ContributionStatus.list())),
-    "amount": fields.Str(required=True),
-    "txId": fields.Str(required=False, missing=None)
-})
-@admin.admin_auth_required
-def create_contribution(proposal_id, user_id, status, amount, tx_id):
-    # Some fields set manually since we're admin, and normally don't do this
-    contribution = ProposalContribution(
-        proposal_id=proposal_id,
-        user_id=user_id,
-        amount=amount,
-    )
-    contribution.status = status
-    contribution.tx_id = tx_id
-
-    db.session.add(contribution)
-    db.session.flush()
-
-    contribution.proposal.set_pending_when_ready()
-    contribution.proposal.set_funded_when_ready()
-
-    db.session.commit()
-    return admin_proposal_contribution_schema.dump(contribution), 200
-
-
-@blueprint.route('/contributions/<contribution_id>', methods=['GET'])
-@admin.admin_auth_required
-def get_contribution(contribution_id):
-    contribution = ProposalContribution.query.filter(ProposalContribution.id == contribution_id).first()
-    if not contribution:
-        return {"message": "No contribution matching that id"}, 404
-
-    return admin_proposal_contribution_schema.dump(contribution), 200
-
-
-@blueprint.route('/contributions/<contribution_id>', methods=['PUT'])
-@body({
-    "proposalId": fields.Int(required=False, missing=None),
-    "userId": fields.Int(required=False, missing=None),
-    "status": fields.Str(required=False, missing=None, validate=validate.OneOf(choices=ContributionStatus.list())),
-    "amount": fields.Str(required=False, missing=None),
-    "txId": fields.Str(required=False, missing=None),
-    "refundTxId": fields.Str(required=False, allow_none=True, missing=None),
-})
-@admin.admin_auth_required
-def edit_contribution(contribution_id, proposal_id, user_id, status, amount, tx_id, refund_tx_id):
-    contribution = ProposalContribution.query.filter(ProposalContribution.id == contribution_id).first()
-    if not contribution:
-        return {"message": "No contribution matching that id"}, 404
-    had_refund = contribution.refund_tx_id
-
-    # do not allow editing certain fields on contributions once a proposal has become funded
-    if (proposal_id or user_id or status or amount or tx_id) and contribution.proposal.is_funded:
-        return {"message": "Cannot edit contributions to fully-funded proposals"}, 400
-
-    # Proposal ID (must belong to an existing proposal)
-    if proposal_id:
-        proposal = Proposal.query.filter(Proposal.id == proposal_id).first()
-        if not proposal:
-            return {"message": "No proposal matching that id"}, 400
-        contribution.proposal_id = proposal_id
-    # User ID (must belong to an existing user or 0 to unset)
-    if user_id is not None:
-        if user_id == 0:
-            contribution.user_id = None
-        else:
-            user = User.query.filter(User.id == user_id).first()
-            if not user:
-                return {"message": "No user matching that id"}, 400
-            contribution.user_id = user_id
-    # Status (must be in list of statuses)
-    if status:
-        if not ContributionStatus.includes(status):
-            return {"message": "Invalid status"}, 400
-        contribution.status = status
-    # Amount (must be a Decimal parseable)
-    if amount:
-        try:
-            contribution.amount = str(Decimal(amount))
-        except:
-            return {"message": "Amount could not be parsed as number"}, 400
-    # Transaction ID (no validation)
-    if tx_id is not None:
-        contribution.tx_id = tx_id
-    # Refund TX ID (no validation)
-    if refund_tx_id is not None:
-        contribution.refund_tx_id = refund_tx_id
-
-    db.session.add(contribution)
-    db.session.flush()
-
-    contribution.proposal.set_pending_when_ready()
-    contribution.proposal.set_funded_when_ready()
-
-    db.session.commit()
-    return admin_proposal_contribution_schema.dump(contribution), 200
-
-
 # Comments
 
 
@@ -704,124 +554,3 @@ def edit_comment(comment_id, hidden, reported):
 
     db.session.commit()
     return admin_comment_schema.dump(comment)
-
-
-# Financials
-
-@blueprint.route("/financials", methods=["GET"])
-@admin.admin_auth_required
-def financials():
-
-    nfmt = '999999.99999999'  # smallest unit of ZEC
-
-    def sql_pc(where: str):
-        return f"SELECT SUM(TO_NUMBER(amount, '{nfmt}')) FROM proposal_contribution WHERE {where}"
-
-    def sql_pc_p(where: str):
-        return f'''
-            SELECT SUM(TO_NUMBER(amount, '{nfmt}'))
-                FROM proposal_contribution as pc
-                INNER JOIN proposal as p ON pc.proposal_id = p.id
-                LEFT OUTER JOIN "user" as u ON pc.user_id = u.id
-				LEFT OUTER JOIN user_settings as us ON u.id = us.user_id
-                WHERE {where}
-        '''
-
-    def sql_ms(where: str):
-        return f'''
-            SELECT SUM(TO_NUMBER(ms.payout_percent, '999')/100 * TO_NUMBER(p.target, '999999.99999999'))
-                FROM milestone as ms
-                INNER JOIN proposal as p ON ms.proposal_id = p.id
-                WHERE {where}
-        '''
-
-    def ex(sql: str):
-        res = db.engine.execute(text(sql))
-        return [row[0] if row[0] else Decimal(0) for row in res][0].normalize()
-
-    contributions = {
-        'total': str(ex(sql_pc("status = 'CONFIRMED' AND staking = FALSE"))),
-        'staking': str(ex(sql_pc("status = 'CONFIRMED' AND staking = TRUE"))),
-        'funding': str(ex(sql_pc_p("pc.status = 'CONFIRMED' AND pc.staking = FALSE AND p.stage = 'FUNDING_REQUIRED'"))),
-        'funded': str(ex(sql_pc_p("pc.status = 'CONFIRMED' AND pc.staking = FALSE AND p.stage in ('WIP', 'COMPLETED')"))),
-        # should have a refund_address
-        'refunding': str(ex(sql_pc_p(
-            '''
-            pc.status = 'CONFIRMED' AND 
-            pc.staking = FALSE AND 
-            pc.refund_tx_id IS NULL AND 
-            p.stage IN ('CANCELED', 'FAILED') AND
-            us.refund_address IS NOT NULL
-            '''
-        ))),
-        # here we don't care about current refund_address of user, just that there has been a refund_tx_id
-        'refunded': str(ex(sql_pc_p(
-            '''
-            pc.status = 'CONFIRMED' AND 
-            pc.staking = FALSE AND 
-            pc.refund_tx_id IS NOT NULL AND 
-            p.stage IN ('CANCELED', 'FAILED')
-            '''
-        ))),
-        # if there is no user, or the user hasn't any refund_address
-        'donations': str(ex(sql_pc_p(
-            '''
-            pc.status = 'CONFIRMED' AND 
-            pc.staking = FALSE AND 
-            pc.refund_tx_id IS NULL AND 
-            (pc.user_id IS NULL OR us.refund_address IS NULL) AND 
-            p.stage IN ('CANCELED', 'FAILED')
-            '''
-        ))),
-        'gross': str(ex(sql_pc_p("pc.status = 'CONFIRMED' AND pc.refund_tx_id IS NULL"))),
-    }
-
-    po_due = ex(sql_ms("ms.stage = 'ACCEPTED'"))  # payments accepted but not yet marked as paid
-    po_paid = ex(sql_ms("ms.stage = 'PAID'"))  # will catch paid ms from all proposals regardless of status/stage
-    # expected payments
-    po_future = ex(sql_ms("ms.stage IN ('IDLE', 'REJECTED', 'REQUESTED') AND p.stage IN ('WIP', 'COMPLETED')"))
-    po_total = po_due + po_paid + po_future
-
-    payouts = {
-        'total': str(po_total),
-        'due': str(po_due),
-        'paid': str(po_paid),
-        'future': str(po_future),
-    }
-
-    grants = {
-        'total': '0',
-        'matching': '0',
-        'bounty': '0',
-    }
-
-    def add_str_dec(a: str, b: str):
-        return str((Decimal(a) + Decimal(b)).quantize(Decimal('0.001'), rounding=ROUND_HALF_DOWN))
-
-    proposals = Proposal.query.all()
-
-    for p in proposals:
-        # CANCELED proposals excluded, though they could have had milestones paid out with grant funds
-        if p.stage in [ProposalStage.WIP, ProposalStage.COMPLETED]:
-            # matching
-            matching = Decimal(p.contributed) * Decimal(p.contribution_matching)
-            remaining = max(Decimal(p.target) - Decimal(p.contributed), Decimal('0.0'))
-            if matching > remaining:
-                matching = remaining
-
-            # bounty
-            bounty = Decimal(p.contribution_bounty)
-            remaining = max(Decimal(p.target) - (matching + Decimal(p.contributed)), Decimal('0.0'))
-            if bounty > remaining:
-                bounty = remaining
-
-            grants['matching'] = add_str_dec(grants['matching'], matching)
-            grants['bounty'] = add_str_dec(grants['bounty'], bounty)
-            grants['total'] = add_str_dec(grants['total'], matching + bounty)
-
-    return {
-        'grants': grants,
-        'contributions': contributions,
-        'payouts': payouts,
-        'net': str(Decimal(contributions['gross']) - Decimal(payouts['paid']))
-    }

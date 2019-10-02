@@ -13,13 +13,11 @@ import { Tabs, Icon, Dropdown, Menu, Button, Alert } from 'antd';
 import { AlertProps } from 'antd/lib/alert';
 import ExceptionPage from 'components/ExceptionPage';
 import HeaderDetails from 'components/HeaderDetails';
-import CampaignBlock from './CampaignBlock';
 import TeamBlock from './TeamBlock';
 import RFPBlock from './RFPBlock';
 import Milestones from './Milestones';
 import CommentsTab from './Comments';
 import UpdatesTab from './Updates';
-import ContributorsTab from './Contributors';
 import UpdateModal from './UpdateModal';
 import CancelModal from './CancelModal';
 import classnames from 'classnames';
@@ -99,6 +97,7 @@ export class ProposalDetail extends React.Component<Props, State> {
       return <Loader size="large" />;
     }
 
+    // TODO: switch 'isTrustee' to 'proposal.isTeamMember' ?
     const isTrustee = !!proposal.team.find(tm => tm.userid === (user && user.userid));
     const isLive = proposal.status === STATUS.LIVE;
 
@@ -143,16 +142,6 @@ export class ProposalDetail extends React.Component<Props, State> {
           </>
         ),
         type: 'error',
-      },
-      [STATUS.STAKING]: {
-        blurb: (
-          <>
-            Your proposal is awaiting a staking contribution. Visit your{' '}
-            <Link to="/profile?tab=pending">profile's pending tab</Link> for more
-            information.
-          </>
-        ),
-        type: 'warning',
       },
     } as { [key in STATUS]: { blurb: ReactNode; type: AlertProps['type'] } };
     let banner = statusBanner[proposal.status];
@@ -223,7 +212,7 @@ export class ProposalDetail extends React.Component<Props, State> {
               )}
           </div>
           <div className="Proposal-top-side">
-            <CampaignBlock proposal={proposal} isPreview={!isLive} />
+            {/* TODO: DetailsBlock ??? */}
             <TeamBlock proposal={proposal} />
             {proposal.rfp && <RFPBlock rfp={proposal.rfp} />}
           </div>
@@ -241,9 +230,6 @@ export class ProposalDetail extends React.Component<Props, State> {
             </Tabs.TabPane>
             <Tabs.TabPane tab="Updates" key="updates" disabled={!isLive}>
               <UpdatesTab proposalId={proposal.proposalId} />
-            </Tabs.TabPane>
-            <Tabs.TabPane tab="Contributors" key="contributors" disabled={!isLive}>
-              <ContributorsTab proposalId={proposal.proposalId} />
             </Tabs.TabPane>
           </LinkableTabs>
         </div>

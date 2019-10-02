@@ -10,7 +10,6 @@ import Basics from './Basics';
 import Team from './Team';
 import Details from './Details';
 import Milestones from './Milestones';
-import Payment from './Payment';
 import Review from './Review';
 import Preview from './Preview';
 import Final from './Final';
@@ -29,7 +28,6 @@ export enum CREATE_STEP {
   TEAM = 'TEAM',
   DETAILS = 'DETAILS',
   MILESTONES = 'MILESTONES',
-  PAYMENT = 'PAYMENT',
   REVIEW = 'REVIEW',
 }
 
@@ -38,7 +36,6 @@ const STEP_ORDER = [
   CREATE_STEP.TEAM,
   CREATE_STEP.DETAILS,
   CREATE_STEP.MILESTONES,
-  CREATE_STEP.PAYMENT,
   CREATE_STEP.REVIEW,
 ];
 
@@ -81,14 +78,6 @@ const STEP_INFO: { [key in CREATE_STEP]: StepInfo } = {
     help:
       'Contributors are more willing to fund proposals with funding spread across multiple milestones',
     component: Milestones,
-  },
-  [CREATE_STEP.PAYMENT]: {
-    short: 'Payment',
-    title: 'Choose how you get paid',
-    subtitle: 'You’ll only be paid if your funding target is reached',
-    help:
-      'Double check your address, and make sure it’s secure. Once sent, payments are irreversible!',
-    component: Payment,
   },
   [CREATE_STEP.REVIEW]: {
     short: 'Review',

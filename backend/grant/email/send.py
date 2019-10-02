@@ -84,20 +84,6 @@ def proposal_rejected(email_args):
     }
 
 
-def proposal_contribution(email_args):
-    if email_args['contribution'].private:
-        email_args['contributor'] = None
-    return {
-        'subject': 'You just got a contribution!',
-        'title': 'You just got a contribution',
-        'preview': '{} just contributed {} to your proposal {}'.format(
-            email_args['contributor'].display_name if email_args['contributor'] else 'An anonymous contributor',
-            email_args['contribution'].amount,
-            email_args['proposal'].title,
-        ),
-        'subscription': EmailSubscription.MY_PROPOSAL_FUNDED,
-    }
-
 
 def proposal_comment(email_args):
     return {
@@ -129,90 +115,6 @@ def proposal_canceled(email_args):
         'preview': 'Your proposal entitled {} has been canceled, and your contributors will be refunded'.format(
             email_args['proposal'].title,
         ),
-    }
-
-
-def staking_contribution_confirmed(email_args):
-    subject = 'Your proposal has been staked!' if \
-        email_args['fully_staked'] else \
-        'Partial staking contribution confirmed'
-    return {
-        'subject': subject,
-        'title': 'Staking contribution confirmed',
-        'preview': 'Your {} ZEC staking contribution to {} has been confirmed!'.format(
-            email_args['contribution'].amount,
-            email_args['proposal'].title
-        ),
-        'subscription': EmailSubscription.MY_PROPOSAL_FUNDED,
-    }
-
-
-def contribution_confirmed(email_args):
-    return {
-        'subject': 'Your contribution has been confirmed!',
-        'title': 'Contribution confirmed',
-        'preview': 'Your {} ZEC contribution to {} has been confirmed!'.format(
-            email_args['contribution'].amount,
-            email_args['proposal'].title
-        ),
-        'subscription': EmailSubscription.FUNDED_PROPOSAL_CONTRIBUTION,
-    }
-
-
-def contribution_update(email_args):
-    return {
-        'subject': 'The {} team posted an update'.format(email_args['proposal'].title),
-        'title': 'New update',
-        'preview': 'The {} team has posted a new update entitled "{}"'.format(
-            email_args['proposal'].title,
-            email_args['proposal_update'].title,
-        ),
-        'subscription': EmailSubscription.FUNDED_PROPOSAL_UPDATE,
-    }
-
-
-def contribution_refunded(email_args):
-    return {
-        'subject': 'Your contribution has been refunded!',
-        'title': 'Contribution refunded',
-        'preview': 'Your recent contribution to {} has been refunded!'.format(
-            email_args['proposal'].title
-        ),
-        'subscription': EmailSubscription.FUNDED_PROPOSAL_CONTRIBUTION,
-    }
-
-
-def contribution_proposal_failed(email_args):
-    return {
-        'subject': 'A proposal you contributed to failed to get funding',
-        'title': 'Proposal failed',
-        'preview': 'The proposal entitled {} failed to get funding, here’s how to get a refund'.format(
-            email_args['proposal'].title,
-        ),
-        'subscription': EmailSubscription.FUNDED_PROPOSAL_FUNDED,
-    }
-
-
-def contribution_proposal_canceled(email_args):
-    return {
-        'subject': 'A proposal you contributed to has been canceled',
-        'title': 'Proposal canceled',
-        'preview': 'The proposal entitled {} has been canceled, here’s how to get a refund'.format(
-            email_args['proposal'].title,
-        ),
-        'subscription': EmailSubscription.FUNDED_PROPOSAL_FUNDED,
-    }
-
-
-def contribution_expired(email_args):
-    return {
-        'subject': 'Your contribution expired',
-        'title': 'Contribution expired',
-        'preview': 'Your {} ZEC contribution to {} could not be confirmed, and has expired'.format(
-            email_args['contribution'].amount,
-            email_args['proposal'].title,
-        ),
-        'subscription': EmailSubscription.FUNDED_PROPOSAL_CONTRIBUTION,
     }
 
 
@@ -316,17 +218,9 @@ get_info_lookup = {
     'change_password': change_password_info,
     'proposal_approved': proposal_approved,
     'proposal_rejected': proposal_rejected,
-    'proposal_contribution': proposal_contribution,
     'proposal_comment': proposal_comment,
     'proposal_failed': proposal_failed,
     'proposal_canceled': proposal_canceled,
-    'staking_contribution_confirmed': staking_contribution_confirmed,
-    'contribution_confirmed': contribution_confirmed,
-    'contribution_update': contribution_update,
-    'contribution_refunded': contribution_refunded,
-    'contribution_proposal_failed': contribution_proposal_failed,
-    'contribution_proposal_canceled': contribution_proposal_canceled,
-    'contribution_expired': contribution_expired,
     'comment_reply': comment_reply,
     'proposal_arbiter': proposal_arbiter,
     'milestone_request': milestone_request,

@@ -1,5 +1,4 @@
 import {
-  Contributor,
   MILESTONE_STAGE,
   Proposal,
   ProposalMilestone,
@@ -30,68 +29,17 @@ export function getGovernanceMilestonesProps({
 
 export function generateProposal({
   amount = 10,
-  funded = 5,
   created = Date.now(),
   milestoneOverrides = [],
-  contributorOverrides = [],
   milestoneCount = 3,
 }: {
   amount?: number;
-  funded?: number;
   created?: number;
   deadline?: number;
   milestoneOverrides?: Array<Partial<ProposalMilestone>>;
-  contributorOverrides?: Array<Partial<Contributor>>;
   milestoneCount?: number;
 }) {
   const amountBn = oneZec.mul(new BN(amount));
-  const fundedBn = oneZec.mul(new BN(funded));
-  const percentFunded = amount / funded;
-
-  let contributors = [
-    {
-      address: '0xAAA91bde2303f2f43325b2108d26f1eaba1e32b',
-      contributionAmount: new BN(0),
-      refundVote: false,
-      refunded: false,
-      proportionalContribution: '',
-      milestoneNoVotes: [false],
-    },
-    {
-      address: '0xBBB491bde2303f2f43325b2108d26f1eaba1e32b',
-      contributionAmount: new BN(0),
-      refundVote: false,
-      refunded: false,
-      proportionalContribution: '',
-      milestoneNoVotes: [false],
-    },
-    {
-      address: '0xCCC491bde2303f2f43325b2108d26f1eaba1e32b',
-      contributionAmount: new BN(0),
-      refundVote: false,
-      refunded: false,
-      proportionalContribution: '',
-      milestoneNoVotes: [false],
-    },
-    {
-      address: '0xDDD491bde2303f2f43325b2108d26f1eaba1e32b',
-      contributionAmount: new BN(0),
-      refundVote: false,
-      refunded: false,
-      proportionalContribution: '',
-      milestoneNoVotes: [false],
-    },
-  ];
-
-  const eachContributorAmount = fundedBn.div(new BN(contributors.length));
-  contributors.forEach(c => (c.contributionAmount = eachContributorAmount));
-  contributorOverrides.forEach((co, idx) => {
-    Object.assign(contributors[idx], co);
-  });
-
-  if (funded === 0) {
-    contributors = [];
-  }
 
   const genMilestoneTitle = () => {
     const ts = ['40chr ', 'Really ', 'Really ', 'Long ', 'Milestone Title'];
@@ -145,23 +93,16 @@ export function generateProposal({
     proposalId: 12345,
     status: STATUS.DRAFT,
     proposalUrlId: '12345-crowdfund-title',
-    proposalAddress: '0x033fDc6C01DC2385118C7bAAB88093e22B8F0710',
     payoutAddress: 'z123',
     dateCreated: created / 1000,
     datePublished: created / 1000,
     dateApproved: created / 1000,
-    deadlineDuration: 86400 * 60,
     target: amountBn,
-    funded: fundedBn,
-    percentFunded,
-    contributionMatching: 0,
-    contributionBounty: new BN(0),
     title: 'Crowdfund Title',
     brief: 'A cool test crowdfund',
     content: 'body',
     stage: PROPOSAL_STAGE.WIP,
     category: PROPOSAL_CATEGORY.COMMUNITY,
-    isStaked: true,
     arbiter: {
       status: PROPOSAL_ARBITER_STATUS.ACCEPTED,
       user: {

@@ -5,7 +5,6 @@ import {
   Proposal,
   ProposalUpdates,
   Comment,
-  ProposalContributions,
   LoadableProposalPage,
   Moreable,
 } from 'types';
@@ -33,7 +32,6 @@ export interface ProposalState {
   updatesError: null | string;
   isFetchingUpdates: boolean;
 
-  proposalContributions: { [id: string]: ProposalContributions };
   fetchContributionsError: null | string;
   isFetchingContributions: boolean;
 
@@ -95,7 +93,6 @@ export const INITIAL_STATE: ProposalState = {
   updatesError: null,
   isFetchingUpdates: false,
 
-  proposalContributions: {},
   fetchContributionsError: null,
   isFetchingContributions: false,
 
@@ -114,17 +111,6 @@ function addUpdates(state: ProposalState, payload: ProposalUpdates) {
       [payload.proposalId]: payload,
     },
     isFetchingUpdates: false,
-  };
-}
-
-function addContributions(state: ProposalState, payload: ProposalContributions) {
-  return {
-    ...state,
-    proposalContributions: {
-      ...state.proposalContributions,
-      [payload.proposalId]: payload,
-    },
-    isFetchingContributions: false,
   };
 }
 
@@ -388,21 +374,6 @@ export default (state = INITIAL_STATE, action: any) => {
         ...state,
         updatesError: (payload && payload.message) || payload.toString(),
         isFetchingUpdates: false,
-      };
-
-    case types.PROPOSAL_CONTRIBUTIONS_PENDING:
-      return {
-        ...state,
-        fetchContributionsError: null,
-        isFetchingContributions: true,
-      };
-    case types.PROPOSAL_CONTRIBUTIONS_FULFILLED:
-      return addContributions(state, payload);
-    case types.PROPOSAL_CONTRIBUTIONS_REJECTED:
-      return {
-        ...state,
-        fetchContributionsError: (payload && payload.message) || payload.toString(),
-        isFetchingContributions: false,
       };
 
     case types.POST_PROPOSAL_COMMENT_PENDING:

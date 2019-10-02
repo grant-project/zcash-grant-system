@@ -9,7 +9,6 @@ from grant.app import create_app
 from grant.extensions import limiter
 from grant.milestone.models import Milestone
 from grant.proposal.models import Proposal
-from grant.settings import PROPOSAL_STAKING_AMOUNT
 from grant.task.jobs import ProposalReminder
 from grant.user.models import User, SocialMedia, db, Avatar
 from grant.utils.enums import ProposalStatus
@@ -128,7 +127,6 @@ class BaseProposalCreatorConfig(BaseUserConfig):
             category=test_proposal["category"],
             target=test_proposal["target"],
             payout_address=test_proposal["payoutAddress"],
-            deadline_duration=test_proposal["deadlineDuration"]
         )
         self._proposal.team.append(self.user)
         db.session.add(self._proposal)
@@ -173,14 +171,3 @@ class BaseProposalCreatorConfig(BaseUserConfig):
         proposal_reminder = ProposalReminder(self.proposal.id)
         proposal_reminder.make_task()
 
-    @patch('requests.get', side_effect=mock_blockchain_api_requests)
-    def stake_proposal(self, mock_get):
-        # 1. submit
-        self.proposal.submit_for_approval()
-        # 2. get staking contribution
-        contribution = self.proposal.get_staking_contribution(self.user.id)
-        # 3. fake a confirmation
-        contribution.confirm(tx_id='tx', amount=str(PROPOSAL_STAKING_AMOUNT.normalize()))
-        db.session.add(contribution)
-        db.session.flush()
-        self.proposal.set_pending_when_ready()

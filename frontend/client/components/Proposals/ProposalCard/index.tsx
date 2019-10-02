@@ -1,11 +1,8 @@
 import React from 'react';
-import classnames from 'classnames';
-import { Progress } from 'antd';
 import { Redirect } from 'react-router-dom';
 import { Proposal } from 'types';
 import Card from 'components/Card';
 import UserAvatar from 'components/UserAvatar';
-import UnitDisplay from 'components/UnitDisplay';
 import './style.less';
 
 export class ProposalCard extends React.Component<Proposal> {
@@ -16,47 +13,42 @@ export class ProposalCard extends React.Component<Proposal> {
     }
     const {
       title,
-      proposalAddress,
       proposalUrlId,
       category,
       datePublished,
       dateCreated,
       team,
       target,
-      funded,
-      contributionMatching,
-      percentFunded,
     } = this.props;
 
     return (
       <Card className="ProposalCard" to={`/proposals/${proposalUrlId}`} title={title}>
-        {contributionMatching > 0 && (
-          <div className="ProposalCard-ribbon">
+        {/* <div className="ProposalCard-ribbon">
             <span>
               x2
               <small>matching</small>
             </span>
-          </div>
-        )}
+          </div> */}
         <div className="ProposalCard-funding">
           <div className="ProposalCard-funding-raised">
-            <UnitDisplay value={funded} symbol="ZEC" /> <small>raised</small> of{' '}
-            <UnitDisplay value={target} symbol="ZEC" /> goal
+            {target} goal
+            {/* <UnitDisplay value={funded} symbol="ZEC" /> <small>raised</small> of{' '}
+            <UnitDisplay value={target} symbol="ZEC" /> goal */}
           </div>
-          <div
+          {/* <div
             className={classnames({
               ['ProposalCard-funding-percent']: true,
               ['is-funded']: percentFunded >= 100,
             })}
           >
             {percentFunded}%
-          </div>
+          </div> */}
         </div>
-        <Progress
+        {/* <Progress
           percent={percentFunded}
           status={percentFunded >= 100 ? 'success' : 'active'}
           showInfo={false}
-        />
+        /> */}
 
         <div className="ProposalCard-team">
           <div className="ProposalCard-team-name">
@@ -73,7 +65,7 @@ export class ProposalCard extends React.Component<Proposal> {
             ))}
           </div>
         </div>
-        <div className="ProposalCard-address">{proposalAddress}</div>
+        {/* <div className="ProposalCard-address">{proposalAddress}</div> */}
         <Card.Info category={category} time={(datePublished || dateCreated) * 1000} />
       </Card>
     );

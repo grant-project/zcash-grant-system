@@ -14,7 +14,6 @@ class CustomEnum():
 class ProposalStatusEnum(CustomEnum):
     DRAFT = 'DRAFT'
     PENDING = 'PENDING'
-    STAKING = 'STAKING'
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'
     LIVE = 'LIVE'
@@ -55,13 +54,6 @@ class CategoryEnum(CustomEnum):
 Category = CategoryEnum()
 
 
-class ContributionStatusEnum(CustomEnum):
-    PENDING = 'PENDING'
-    CONFIRMED = 'CONFIRMED'
-    DELETED = 'DELETED'
-
-
-ContributionStatus = ContributionStatusEnum()
 
 
 class RFPStatusEnum(CustomEnum):

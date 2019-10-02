@@ -30,7 +30,6 @@ interface CreateFormErrors {
   content?: string;
   payoutAddress?: string;
   milestones?: string[];
-  deadlineDuration?: string;
 }
 
 export type KeyOfForm = keyof CreateFormErrors;
@@ -44,7 +43,6 @@ export const FIELD_NAME_MAP: { [key in KeyOfForm]: string } = {
   content: 'Details',
   payoutAddress: 'Payout address',
   milestones: 'Milestones',
-  deadlineDuration: 'Funding deadline',
 };
 
 const requiredFields = [
@@ -54,7 +52,6 @@ const requiredFields = [
   'target',
   'content',
   'payoutAddress',
-  'deadlineDuration',
 ];
 
 export function getCreateErrors(
@@ -235,20 +232,13 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
     proposalId: 0,
     status: STATUS.DRAFT,
     proposalUrlId: '0-title',
-    proposalAddress: '0x0',
     payoutAddress: '0x0',
     dateCreated: Date.now() / 1000,
     datePublished: Date.now() / 1000,
     dateApproved: Date.now() / 1000,
-    deadlineDuration: 86400 * 60,
     target: toZat(draft.target),
-    funded: Zat('0'),
-    contributionMatching: 0,
-    contributionBounty: Zat('0'),
-    percentFunded: 0,
     stage: PROPOSAL_STAGE.PREVIEW,
     category: draft.category || PROPOSAL_CATEGORY.CORE_DEV,
-    isStaked: true,
     arbiter: {
       status: PROPOSAL_ARBITER_STATUS.ACCEPTED,
     },

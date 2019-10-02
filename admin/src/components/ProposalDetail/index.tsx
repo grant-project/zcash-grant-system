@@ -116,52 +116,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
       />
     );
 
-    const renderMatchingControl = () => (
-      <div className="ProposalDetail-controls-control">
-        <Popconfirm
-          overlayClassName="ProposalDetail-popover-overlay"
-          onConfirm={this.handleToggleMatching}
-          title={
-            <>
-              <div>
-                Turn {p.contributionMatching ? 'off' : 'on'} contribution matching?
-              </div>
-              {p.status === PROPOSAL_STATUS.LIVE && (
-                <div>
-                  This is a LIVE proposal, this will alter the funding state of the
-                  proposal!
-                </div>
-              )}
-            </>
-          }
-          okText="ok"
-          cancelText="cancel"
-        >
-          <Switch
-            checked={p.contributionMatching === 1}
-            loading={store.proposalDetailUpdating}
-            disabled={
-              p.isFailed ||
-              [PROPOSAL_STAGE.WIP, PROPOSAL_STAGE.COMPLETED].includes(p.stage)
-            }
-          />{' '}
-        </Popconfirm>
-        <span>
-          matching{' '}
-          <Info
-            placement="right"
-            content={
-              <span>
-                <b>Contribution matching</b>
-                <br /> Funded amount will be multiplied by 2.
-                <br /> <i>Disabled after proposal is fully-funded.</i>
-              </span>
-            }
-          />
-        </span>
-      </div>
-    );
-
+    // TODO: should this stay?
     const renderBountyControl = () => (
       <div className="ProposalDetail-controls-control">
         <Button
@@ -320,6 +275,8 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                 {' '}
                 Please make a payment of <b>{amount.toString()} ZEC</b> to:
               </p>{' '}
+              {/*}
+              TODO - change/fix/del
               <pre>{p.payoutAddress}</pre>
               <Input.Search
                 placeholder="please enter payment txid"
@@ -327,37 +284,12 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                 enterButton="Mark Paid"
                 onChange={e => this.setState({ paidTxId: e.target.value })}
                 onSearch={this.handlePaidMilestone}
-              />
+          /> */}
             </div>
           }
         />
       );
     };
-
-    const renderFailed = () =>
-      p.isFailed && (
-        <Alert
-          showIcon
-          type="error"
-          message={
-            p.stage === PROPOSAL_STAGE.FAILED ? 'Proposal failed' : 'Proposal canceled'
-          }
-          description={
-            p.stage === PROPOSAL_STAGE.FAILED ? (
-              <>
-                This proposal failed to reach its funding goal of <b>{p.target} ZEC</b> by{' '}
-                <b>{formatDateSeconds(p.datePublished + p.deadlineDuration)}</b>. All
-                contributors will need to be refunded.
-              </>
-            ) : (
-              <>
-                This proposal was canceled by an admin, and will be refunding contributors{' '}
-                <b>{refundablePct}%</b> of their contributions.
-              </>
-            )
-          }
-        />
-      );
 
     const renderDeetItem = (name: string, val: any) => (
       <div className="ProposalDetail-deet">
@@ -379,7 +311,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
             {renderNominateArbiter()}
             {renderNominatedArbiter()}
             {renderMilestoneAccepted()}
-            {renderFailed()}
             <Collapse defaultActiveKey={['brief', 'content', 'milestones']}>
 
               <Collapse.Panel key="brief" header="brief">
@@ -424,7 +355,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
               {renderCancelControl()}
               {renderArbiterControl()}
               {renderBountyControl()}
-              {renderMatchingControl()}
             </Card>
 
             {/* DETAILS */}
@@ -435,23 +365,13 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                 'published',
                 p.datePublished ? formatDateSeconds(p.datePublished) : 'n/a',
               )}
-              {renderDeetItem(
-                'deadlineDuration',
-                formatDurationSeconds(p.deadlineDuration),
-              )}
-              {p.datePublished &&
-                renderDeetItem(
-                  '(deadline)',
-                  formatDateSeconds(p.datePublished + p.deadlineDuration),
-                )}
+              { /* TODO: should 'isFailed' be deleted? */}
               {renderDeetItem('isFailed', JSON.stringify(p.isFailed))}
               {renderDeetItem('status', p.status)}
               {renderDeetItem('stage', p.stage)}
               {renderDeetItem('category', p.category)}
               {renderDeetItem('target', p.target)}
-              {renderDeetItem('contributed', p.contributed)}
-              {renderDeetItem('funded (inc. matching)', p.funded)}
-              {renderDeetItem('matching', p.contributionMatching)}
+              {/** TODO: should 'bounty' be deleted?  */}
               {renderDeetItem('bounty', p.contributionBounty)}
               {renderDeetItem('rfpOptIn', JSON.stringify(p.rfpOptIn))}
               {renderDeetItem(
@@ -535,16 +455,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
     message.info('Proposal rejected');
   };
 
-  private handleToggleMatching = async () => {
-    if (store.proposalDetail) {
-      // we lock this to be 1 or 0 for now, we may support more values later on
-      const contributionMatching =
-        store.proposalDetail.contributionMatching === 0 ? 1 : 0;
-      await store.updateProposalDetail({ contributionMatching });
-      message.success('Updated matching');
-    }
-  };
-
+  // TODO: should this be deleted?
   private handleSetBounty = async () => {
     if (store.proposalDetail) {
       FeedbackModal.open({
@@ -566,12 +477,13 @@ class ProposalDetailNaked extends React.Component<Props, State> {
     }
   };
 
-  private handlePaidMilestone = async () => {
-    const pid = store.proposalDetail!.proposalId;
-    const mid = store.proposalDetail!.currentMilestone!.id;
-    await store.markMilestonePaid(pid, mid, this.state.paidTxId);
-    message.success('Marked milestone paid.');
-  };
+  // TODO: fix/change/delete
+  // private handlePaidMilestone = async () => {
+  //   const pid = store.proposalDetail!.proposalId;
+  //   const mid = store.proposalDetail!.currentMilestone!.id;
+  //   await store.markMilestonePaid(pid, mid, this.state.paidTxId);
+  //   message.success('Marked milestone paid.');
+  // };
 }
 
 const ProposalDetail = withRouter(view(ProposalDetailNaked));

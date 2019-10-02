@@ -5,7 +5,6 @@ import {
   updateUser as apiUpdateUser,
   fetchUserInvites as apiFetchUserInvites,
   putInviteResponse,
-  deleteProposalContribution,
   deleteProposalDraft,
   putProposalPublish,
 } from 'api/api';
@@ -90,18 +89,6 @@ export function respondToInvite(
         payload: { userId, inviteId, error },
       });
     }
-  };
-}
-
-export function deleteContribution(userId: string | number, contributionId: string | number) {
-  // Fire and forget
-  deleteProposalContribution(contributionId);
-  return {
-    type: types.DELETE_CONTRIBUTION,
-    payload: {
-      userId,
-      contributionId,
-    },
   };
 }
 

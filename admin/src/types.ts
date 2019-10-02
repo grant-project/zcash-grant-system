@@ -132,40 +132,8 @@ export interface CommentArgs {
   hidden: boolean;
   reported: boolean;
 }
-// NOTE: sync with backend/utils/enums.py
-export enum CONTRIBUTION_STATUS {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
-  DELETED = 'DELETED',
-}
-export interface Contribution {
-  id: number;
-  status: CONTRIBUTION_STATUS;
-  txId: null | string;
-  amount: string;
-  dateCreated: number;
-  user: User | null;
-  proposal: Proposal;
-  addresses: {
-    transparent: string;
-    sprout: string;
-    memo: string;
-  };
-  staking: boolean;
-  private: boolean;
-  refundAddress?: string;
-  refundTxId?: string;
-}
-export interface ContributionArgs {
-  proposalId?: string | number;
-  userId?: string | number;
-  amount?: string;
-  status?: string;
-  txId?: string;
-  refundTxId?: string;
-}
+
 export interface User {
-  accountAddress: string;
   avatar: null | { imageUrl: string };
   displayName: string;
   emailAddress: string;
@@ -174,7 +142,6 @@ export interface User {
   userid: number;
   proposals: Proposal[];
   comments: Comment[];
-  contributions: Contribution[];
   silenced: boolean;
   banned: boolean;
   bannedReason: string;

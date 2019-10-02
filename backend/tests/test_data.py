@@ -46,7 +46,6 @@ test_proposal = {
     "category": Category.ACCESSIBILITY,
     "target": "123.456",
     "payoutAddress": "123",
-    "deadlineDuration": 100
 }
 
 test_comment = {
@@ -127,12 +126,6 @@ test_reply = {
     # Fill in parentCommentId in test
 }
 
-mock_contribution_addresses = mock_request({
-    'transparent': 't123',
-    'sprout': 'z123',
-    'memo': '123',
-})
-
 mock_valid_address = mock_request({
     'valid': True,
 })
@@ -141,10 +134,7 @@ mock_invalid_address = mock_request({
     'valid': False,
 })
 
-
 def mock_blockchain_api_requests(path, **kwargs):
-    if '/contribution/addresses' in path:
-        return mock_contribution_addresses()
     if '/validate/address' in path:
         return mock_valid_address()
     raise Exception('No mock data defined for path {}'.format(path))

@@ -8,7 +8,6 @@ import {
   TeamInvite,
   TeamInviteWithProposal,
   SOCIAL_SERVICE,
-  ContributionWithAddressesAndUser,
   EmailSubscriptions,
   RFP,
   ProposalPageParams,
@@ -52,10 +51,6 @@ export function reportProposalComment(proposalId: number, commentId: number) {
 
 export function getProposalUpdates(proposalId: number | string) {
   return axios.get(`/api/v1/proposals/${proposalId}/updates`);
-}
-
-export function getProposalContributions(proposalId: number | string) {
-  return axios.get(`/api/v1/proposals/${proposalId}/contributions`);
 }
 
 export function postProposal(payload: ProposalDraft) {
@@ -136,7 +131,6 @@ export function getUserSettings(
 
 interface SettingsArgs {
   emailSubscriptions?: EmailSubscriptions;
-  refundAddress?: string;
 }
 export function updateUserSettings(
   userId: string | number,
@@ -179,16 +173,6 @@ export function getSocialAuthUrl(service: SOCIAL_SERVICE): Promise<any> {
 
 export function verifySocial(service: SOCIAL_SERVICE, code: string): Promise<any> {
   return axios.post(`/api/v1/users/social/${service}/verify`, { code });
-}
-
-export async function fetchCrowdFundFactoryJSON(): Promise<any> {
-  const res = await axios.get(process.env.CROWD_FUND_FACTORY_URL as string);
-  return res.data;
-}
-
-export async function fetchCrowdFundJSON(): Promise<any> {
-  const res = await axios.get(process.env.CROWD_FUND_URL as string);
-  return res.data;
 }
 
 export function postProposalUpdate(
@@ -313,17 +297,6 @@ export function putInviteResponse(
   });
 }
 
-export function postProposalContribution(
-  proposalId: number,
-  amount: string,
-  isPrivate: boolean = true,
-): Promise<{ data: ContributionWithAddressesAndUser }> {
-  return axios.post(`/api/v1/proposals/${proposalId}/contributions`, {
-    amount,
-    private: isPrivate,
-  });
-}
-
 export function postProposalComment(payload: {
   proposalId: number;
   parentCommentId?: number;
@@ -331,23 +304,6 @@ export function postProposalComment(payload: {
 }): Promise<{ data: any }> {
   const { proposalId, ...args } = payload;
   return axios.post(`/api/v1/proposals/${proposalId}/comments`, args);
-}
-
-export function deleteProposalContribution(contributionId: string | number) {
-  return axios.delete(`/api/v1/proposals/contribution/${contributionId}`);
-}
-
-export function getProposalContribution(
-  proposalId: number,
-  contributionId: number,
-): Promise<{ data: ContributionWithAddressesAndUser }> {
-  return axios.get(`/api/v1/proposals/${proposalId}/contributions/${contributionId}`);
-}
-
-export function getProposalStakingContribution(
-  proposalId: number,
-): Promise<{ data: ContributionWithAddressesAndUser }> {
-  return axios.get(`/api/v1/proposals/${proposalId}/stake`);
 }
 
 export function getRFPs(): Promise<{ data: RFP[] }> {

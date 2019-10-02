@@ -14,12 +14,10 @@ from grant.proposal.models import (
     Proposal,
     ProposalTeamInvite,
     invites_with_proposal_schema,
-    ProposalContribution,
-    user_proposal_contributions_schema,
     user_proposals_schema,
     user_proposal_arbiters_schema
 )
-from grant.utils.enums import ProposalStatus, ContributionStatus
+from grant.utils.enums import ProposalStatus
 from grant.utils.exceptions import ValidationException
 from grant.utils.requests import validate_blockchain_get
 from grant.utils.social import verify_social, get_social_login_url, VerifySocialException
@@ -48,11 +46,10 @@ def get_me():
 @query({
     "withProposals": fields.Bool(required=False, missing=None),
     "withComments": fields.Bool(required=False, missing=None),
-    "withFunded": fields.Bool(required=False, missing=None),
     "withPending": fields.Bool(required=False, missing=None),
     "withArbitrated": fields.Bool(required=False, missing=None)
 })
-def get_user(user_id, with_proposals, with_comments, with_funded, with_pending, with_arbitrated):
+def get_user(user_id, with_proposals, with_comments, with_pending, with_arbitrated):
     user = User.get_by_id(user_id)
     if user:
         result = user_schema.dump(user)
@@ -62,21 +59,12 @@ def get_user(user_id, with_proposals, with_comments, with_funded, with_pending, 
             proposals = Proposal.get_by_user(user)
             proposals_dump = user_proposals_schema.dump(proposals)
             result["proposals"] = proposals_dump
-        if with_funded:
-            contributions = ProposalContribution.get_by_userid(user_id)
-            if not authed_user or user.id != authed_user.id:
-                contributions = [c for c in contributions if c.status == ContributionStatus.CONFIRMED]
-                contributions = [c for c in contributions if not c.private]
-            contributions = [c for c in contributions if c.proposal.status == ProposalStatus.LIVE]
-            contributions_dump = user_proposal_contributions_schema.dump(contributions)
-            result["contributions"] = contributions_dump
         if with_comments:
             comments = Comment.get_by_user(user)
             comments_dump = user_comments_schema.dump(comments)
             result["comments"] = comments_dump
         if with_pending and is_self:
             pending = Proposal.get_by_user(user, [
-                ProposalStatus.STAKING,
                 ProposalStatus.PENDING,
                 ProposalStatus.APPROVED,
                 ProposalStatus.REJECTED,
@@ -348,10 +336,8 @@ def get_user_settings(user_id):
 @auth.requires_same_user_auth
 @body({
     "emailSubscriptions": fields.Dict(required=False, missing=None),
-    "refundAddress": fields.Str(required=False, missing=None,
-                                validate=lambda r: validate_blockchain_get('/validate/address', {'address': r}))
 })
-def set_user_settings(user_id, email_subscriptions, refund_address):
+def set_user_settings(user_id, email_subscriptions):
     if email_subscriptions:
         try:
             email_subscriptions = keys_to_snake_case(email_subscriptions)
@@ -359,10 +345,6 @@ def set_user_settings(user_id, email_subscriptions, refund_address):
         except ValidationException as e:
             return {"message": str(e)}, 400
 
-    if refund_address == '' and g.current_user.settings.refund_address:
-        return {"message": "Refund address cannot be unset, only changed"}, 400
-    if refund_address:
-        g.current_user.settings.refund_address = refund_address
 
     db.session.commit()
     return user_settings_schema.dump(g.current_user.settings)

@@ -5,7 +5,6 @@ import {
   getProposalComments,
   getProposalUpdates,
   reportProposalComment as apiReportProposalComment,
-  getProposalContributions,
   postProposalComment as apiPostProposalComment,
   requestProposalPayout,
   acceptProposalPayout,
@@ -156,18 +155,6 @@ export function fetchProposalUpdates(proposalId: Proposal['proposalId']) {
       payload: getProposalUpdates(proposalId).then(res => ({
         proposalId,
         updates: res.data,
-      })),
-    });
-  };
-}
-
-export function fetchProposalContributions(proposalId: Proposal['proposalId']) {
-  return (dispatch: Dispatch<any>) => {
-    dispatch({
-      type: types.PROPOSAL_CONTRIBUTIONS,
-      payload: getProposalContributions(proposalId).then(res => ({
-        proposalId,
-        ...res.data,
       })),
     });
   };

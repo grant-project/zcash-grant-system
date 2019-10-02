@@ -94,12 +94,6 @@ class RFPDetail extends React.Component<Props> {
                 </strong>
               </li>
             )}
-            {rfp.matching && (
-              <li>
-                Contributions will have their <strong>funding matched</strong> by the
-                Zcash Foundation
-              </li>
-            )}
             {rfp.dateCloses && (
               <li>
                 Proposal submissions end {moment(rfp.dateCloses * 1000).format('LL')}

@@ -1,7 +1,6 @@
 import {
   PROPOSAL_STATUSES,
   RFP_STATUSES,
-  CONTRIBUTION_STATUSES,
   PROPOSAL_ARBITER_STATUSES,
   MILESTONE_STAGES,
   PROPOSAL_STAGES,
@@ -78,30 +77,6 @@ const RFP_FILTERS = RFP_STATUSES.map(s => ({
 export const rfpFilters: Filters = {
   list: RFP_FILTERS,
   getById: getFilterById(RFP_FILTERS),
-};
-
-// Contribution
-
-const CONTRIBUTION_FILTERS = CONTRIBUTION_STATUSES.map(s => ({
-  id: `STATUS_${s.id}`,
-  display: `Status: ${s.tagDisplay}`,
-  color: s.tagColor,
-  group: 'Status',
-})).concat([{
-  id: 'REFUNDABLE',
-  display: 'Refundable',
-  color: '#afd500',
-  group: 'Refundable',
-}, {
-  id: 'DONATION',
-  display: 'Donations',
-  color: '#afd500',
-  group: 'Donations',
-}]);
-
-export const contributionFilters: Filters = {
-  list: CONTRIBUTION_FILTERS,
-  getById: getFilterById(CONTRIBUTION_FILTERS),
 };
 
 // User

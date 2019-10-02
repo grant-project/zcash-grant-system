@@ -14,5 +14,4 @@ export interface User {
 
 export interface UserSettings {
   emailSubscriptions: EmailSubscriptions;
-  refundAddress?: string | null;
 }

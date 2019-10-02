@@ -1,6 +1,6 @@
 import { Zat } from 'utils/units';
 import { PROPOSAL_CATEGORY, PROPOSAL_STAGE } from 'api/constants';
-import { CreateMilestone, Update, User, Comment, ContributionWithUser } from 'types';
+import { CreateMilestone, Update, User, Comment } from 'types';
 import { ProposalMilestone } from './milestone';
 import { RFP } from './rfp';
 
@@ -9,15 +9,6 @@ export interface TeamInvite {
   dateCreated: number;
   address: string;
   accepted: boolean | null;
-}
-
-export interface Contributor {
-  address: string;
-  contributionAmount: Zat;
-  refundVote: boolean;
-  refunded: boolean;
-  proportionalContribution: string;
-  milestoneNoVotes: boolean[];
 }
 
 export interface ProposalArbiter {
@@ -39,24 +30,17 @@ export interface ProposalDraft {
   stage: PROPOSAL_STAGE;
   target: string;
   payoutAddress: string;
-  deadlineDuration: number;
   milestones: CreateMilestone[];
   team: User[];
   invites: TeamInvite[];
   status: STATUS;
-  isStaked: boolean;
   rfp?: RFP;
   rfpOptIn?: boolean;
 }
 
 export interface Proposal extends Omit<ProposalDraft, 'target' | 'invites'> {
-  proposalAddress: string;
   proposalUrlId: string;
   target: Zat;
-  funded: Zat;
-  percentFunded: number;
-  contributionMatching: number;
-  contributionBounty: Zat;
   milestones: ProposalMilestone[];
   currentMilestone?: ProposalMilestone;
   datePublished: number | null;
@@ -79,12 +63,6 @@ export interface ProposalComments {
 export interface ProposalUpdates {
   proposalId: Proposal['proposalId'];
   updates: Update[];
-}
-
-export interface ProposalContributions {
-  proposalId: Proposal['proposalId'];
-  top: ContributionWithUser[];
-  latest: ContributionWithUser[];
 }
 
 export interface UserProposal {
