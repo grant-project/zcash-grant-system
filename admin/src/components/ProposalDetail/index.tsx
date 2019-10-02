@@ -79,7 +79,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
             disabled={disabled}
             block
           >
-            Cancel & refund
+            Cancel
           </Button>
         </Popconfirm>
       );
@@ -98,24 +98,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
             p.stage === PROPOSAL_STAGE.COMPLETED,
         }}
       />
-    );
-
-    // TODO: should this stay?
-    const renderBountyControl = () => (
-      <div className="ProposalDetail-controls-control">
-        <Button
-          icon="dollar"
-          className="ProposalDetail-controls-control"
-          loading={store.proposalDetailUpdating}
-          onClick={this.handleSetBounty}
-          disabled={
-            p.isFailed || [PROPOSAL_STAGE.WIP, PROPOSAL_STAGE.COMPLETED].includes(p.stage)
-          }
-          block
-        >
-          Set bounty
-        </Button>
-      </div>
     );
 
     const renderApproved = () =>
@@ -338,7 +320,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
             <Card size="small" className="ProposalDetail-controls">
               {renderCancelControl()}
               {renderArbiterControl()}
-              {renderBountyControl()}
             </Card>
 
             {/* DETAILS */}
@@ -355,8 +336,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
               {renderDeetItem('stage', p.stage)}
               {renderDeetItem('category', p.category)}
               {renderDeetItem('target', p.target)}
-              {/** TODO: should 'bounty' be deleted?  */}
-              {renderDeetItem('bounty', p.contributionBounty)}
               {renderDeetItem('rfpOptIn', JSON.stringify(p.rfpOptIn))}
               {renderDeetItem(
                 'arbiter',
@@ -437,28 +416,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
   private handleReject = async (reason: string) => {
     await store.approveProposal(false, reason);
     message.info('Proposal rejected');
-  };
-
-  // TODO: should this be deleted?
-  private handleSetBounty = async () => {
-    if (store.proposalDetail) {
-      FeedbackModal.open({
-        title: 'Set bounty?',
-        content:
-          'Set the bounty for this proposal. The bounty will count towards the funding goal.',
-        type: 'input',
-        inputProps: {
-          addonBefore: 'Amount',
-          addonAfter: 'ZEC',
-          placeholder: '1.5',
-        },
-        okText: 'Set bounty',
-        onOk: async contributionBounty => {
-          await store.updateProposalDetail({ contributionBounty });
-          message.success('Updated bounty');
-        },
-      });
-    }
   };
 
   // TODO: fix/change/delete

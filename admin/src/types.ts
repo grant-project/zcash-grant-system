@@ -108,11 +108,7 @@ export interface Proposal {
   team: User[];
   comments: Comment[];
   target: string;
-  contributed: string;
-  funded: string;
   rejectReason: string;
-  contributionMatching: number;
-  contributionBounty: string;
   rfpOptIn: null | boolean;
   rfp?: RFP;
   arbiter: ProposalArbiter;
