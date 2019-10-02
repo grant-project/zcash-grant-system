@@ -1,3 +1,5 @@
+// TODO: update or delete
+
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 
@@ -10,15 +12,15 @@ import { generateProposal } from './props';
 
 const propsNoFunding = generateProposal({
   amount: 5,
-  funded: 0,
+  // funded: 0,
 });
 const propsHalfFunded = generateProposal({
   amount: 5,
-  funded: 2.5,
+  // funded: 2.5,
 });
 const propsFunded = generateProposal({
   amount: 5,
-  funded: 5,
+  // funded: 5,
 });
 const propsNotFundedExpired = generateProposal({
   created: Date.now() - 1000 * 60 * 60 * 10,

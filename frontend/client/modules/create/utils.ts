@@ -13,7 +13,7 @@ import {
   isValidTAddress,
   isValidSproutAddress,
 } from 'utils/validators';
-import { Zat, toZat } from 'utils/units';
+import { toZat } from 'utils/units';
 import { PROPOSAL_CATEGORY, PROPOSAL_STAGE } from 'api/constants';
 import {
   ProposalDetail,

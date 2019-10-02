@@ -31,32 +31,32 @@ const cases: { [index: string]: any } = {
   // trustee - first
   ['not funded']: generateProposal({
     amount: 5,
-    funded: 0,
+    // funded: 0,
   }),
   ['first - waiting']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
   }),
   ['first - not paid']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [{ stage: PAID }, msWaiting, msWaiting],
   }),
 
   // trustee - second
   ['second - waiting']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [msPaid, msWaiting, msWaiting],
   }),
   ['second - active']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [msPaid, msActive, msWaiting],
   }),
   ['second - not paid']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [msPaid, { stage: PAID }, msWaiting],
   }),
   // ['second - no vote']: generateProposal({
@@ -67,24 +67,24 @@ const cases: { [index: string]: any } = {
   // }),
   ['second - rejected']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [msPaid, msRejected, msWaiting],
   }),
 
   // trustee - third
   ['final - waiting']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [msPaid, msPaid, msWaiting],
   }),
   ['final - active']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [msPaid, msPaid, msActive],
   }),
   ['final - not paid']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [msPaid, msPaid, { stage: PAID }],
   }),
   // ['final - no vote']: generateProposal({
@@ -95,7 +95,7 @@ const cases: { [index: string]: any } = {
   // }),
   ['final - rejected']: generateProposal({
     amount: 5,
-    funded: 5,
+    // funded: 5,
     milestoneOverrides: [msPaid, msPaid, msRejected],
   }),
 };

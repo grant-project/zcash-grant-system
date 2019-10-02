@@ -2,22 +2,10 @@ import React from 'react';
 import BN from 'bn.js';
 import { view } from 'react-easy-state';
 import { RouteComponentProps, withRouter } from 'react-router';
-import {
-  Row,
-  Col,
-  Card,
-  Alert,
-  Button,
-  Collapse,
-  Popconfirm,
-  Input,
-  Switch,
-  Tag,
-  message,
-} from 'antd';
+import { Row, Col, Card, Alert, Button, Collapse, Popconfirm, Tag, message } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import store from 'src/store';
-import { formatDateSeconds, formatDurationSeconds } from 'util/time';
+import { formatDateSeconds } from 'util/time';
 import {
   PROPOSAL_STATUS,
   PROPOSAL_ARBITER_STATUS,
@@ -26,7 +14,6 @@ import {
 } from 'src/types';
 import { Link } from 'react-router-dom';
 import Back from 'components/Back';
-import Info from 'components/Info';
 import Markdown from 'components/Markdown';
 import ArbiterControl from 'components/ArbiterControl';
 import { toZat, fromZat } from 'src/util/units';
@@ -61,9 +48,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
       p.status === PROPOSAL_STATUS.LIVE &&
       !p.isFailed &&
       p.stage !== PROPOSAL_STAGE.COMPLETED;
-    const refundablePct = p.milestones.reduce((prev, m) => {
-      return m.datePaid ? prev - parseFloat(m.payoutPercent) : prev;
-    }, 100);
 
     const renderCancelControl = () => {
       const disabled = this.getCancelAndRefundDisabled();
@@ -312,7 +296,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
             {renderNominatedArbiter()}
             {renderMilestoneAccepted()}
             <Collapse defaultActiveKey={['brief', 'content', 'milestones']}>
-
               <Collapse.Panel key="brief" header="brief">
                 {p.brief}
               </Collapse.Panel>
@@ -322,24 +305,25 @@ class ProposalDetailNaked extends React.Component<Props, State> {
               </Collapse.Panel>
 
               <Collapse.Panel key="milestones" header="milestones">
-                  {
-                      p.milestones.map((milestone, i) =>
-
-                          <Card title={
-                                <>
-                                  {milestone.title + ' '}
-                                  {milestone.immediatePayout && <Tag color="magenta">Immediate Payout</Tag>}
-                                </>
-                                }
-                                extra={`${milestone.payoutPercent}% Payout`}
-                                key={i}
-                          >
-                              <p><b>Estimated Date:</b> {formatDateSeconds(milestone.dateEstimated )} </p>
-                              <p>{milestone.content}</p>
-                          </Card>
-
-                      )
-                  }
+                {p.milestones.map((milestone, i) => (
+                  <Card
+                    title={
+                      <>
+                        {milestone.title + ' '}
+                        {milestone.immediatePayout && (
+                          <Tag color="magenta">Immediate Payout</Tag>
+                        )}
+                      </>
+                    }
+                    extra={`${milestone.payoutPercent}% Payout`}
+                    key={i}
+                  >
+                    <p>
+                      <b>Estimated Date:</b> {formatDateSeconds(milestone.dateEstimated)}{' '}
+                    </p>
+                    <p>{milestone.content}</p>
+                  </Card>
+                ))}
               </Collapse.Panel>
 
               <Collapse.Panel key="json" header="json">
@@ -365,7 +349,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                 'published',
                 p.datePublished ? formatDateSeconds(p.datePublished) : 'n/a',
               )}
-              { /* TODO: should 'isFailed' be deleted? */}
+              {/* TODO: should 'isFailed' be deleted? */}
               {renderDeetItem('isFailed', JSON.stringify(p.isFailed))}
               {renderDeetItem('status', p.status)}
               {renderDeetItem('stage', p.stage)}
