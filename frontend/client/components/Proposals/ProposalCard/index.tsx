@@ -3,6 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { Proposal } from 'types';
 import Card from 'components/Card';
 import UserAvatar from 'components/UserAvatar';
+import UnitDisplay from 'components/UnitDisplay';
 import './style.less';
 
 export class ProposalCard extends React.Component<Proposal> {
@@ -31,7 +32,7 @@ export class ProposalCard extends React.Component<Proposal> {
           </div> */}
         <div className="ProposalCard-funding">
           <div className="ProposalCard-funding-raised">
-            {target} goal
+            <UnitDisplay value={target} symbol="ZEC" /> goal
             {/* <UnitDisplay value={funded} symbol="ZEC" /> <small>raised</small> of{' '}
             <UnitDisplay value={target} symbol="ZEC" /> goal */}
           </div>
