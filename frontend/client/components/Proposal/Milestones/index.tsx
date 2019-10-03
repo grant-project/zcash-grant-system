@@ -228,9 +228,6 @@ class ProposalMilestones extends React.Component<Props, State> {
               ))}
             </Steps>
             <Milestone
-              isFunded={[PROPOSAL_STAGE.WIP, PROPOSAL_STAGE.COMPLETED].includes(
-                proposal.stage,
-              )}
               proposalId={proposal.proposalId}
               showRejectPayout={this.handleShowRejectPayout}
               {...{ requestPayout, acceptPayout, rejectPayout }}
@@ -316,7 +313,6 @@ interface MilestoneProps extends MSProps {
   hasArbiter: boolean;
   isCurrent: boolean;
   proposalId: number;
-  isFunded: boolean;
 }
 const Milestone: React.SFC<MilestoneProps> = p => {
   const estimatedDate = moment(p.dateEstimated * 1000).format('MMMM YYYY');
@@ -392,7 +388,7 @@ const Milestone: React.SFC<MilestoneProps> = p => {
 };
 
 const MilestoneAction: React.SFC<MilestoneProps> = p => {
-  if (!p.isCurrent || !p.isFunded || p.stage === MILESTONE_STAGE.PAID) {
+  if (!p.isCurrent || p.stage === MILESTONE_STAGE.PAID) {
     return null;
   }
   if (!p.hasArbiter && !p.isTeamMember) {

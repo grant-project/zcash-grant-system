@@ -35,7 +35,7 @@ def create_proposals(count):
     user = User.query.filter_by().first()
     for i in range(count):
         if i < 5:
-            stage = ProposalStageEnum.FUNDING_REQUIRED
+            stage = ProposalStageEnum.WIP
         else:
             stage = ProposalStageEnum.COMPLETED
         p = Proposal.create(
@@ -47,7 +47,6 @@ def create_proposals(count):
             category=Category.ACCESSIBILITY,
             target="123.456",
             payout_address="fake123",
-            deadline_duration=100
         )
         p.date_published = datetime.datetime.now()
         p.team.append(user)

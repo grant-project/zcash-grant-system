@@ -81,6 +81,7 @@ export enum PROPOSAL_STATUS {
 // NOTE: sync with backend/grant/utils/enums.py ProposalStage
 export enum PROPOSAL_STAGE {
   PREVIEW = 'PREVIEW',
+  FUNDING_REQUIRED = 'FUNDING_REQUIRED', // kept for backwards compatibility 
   WIP = 'WIP',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',

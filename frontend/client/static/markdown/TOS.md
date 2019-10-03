@@ -1,3 +1,5 @@
+[//]: # TODO: change/remove crowdfunding language
+
 # ZF Grants Terms and Conditions
 
 Thanks for your interest in ZF Grants. By using this website (the

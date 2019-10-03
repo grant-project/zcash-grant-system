@@ -382,8 +382,8 @@ def paid_milestone_payout_request(id, mid, tx_id):
     proposal = Proposal.query.filter_by(id=id).first()
     if not proposal:
         return {"message": "No proposal matching id"}, 404
-    if not proposal.is_funded:
-        return {"message": "Proposal is not fully funded"}, 400
+    if not proposal.status == ProposalStatus.LIVE:
+        return {"message": "Proposal is not live"}, 400
     for ms in proposal.milestones:
         if ms.id == int(mid):
             ms.mark_paid(tx_id)

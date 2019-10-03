@@ -336,7 +336,7 @@ class Proposal(db.Model):
                     'admin_note': reject_reason
                 })
 
-    # state: status APPROVE -> LIVE, stage PREVIEW -> FUNDING_REQUIRED
+    # state: status APPROVE -> LIVE, stage PREVIEW -> WIP
     def publish(self):
         self.validate_publishable()
         # specific validation
@@ -344,7 +344,7 @@ class Proposal(db.Model):
             raise ValidationException(f"Proposal status must be approved")
         self.date_published = datetime.datetime.now()
         self.status = ProposalStatus.LIVE
-        self.stage = ProposalStage.FUNDING_REQUIRED
+        self.stage = ProposalStage.WIP
 
     def cancel(self):
         if self.status != ProposalStatus.LIVE:

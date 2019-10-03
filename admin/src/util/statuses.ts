@@ -95,17 +95,24 @@ export const PROPOSAL_STAGES: Array<StatusSoT<PROPOSAL_STAGE>> = [
     hint: 'Proposal is not yet published.',
   },
   {
+    id: PROPOSAL_STAGE.FUNDING_REQUIRED, // kept for backwards compatibility
+    tagDisplay: 'Funding (deprecated)',
+    tagColor: '#bebebe',
+    hint: 'Proposal has been published but still needs funding.',
+  },
+  {
     id: PROPOSAL_STAGE.WIP,
     tagDisplay: 'WIP',
     tagColor: '#8d8d8d',
-    hint: 'Proposal is fully funded and the work is being done.',
+    hint: 'Proposal has been published and the work is being done.',
   },
   {
     id: PROPOSAL_STAGE.COMPLETED,
     tagDisplay: 'Completed',
     tagColor: '#108ee9',
-    hint: 'Proposal was accepted, published, funded and all funds paid out.',
+    hint: 'Proposal was accepted, published, funded and all work completed',
   },
+  //TODO: update FAILED stage hint
   {
     id: PROPOSAL_STAGE.FAILED,
     tagDisplay: 'Failed',
@@ -170,7 +177,6 @@ export const RFP_STATUSES: Array<StatusSoT<RFP_STATUS>> = [
       'RFP has been closed to new submissions and will no longer be listed, but can still be viewed, and associated proposals will remain open.',
   },
 ];
-
 
 export function getStatusById<E>(statuses: Array<StatusSoT<E>>, id: E) {
   const result = statuses.find(s => s.id === id);
