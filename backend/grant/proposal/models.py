@@ -279,6 +279,8 @@ class Proposal(db.Model):
         self.payout_address = payout_address[:255]
         Proposal.simple_validate(vars(self))
 
+    def update_rfp_opt_in(self, opt_in: bool):
+        self.rfp_opt_in = opt_in
 
     def send_admin_email(self, type: str):
         from grant.user.models import User

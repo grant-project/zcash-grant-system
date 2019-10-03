@@ -95,12 +95,6 @@ export const PROPOSAL_STAGES: Array<StatusSoT<PROPOSAL_STAGE>> = [
     hint: 'Proposal is not yet published.',
   },
   {
-    id: PROPOSAL_STAGE.FUNDING_REQUIRED,
-    tagDisplay: 'Funding',
-    tagColor: '#bebebe',
-    hint: 'Proposal has been published but still needs funding.',
-  },
-  {
     id: PROPOSAL_STAGE.WIP,
     tagDisplay: 'WIP',
     tagColor: '#8d8d8d',
