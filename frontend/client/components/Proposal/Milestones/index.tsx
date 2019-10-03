@@ -13,7 +13,6 @@ import {
   MILESTONE_STAGE,
   PROPOSAL_ARBITER_STATUS,
 } from 'types';
-import { PROPOSAL_STAGE } from 'api/constants';
 import UnitDisplay from 'components/UnitDisplay';
 import Loader from 'components/Loader';
 import { AppState } from 'store/reducers';
