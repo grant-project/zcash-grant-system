@@ -2,7 +2,18 @@ import React from 'react';
 import BN from 'bn.js';
 import { view } from 'react-easy-state';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { Row, Col, Card, Alert, Button, Collapse, Popconfirm, Tag, message } from 'antd';
+import {
+  Row,
+  Col,
+  Card,
+  Alert,
+  Button,
+  Collapse,
+  Popconfirm,
+  Input,
+  Tag,
+  message,
+} from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import store from 'src/store';
 import { formatDateSeconds } from 'util/time';
@@ -241,8 +252,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                 {' '}
                 Please make a payment of <b>{amount.toString()} ZEC</b> to:
               </p>{' '}
-              {/*}
-              TODO - change/fix/del
               <pre>{p.payoutAddress}</pre>
               <Input.Search
                 placeholder="please enter payment txid"
@@ -250,7 +259,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                 enterButton="Mark Paid"
                 onChange={e => this.setState({ paidTxId: e.target.value })}
                 onSearch={this.handlePaidMilestone}
-          /> */}
+              />
             </div>
           }
         />
@@ -418,13 +427,12 @@ class ProposalDetailNaked extends React.Component<Props, State> {
     message.info('Proposal rejected');
   };
 
-  // TODO: fix/change/delete
-  // private handlePaidMilestone = async () => {
-  //   const pid = store.proposalDetail!.proposalId;
-  //   const mid = store.proposalDetail!.currentMilestone!.id;
-  //   await store.markMilestonePaid(pid, mid, this.state.paidTxId);
-  //   message.success('Marked milestone paid.');
-  // };
+  private handlePaidMilestone = async () => {
+    const pid = store.proposalDetail!.proposalId;
+    const mid = store.proposalDetail!.currentMilestone!.id;
+    await store.markMilestonePaid(pid, mid, this.state.paidTxId);
+    message.success('Marked milestone paid.');
+  };
 }
 
 const ProposalDetail = withRouter(view(ProposalDetailNaked));
