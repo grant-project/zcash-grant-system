@@ -1,9 +1,9 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Proposal } from 'types';
+import { Progress } from 'antd';
 import Card from 'components/Card';
 import UserAvatar from 'components/UserAvatar';
-import UnitDisplay from 'components/UnitDisplay';
 import './style.less';
 
 export class ProposalCard extends React.Component<Proposal> {
@@ -19,37 +19,42 @@ export class ProposalCard extends React.Component<Proposal> {
       datePublished,
       dateCreated,
       team,
-      target,
+      milestones,
+      currentMilestone,
     } = this.props;
+
+    const percentProgress = currentMilestone
+      ? Math.floor(((currentMilestone.index + 1) / milestones.length) * 100)
+      : 0;
 
     return (
       <Card className="ProposalCard" to={`/proposals/${proposalUrlId}`} title={title}>
-        {/* <div className="ProposalCard-ribbon">
-            <span>
-              x2
-              <small>matching</small>
-            </span>
-          </div> */}
-        <div className="ProposalCard-funding">
-          <div className="ProposalCard-funding-raised">
-            <UnitDisplay value={target} symbol="ZEC" /> goal
-            {/* <UnitDisplay value={funded} symbol="ZEC" /> <small>raised</small> of{' '}
-            <UnitDisplay value={target} symbol="ZEC" /> goal */}
-          </div>
-          {/* <div
-            className={classnames({
-              ['ProposalCard-funding-percent']: true,
-              ['is-funded']: percentFunded >= 100,
-            })}
-          >
-            {percentFunded}%
-          </div> */}
-        </div>
-        {/* <Progress
-          percent={percentFunded}
-          status={percentFunded >= 100 ? 'success' : 'active'}
-          showInfo={false}
-        /> */}
+        {currentMilestone && (
+          <>
+            <div className="ProposalCard-funding">
+              <div className="ProposalCard-funding-raised">
+                {currentMilestone.index + 1}{' '}
+                <small>
+                  milestone
+                  {currentMilestone.index + 1 > 1 ? 's' : ''}
+                </small>{' '}
+                of {milestones.length}
+              </div>
+              <div
+                className={`ProposalCard-funding-percent ${
+                  percentProgress >= 100 ? 'is-funded' : ''
+                }`}
+              >
+                {percentProgress}%
+              </div>
+            </div>
+            <Progress
+              percent={percentProgress}
+              status={percentProgress >= 100 ? 'success' : 'active'}
+              showInfo={false}
+            />
+          </>
+        )}
 
         <div className="ProposalCard-team">
           <div className="ProposalCard-team-name">

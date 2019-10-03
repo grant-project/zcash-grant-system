@@ -13,6 +13,7 @@ import { Tabs, Icon, Dropdown, Menu, Button, Alert } from 'antd';
 import { AlertProps } from 'antd/lib/alert';
 import ExceptionPage from 'components/ExceptionPage';
 import HeaderDetails from 'components/HeaderDetails';
+import DetailBlock from './DetailBlock';
 import TeamBlock from './TeamBlock';
 import RFPBlock from './RFPBlock';
 import Milestones from './Milestones';
@@ -163,6 +164,7 @@ export class ProposalDetail extends React.Component<Props, State> {
         <div className="Proposal-top">
           {isLive && (
             <div className="Proposal-top-social">
+              {/* TODO: update contribution language */}
               <SocialShare
                 url={(typeof window !== 'undefined' && window.location.href) || ''}
                 title={`${proposal.title} needs funding on Grant-io!`}
@@ -212,7 +214,7 @@ export class ProposalDetail extends React.Component<Props, State> {
               )}
           </div>
           <div className="Proposal-top-side">
-            {/* TODO: DetailsBlock ??? */}
+            <DetailBlock proposal={proposal} isPreview={isPreview} />
             <TeamBlock proposal={proposal} />
             {proposal.rfp && <RFPBlock rfp={proposal.rfp} />}
           </div>
