@@ -234,7 +234,7 @@ def update_proposal(milestones, proposal_id, rfp_opt_in, **kwargs):
         return {"message": "{}".format(str(e))}, 400
     db.session.add(g.current_proposal)
 
-    # twiddle rfp opt-in (modifies proposal matching and/or bounty)
+    # twiddle rfp opt-in (modifies bounty)
     if rfp_opt_in is not None:
         g.current_proposal.update_rfp_opt_in(rfp_opt_in)
 

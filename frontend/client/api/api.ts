@@ -61,6 +61,7 @@ export function postProposal(payload: ProposalDraft) {
   });
 }
 
+// TODO: remove withFunded
 export function getUser(address: string): Promise<{ data: User }> {
   return axios
     .get(`/api/v1/users/${address}`, {

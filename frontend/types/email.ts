@@ -1,4 +1,5 @@
 // NOTE: sync with /backend/grant/email/subscription_settings.py EmailSubscription enum keys
+// TODO: update/remove funded emails
 export interface EmailSubscriptions {
   fundedProposalCanceled: boolean;
   fundedProposalContribution: boolean;

@@ -4,7 +4,7 @@ from grant.utils.exceptions import ValidationException
 
 
 # NOTE: custom migration required if order or bit changes meaning
-# TODO: remove unused settings
+# TODO: update/remove funded & contribution subscriptions
 class EmailSubscription(Enum):
     MY_COMMENT_REPLY = {
         'bit': 0,

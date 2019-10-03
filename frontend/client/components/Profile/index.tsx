@@ -86,6 +86,7 @@ class Profile extends React.Component<Props> {
 
     return (
       <div className="Profile">
+        {/**TODO: change contribution language */}
         <HeaderDetails
           title={`${user.displayName} is funding projects on ZF Grants`}
           description={`Join ${user.displayName} in funding the future!`}

@@ -19,6 +19,8 @@ export const EMAIL_SUBSCRIPTIONS: { [key in ESKey]: EmailSubscriptionInfo } = {
     value: false,
   },
 
+  // TODO: convert funded emails
+
   // FUNDED
   fundedProposalCanceled: {
     description: 'gets canceled',

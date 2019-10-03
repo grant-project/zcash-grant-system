@@ -66,6 +66,7 @@ class UpdateModal extends React.Component<Props, State> {
         width={800}
         centered
       >
+        {/* TODO: update description */}
         <div className="UpdateModal">
           {hasSubmitted ? (
             <Result

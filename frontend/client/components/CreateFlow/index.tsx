@@ -79,7 +79,7 @@ const STEP_INFO: { [key in CREATE_STEP]: StepInfo } = {
     title: 'Set up milestones for deliverables',
     subtitle: 'Make a timeline of when you’ll complete tasks, and receive funds',
     help:
-      'Contributors are more willing to fund proposals with funding spread across multiple milestones',
+      'Proposals are more likely to get approved with funding spread across multiple milestones',
     component: Milestones,
   },
   [CREATE_STEP.PAYMENT]: {

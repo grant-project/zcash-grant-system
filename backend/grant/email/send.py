@@ -96,7 +96,7 @@ def proposal_comment(email_args):
         'subscription': EmailSubscription.MY_PROPOSAL_COMMENT,
     }
 
-
+# TODO: update/remove funding
 def proposal_failed(email_args):
     return {
         'subject': 'Your proposal failed to get funding',
@@ -107,12 +107,11 @@ def proposal_failed(email_args):
         'subscription': EmailSubscription.MY_PROPOSAL_FUNDED,
     }
 
-
 def proposal_canceled(email_args):
     return {
         'subject': 'Your proposal has been canceled',
         'title': 'Proposal canceled',
-        'preview': 'Your proposal entitled {} has been canceled, and your contributors will be refunded'.format(
+        'preview': 'Your proposal entitled {} has been canceled by the administration team'.format(
             email_args['proposal'].title,
         ),
     }
@@ -170,6 +169,7 @@ def milestone_accept(email_args):
     }
 
 
+#TODO: update email subscription
 def milestone_paid(email_args):
     p = email_args['proposal']
     a = email_args['amount']

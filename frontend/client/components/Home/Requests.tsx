@@ -33,7 +33,6 @@ class HomeRequests extends React.Component<Props> {
     // 2 live RFPs, sorted by highest bounty first
     const activeRfps = (rfps || [])
       .filter(rfp => rfp.status === RFP_STATUS.LIVE)
-      // TODO: keep this sort block?
       .sort((a, b) => {
         const aBounty = a.bounty || new BN(0);
         const bBounty = b.bounty || new BN(0);

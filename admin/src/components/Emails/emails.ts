@@ -52,6 +52,8 @@ export default [
     description:
       'Sent if someone makes a top-level comment on your proposal. Replies don’t send an email.',
   },
+
+  //TODO: update description
   {
     id: 'proposal_failed',
     title: 'Proposal failed',
