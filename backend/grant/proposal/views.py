@@ -431,7 +431,6 @@ def request_milestone_payout(proposal_id, milestone_id):
 def accept_milestone_payout_request(proposal_id, milestone_id):
     for ms in g.current_proposal.milestones:
         if ms.id == int(milestone_id):
-            # TODO: should g.current_user.id be removed?
             ms.accept_request(g.current_user.id)
             db.session.add(ms)
             db.session.commit()
@@ -457,7 +456,6 @@ def accept_milestone_payout_request(proposal_id, milestone_id):
 def reject_milestone_payout_request(proposal_id, milestone_id, reason):
     for ms in g.current_proposal.milestones:
         if ms.id == int(milestone_id):
-            # TODO: should g.current_user.id be removed?
             ms.reject_request(g.current_user.id, reason)
             db.session.add(ms)
             db.session.commit()

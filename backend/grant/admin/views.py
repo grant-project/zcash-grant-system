@@ -403,7 +403,6 @@ def paid_milestone_payout_request(id, mid, tx_id):
                     'proposal': proposal,
                     'milestone': ms,
                     'amount': amount,
-                    # TODO: should tx_explorer_url be deleted?
                     'tx_explorer_url': make_explore_url(tx_id),
                     'proposal_milestones_url': make_url(f'/proposals/{proposal.id}?tab=milestones'),
                 })
