@@ -442,7 +442,6 @@ def get_rfps():
     "content": fields.Str(required=True),
     "category": fields.Str(required=True, validate=validate.OneOf(choices=Category.list())),
     "bounty": fields.Str(required=False, missing=0),
-    "matching": fields.Bool(required=False, missing=False),
     "dateCloses": fields.Int(required=False, missing=None)
 })
 @admin.admin_auth_required

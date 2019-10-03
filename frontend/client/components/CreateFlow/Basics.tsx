@@ -73,8 +73,7 @@ class CreateFlowBasics extends React.Component<Props, State> {
       errors.target = undefined;
     }
 
-    const rfpOptInRequired =
-      rfp && (rfp.matching || (rfp.bounty && parseFloat(rfp.bounty.toString()) > 0));
+    const rfpOptInRequired = rfp && (rfp.bounty && parseFloat(rfp.bounty.toString()) > 0);
 
     return (
       <Form layout="vertical" style={{ maxWidth: 600, margin: '0 auto' }}>
@@ -112,8 +111,7 @@ class CreateFlowBasics extends React.Component<Props, State> {
             description={
               <>
                 <div>
-                  This RFP offers either a bounty or matching. This will require ZFGrants
-                  to fulfill{' '}
+                  This RFP offers a bounty. This will require ZFGrants to fulfill{' '}
                   <a
                     target="_blank"
                     href="https://en.wikipedia.org/wiki/Know_your_customer"
@@ -131,7 +129,7 @@ class CreateFlowBasics extends React.Component<Props, State> {
                       checked={rfpOptIn !== null && rfpOptIn === false}
                     >
                       <b>No</b>, I do not wish to provide KYC information and understand I
-                      will not receive any matching or bounty funds from ZFGrants
+                      will not receive any bounty funds from ZFGrants
                     </Radio>
                   </Radio.Group>
                 </div>

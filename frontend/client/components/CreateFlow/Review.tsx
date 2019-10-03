@@ -53,7 +53,7 @@ class CreateReview extends React.Component<Props> {
             key: 'rfpOptIn',
             content: <div>{form.rfpOptIn ? 'Accepted' : 'Declined'}</div>,
             error: errors.rfpOptIn,
-            isHide: !form.rfp || (form.rfp && !form.rfp.matching && !form.rfp.bounty),
+            isHide: !form.rfp || (form.rfp && !form.rfp.bounty),
           },
           {
             key: 'brief',
@@ -106,6 +106,17 @@ class CreateReview extends React.Component<Props> {
             key: 'milestones',
             content: <ReviewMilestones milestones={form.milestones} />,
             error: errors.milestones && errors.milestones.join(' '),
+          },
+        ],
+      },
+      {
+        step: CREATE_STEP.PAYMENT,
+        name: 'Payment',
+        fields: [
+          {
+            key: 'payoutAddress',
+            content: <code>{form.payoutAddress}</code>,
+            error: errors.payoutAddress,
           },
         ],
       },

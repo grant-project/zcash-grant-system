@@ -11,7 +11,6 @@ import {
   Button,
   message,
   Spin,
-  Checkbox,
   Row,
   Col,
   DatePicker,
@@ -56,7 +55,6 @@ class RFPForm extends React.Component<Props, State> {
       content: '',
       category: '',
       status: '',
-      matching: false,
       bounty: undefined,
       dateCloses: undefined,
     };
@@ -74,7 +72,6 @@ class RFPForm extends React.Component<Props, State> {
           content: rfp.content,
           category: rfp.category,
           status: rfp.status,
-          matching: rfp.matching,
           bounty: rfp.bounty,
           dateCloses: rfp.dateCloses || undefined,
         };
@@ -207,17 +204,6 @@ class RFPForm extends React.Component<Props, State> {
                   addonAfter="ZEC"
                   size="large"
                 />,
-              )}
-              {getFieldDecorator('matching', {
-                initialValue: defaults.matching,
-              })(
-                <Checkbox
-                  className="RFPForm-bounty-matching"
-                  name="matching"
-                  defaultChecked={defaults.matching}
-                >
-                  Match community contributions for approved proposals
-                </Checkbox>,
               )}
             </Form.Item>
           </Col>

@@ -88,7 +88,7 @@ export function getCreateErrors(
   }
 
   // RFP opt-in
-  if (rfp && (rfp.bounty || rfp.matching) && rfpOptIn === null) {
+  if (rfp && rfp.bounty && rfpOptIn === null) {
     errors.rfpOptIn = 'Please accept or decline KYC';
   }
 

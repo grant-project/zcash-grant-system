@@ -24,7 +24,6 @@ export default class RFPItem extends React.Component<Props> {
       dateCloses,
       dateClosed,
       bounty,
-      matching,
     } = rfp;
     const closeDate = dateCloses || dateClosed;
 
@@ -34,13 +33,6 @@ export default class RFPItem extends React.Component<Props> {
         tags.push(
           <Tag key="bounty" color="#CF8A00">
             <UnitDisplay value={bounty} symbol="ZEC" /> bounty
-          </Tag>,
-        );
-      }
-      if (matching) {
-        tags.push(
-          <Tag key="matching" color="#1890ff">
-            x2 matching
           </Tag>,
         );
       }

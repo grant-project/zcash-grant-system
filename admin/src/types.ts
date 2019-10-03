@@ -53,7 +53,6 @@ export interface RFPArgs {
   brief: string;
   content: string;
   category: string;
-  matching: boolean;
   dateCloses: number | null | undefined;
   bounty: string | null | undefined;
   status: string;

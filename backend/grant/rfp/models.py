@@ -57,7 +57,6 @@ class RFP(db.Model):
         category: str,
         bounty: str,
         date_closes: datetime,
-        matching: bool = False,
         status: str = RFPStatus.DRAFT,
     ):
         assert RFPStatus.includes(status)
@@ -70,7 +69,6 @@ class RFP(db.Model):
         self.category = category
         self.bounty = bounty
         self.date_closes = date_closes
-        self.matching = matching
         self.status = status
 
 
@@ -85,7 +83,6 @@ class RFPSchema(ma.Schema):
             "content",
             "category",
             "status",
-            "matching",
             "bounty",
             "date_created",
             "date_closes",
@@ -131,7 +128,6 @@ class AdminRFPSchema(ma.Schema):
             "content",
             "category",
             "status",
-            "matching",
             "bounty",
             "date_created",
             "date_closes",

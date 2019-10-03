@@ -12,7 +12,6 @@ export interface RFP {
   status: RFP_STATUS;
   acceptedProposals: Proposal[];
   bounty: Zat | null;
-  matching: boolean;
   dateOpened: number;
   dateClosed?: number;
   dateCloses?: number;

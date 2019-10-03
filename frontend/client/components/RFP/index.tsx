@@ -50,14 +50,6 @@ class RFPDetail extends React.Component<Props> {
 
     const tags = [];
 
-    if (rfp.matching) {
-      tags.push(
-        <Tag key="matching" color="#1890ff">
-          x2 matching
-        </Tag>,
-      );
-    }
-
     if (rfp.bounty) {
       tags.push(
         <Tag key="bounty" color="#CF8A00">
