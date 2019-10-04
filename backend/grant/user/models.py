@@ -57,6 +57,7 @@ class UserSettings(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     _email_subscriptions = db.Column("email_subscriptions", db.Integer, default=0)  # bitmask
+    refund_address = db.Column(db.String(255), unique=False, nullable=True)
 
     user = db.relationship("User", back_populates="settings")
 
@@ -397,6 +398,7 @@ class UserSettingsSchema(ma.Schema):
         model = UserSettings
         fields = (
             "email_subscriptions",
+            "refund_address",
         )
 
 
