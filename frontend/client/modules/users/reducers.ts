@@ -3,6 +3,7 @@ import {
   User,
   UserProposal,
   UserComment,
+  UserContribution,
   TeamInviteWithProposal,
   UserProposalArbiter,
 } from 'types';
@@ -22,6 +23,7 @@ export interface UserState extends User {
   pendingProposals: UserProposal[];
   arbitrated: UserProposalArbiter[];
   proposals: UserProposal[];
+  contributions: UserContribution[];
   comments: UserComment[];
   isFetchingInvites: boolean;
   hasFetchedInvites: boolean;
@@ -53,6 +55,7 @@ export const INITIAL_USER_STATE: UserState = {
   pendingProposals: [],
   arbitrated: [],
   proposals: [],
+  contributions: [],
   comments: [],
   isFetchingInvites: false,
   hasFetchedInvites: false,

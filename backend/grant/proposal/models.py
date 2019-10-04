@@ -15,6 +15,7 @@ from grant.utils.enums import (
     ProposalStatus,
     ProposalStage,
     Category,
+    ContributionStatus,
     ProposalArbiterStatus,
     MilestoneStage
 )
@@ -70,6 +71,110 @@ class ProposalUpdate(db.Model):
         self.title = title[:255]
         self.content = content
         self.date_created = datetime.datetime.now()
+
+
+class ProposalContribution(db.Model):
+    __tablename__ = "proposal_contribution"
+
+    id = db.Column(db.Integer(), primary_key=True)
+    date_created = db.Column(db.DateTime, nullable=False)
+
+    proposal_id = db.Column(db.Integer, db.ForeignKey("proposal.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    status = db.Column(db.String(255), nullable=False)
+    amount = db.Column(db.String(255), nullable=False)
+    tx_id = db.Column(db.String(255), nullable=True)
+    refund_tx_id = db.Column(db.String(255), nullable=True)
+    staking = db.Column(db.Boolean, nullable=False)
+    private = db.Column(db.Boolean, nullable=False, default=False, server_default='true')
+
+    user = db.relationship("User")
+
+    def __init__(
+            self,
+            proposal_id: int,
+            amount: str,
+            user_id: int = None,
+            staking: bool = False,
+            private: bool = True,
+    ):
+        self.proposal_id = proposal_id
+        self.amount = amount
+        self.user_id = user_id
+        self.staking = staking
+        self.private = private
+        self.date_created = datetime.datetime.now()
+        self.status = ContributionStatus.PENDING
+
+    @staticmethod
+    def get_existing_contribution(user_id: int, proposal_id: int, amount: str, private: bool = False):
+        return ProposalContribution.query.filter_by(
+            user_id=user_id,
+            proposal_id=proposal_id,
+            amount=amount,
+            private=private,
+            status=ContributionStatus.PENDING,
+        ).first()
+
+    @staticmethod
+    def get_by_userid(user_id):
+        return ProposalContribution.query \
+            .filter(ProposalContribution.user_id == user_id) \
+            .filter(ProposalContribution.status != ContributionStatus.DELETED) \
+            .filter(ProposalContribution.staking == False) \
+            .order_by(ProposalContribution.date_created.desc()) \
+            .all()
+
+    @staticmethod
+    def validate(contribution):
+        from grant.user.models import User
+
+        proposal_id = contribution.get('proposal_id')
+        user_id = contribution.get('user_id')
+        status = contribution.get('status')
+        amount = contribution.get('amount')
+        tx_id = contribution.get('tx_id')
+
+        # Proposal ID (must belong to an existing proposal)
+        if proposal_id:
+            proposal = Proposal.query.filter(Proposal.id == proposal_id).first()
+            if not proposal:
+                raise ValidationException('No proposal matching that ID')
+            contribution.proposal_id = proposal_id
+        else:
+            raise ValidationException('Proposal ID is required')
+        # User ID (must belong to an existing user)
+        if user_id:
+            user = User.query.filter(User.id == user_id).first()
+            if not user:
+                raise ValidationException('No user matching that ID')
+            contribution.user_id = user_id
+        else:
+            raise ValidationException('User ID is required')
+        # Status (must be in list of statuses)
+        if status:
+            if not ContributionStatus.includes(status):
+                raise ValidationException('Invalid status')
+            contribution.status = status
+        else:
+            raise ValidationException('Status is required')
+        # Amount (must be a Decimal parseable)
+        if amount:
+            try:
+                contribution.amount = str(Decimal(amount))
+            except:
+                raise ValidationException('Amount must be a number')
+        else:
+            raise ValidationException('Amount is required')
+
+    def confirm(self, tx_id: str, amount: str):
+        self.status = ContributionStatus.CONFIRMED
+        self.tx_id = tx_id
+        self.amount = amount
+
+    @hybrid_property
+    def refund_address(self):
+        return self.user.settings.refund_address if self.user else None
 
 
 class ProposalArbiter(db.Model):
@@ -134,6 +239,7 @@ class Proposal(db.Model):
     team = db.relationship("User", secondary=proposal_team)
     comments = db.relationship(Comment, backref="proposal", lazy=True, cascade="all, delete-orphan")
     updates = db.relationship(ProposalUpdate, backref="proposal", lazy=True, cascade="all, delete-orphan")
+    contributions = db.relationship(ProposalContribution, backref="proposal", lazy=True, cascade="all, delete-orphan")
     milestones = db.relationship("Milestone", backref="proposal",
                                  order_by="asc(Milestone.index)", lazy=True, cascade="all, delete-orphan")
     invites = db.relationship(ProposalTeamInvite, backref="proposal", lazy=True, cascade="all, delete-orphan")
@@ -524,7 +630,56 @@ invite_with_proposal_schema = InviteWithProposalSchema()
 invites_with_proposal_schema = InviteWithProposalSchema(many=True)
 
 
+class ProposalContributionSchema(ma.Schema):
+    class Meta:
+        model = ProposalContribution
+        # Fields to expose
+        fields = (
+            "id",
+            "proposal",
+            "user",
+            "status",
+            "tx_id",
+            "amount",
+            "date_created",
+            "addresses",
+            "is_anonymous",
+            "private"
+        )
 
+    proposal = ma.Nested("ProposalSchema")
+    user = ma.Nested("UserSchema", default=anonymous_user)
+    date_created = ma.Method("get_date_created")
+    addresses = ma.Method("get_addresses")
+    is_anonymous = ma.Method("get_is_anonymous")
+
+    def get_date_created(self, obj):
+        return dt_to_unix(obj.date_created)
+
+    def get_addresses(self, obj):
+        # Omit 'memo' and 'sprout' for now
+        # NOTE: Add back in 'sapling' when ready
+        addresses = blockchain_get('/contribution/addresses', {'contributionId': obj.id})
+        return {
+            'transparent': addresses['transparent'],
+        }
+
+    def get_is_anonymous(self, obj):
+        return not obj.user_id or obj.private
+
+    @post_dump
+    def stub_anonymous_user(self, data):
+        if 'user' in data and data['user'] is None or data['private']:
+            data['user'] = anonymous_user
+        return data
+
+
+proposal_contribution_schema = ProposalContributionSchema()
+proposal_contributions_schema = ProposalContributionSchema(many=True)
+user_proposal_contribution_schema = ProposalContributionSchema(exclude=['user', 'addresses'])
+user_proposal_contributions_schema = ProposalContributionSchema(many=True, exclude=['user', 'addresses'])
+proposal_proposal_contribution_schema = ProposalContributionSchema(exclude=['proposal', 'addresses'])
+proposal_proposal_contributions_schema = ProposalContributionSchema(many=True, exclude=['proposal', 'addresses'])
 
 class ProposalArbiterSchema(ma.Schema):
     class Meta:

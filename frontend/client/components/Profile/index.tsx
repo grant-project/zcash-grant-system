@@ -18,6 +18,7 @@ import ProfilePendingList from './ProfilePendingList';
 import ProfileProposal from './ProfileProposal';
 import ProfileComment from './ProfileComment';
 import ProfileInvite from './ProfileInvite';
+import ProfileContribution from './ProfileContribution';
 import Placeholder from 'components/Placeholder';
 import Loader from 'components/Loader';
 import ExceptionPage from 'components/ExceptionPage';
@@ -75,7 +76,14 @@ class Profile extends React.Component<Props> {
       return <ExceptionPage code="404" desc="No user could be found" />;
     }
 
-    const { proposals, pendingProposals, comments, invites, arbitrated } = user;
+    const {
+      proposals,
+      pendingProposals,
+      comments,
+      invites,
+      arbitrated,
+      contributions,
+    } = user;
 
     const isLoading = user.isFetching;
     const nonePending = pendingProposals.length === 0;
@@ -83,6 +91,7 @@ class Profile extends React.Component<Props> {
     const noneCommented = comments.length === 0;
     const noneArbitrated = arbitrated.length === 0;
     const noneInvites = user.hasFetchedInvites && invites.length === 0;
+    const hasFunded = contributions.length > 0;
 
     return (
       <div className="Profile">
@@ -137,6 +146,19 @@ class Profile extends React.Component<Props> {
                 ))}
               </div>
             </Tabs.TabPane>
+            {hasFunded && (
+              <Tabs.TabPane tab={TabTitle('Funded', contributions.length)} key="funded">
+                <div>
+                  {contributions.map(c => (
+                    <ProfileContribution
+                      key={c.id}
+                      userId={user.userid}
+                      contribution={c}
+                    />
+                  ))}
+                </div>
+              </Tabs.TabPane>
+            )}
             <Tabs.TabPane tab={TabTitle('Comments', comments.length)} key="comments">
               <div>
                 {noneCommented && (

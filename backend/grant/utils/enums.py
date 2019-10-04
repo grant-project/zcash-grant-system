@@ -14,6 +14,7 @@ class CustomEnum():
 class ProposalStatusEnum(CustomEnum):
     DRAFT = 'DRAFT'
     PENDING = 'PENDING'
+    STAKING = 'STAKING'  # kept for backwards compatibility
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'
     LIVE = 'LIVE'
@@ -33,7 +34,7 @@ ProposalSort = ProposalSortEnum()
 
 class ProposalStageEnum(CustomEnum):
     PREVIEW = 'PREVIEW'
-    FUNDING_REQUIRED = 'FUNDING_REQUIRED' # kept for backwards compatibility
+    FUNDING_REQUIRED = 'FUNDING_REQUIRED'  # kept for backwards compatibility
     WIP = 'WIP'
     COMPLETED = 'COMPLETED'
     FAILED = 'FAILED'
@@ -54,6 +55,13 @@ class CategoryEnum(CustomEnum):
 Category = CategoryEnum()
 
 
+class ContributionStatusEnum(CustomEnum):
+    PENDING = 'PENDING'
+    CONFIRMED = 'CONFIRMED'
+    DELETED = 'DELETED'
+
+
+ContributionStatus = ContributionStatusEnum()
 
 
 class RFPStatusEnum(CustomEnum):

@@ -21,9 +21,11 @@ import CommentsTab from './Comments';
 import UpdatesTab from './Updates';
 import UpdateModal from './UpdateModal';
 import CancelModal from './CancelModal';
+import ContributorsTab from './Contributors';
 import classnames from 'classnames';
 import { withRouter } from 'react-router';
 import SocialShare from 'components/SocialShare';
+import { CONTRIBUTIONS_CUTOFF } from 'utils/constants';
 import './index.less';
 
 interface OwnProps {
@@ -90,6 +92,8 @@ export class ProposalDetail extends React.Component<Props, State> {
     const { isBodyExpanded, isBodyOverflowing, isCancelOpen, isUpdateOpen } = this.state;
     const showExpand = !isBodyExpanded && isBodyOverflowing;
     const wrongProposal = proposal && proposal.proposalId !== this.props.proposalId;
+    const showContributions =
+      proposal && proposal.datePublished && proposal.datePublished < CONTRIBUTIONS_CUTOFF;
 
     if (detailError) {
       return <ExceptionPage code="404" desc="Could not find that proposal" />;
@@ -233,6 +237,11 @@ export class ProposalDetail extends React.Component<Props, State> {
             <Tabs.TabPane tab="Updates" key="updates" disabled={!isLive}>
               <UpdatesTab proposalId={proposal.proposalId} />
             </Tabs.TabPane>
+            {showContributions && (
+              <Tabs.TabPane tab="Contributors" key="contributors" disabled={!isLive}>
+                <ContributorsTab proposalId={proposal.proposalId} />
+              </Tabs.TabPane>
+            )}
           </LinkableTabs>
         </div>
 

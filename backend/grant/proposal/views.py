@@ -22,8 +22,7 @@ from grant.utils.auth import (
     get_authed_user,
     internal_webhook
 )
-from grant.utils.enums import Category
-from grant.utils.enums import ProposalStatus, ProposalStage
+from grant.utils.enums import Category, ProposalStatus, ProposalStage, ContributionStatus
 from grant.utils.exceptions import ValidationException
 from grant.utils.misc import is_email, make_url, from_zat, make_explore_url
 from .models import (
@@ -32,9 +31,12 @@ from .models import (
     proposal_schema,
     ProposalUpdate,
     proposal_update_schema,
+    ProposalContribution,
+    proposal_contribution_schema,
     proposal_team,
     ProposalTeamInvite,
     proposal_team_invite_schema,
+    proposal_proposal_contributions_schema,
     db,
 )
 
@@ -404,7 +406,48 @@ def delete_proposal_team_invite(proposal_id, id_or_address):
     return {"message": "ok"}, 202
 
 
+@blueprint.route("/<proposal_id>/contributions", methods=["GET"])
+def get_proposal_contributions(proposal_id):
+    proposal = Proposal.query.filter_by(id=proposal_id).first()
+    if not proposal:
+        return {"message": "No proposal matching id"}, 404
 
+    top_contributions = ProposalContribution.query.filter_by(
+        proposal_id=proposal_id,
+        status=ContributionStatus.CONFIRMED,
+        staking=False,
+    ).order_by(
+        ProposalContribution.amount.desc()
+    ).limit(
+        5
+    ).all()
+    latest_contributions = ProposalContribution.query.filter_by(
+        proposal_id=proposal_id,
+        status=ContributionStatus.CONFIRMED,
+        staking=False,
+    ).order_by(
+        ProposalContribution.date_created.desc()
+    ).limit(
+        5
+    ).all()
+
+    return {
+        'top': proposal_proposal_contributions_schema.dump(top_contributions),
+        'latest': proposal_proposal_contributions_schema.dump(latest_contributions),
+    }
+
+
+@blueprint.route("/<proposal_id>/contributions/<contribution_id>", methods=["GET"])
+def get_proposal_contribution(proposal_id, contribution_id):
+    proposal = Proposal.query.filter_by(id=proposal_id).first()
+    if not proposal:
+        return {"message": "No proposal matching id"}, 404
+
+    contribution = ProposalContribution.query.filter_by(id=contribution_id).first()
+    if not contribution:
+        return {"message": "No contribution matching id"}, 404
+
+    return proposal_contribution_schema.dump(contribution)
 
 # request MS payout
 @blueprint.route("/<proposal_id>/milestone/<milestone_id>/request", methods=["PUT"])
