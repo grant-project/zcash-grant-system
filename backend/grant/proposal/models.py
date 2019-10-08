@@ -218,6 +218,7 @@ class Proposal(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     date_created = db.Column(db.DateTime)
     rfp_id = db.Column(db.Integer(), db.ForeignKey('rfp.id'), nullable=True)
+    version = db.Column(db.String(255), nullable=True)
 
     # Content info
     status = db.Column(db.String(255), nullable=False)
@@ -272,6 +273,7 @@ class Proposal(db.Model):
         self.payout_address = payout_address
         self.deadline_duration = deadline_duration
         self.stage = stage
+        self.version = '2'
 
     @staticmethod
     def simple_validate(proposal):
@@ -703,7 +705,8 @@ class ProposalSchema(ma.Schema):
             "invites",
             "rfp",
             "rfp_opt_in",
-            "arbiter"
+            "arbiter",
+            "version",
         )
 
     date_created = ma.Method("get_date_created")

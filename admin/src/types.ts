@@ -116,6 +116,7 @@ export interface Proposal {
   rfpOptIn: null | boolean;
   rfp?: RFP;
   arbiter: ProposalArbiter;
+  version: '2' | null;
 }
 export interface Comment {
   id: number;

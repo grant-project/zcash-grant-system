@@ -173,6 +173,8 @@ export function generateProposal({
         socialMedias: [],
       },
     },
+    version: '2',
+    isVersionTwo: true,
     team: [
       {
         userid: 123,
