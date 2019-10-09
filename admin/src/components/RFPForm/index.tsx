@@ -11,7 +11,7 @@ import {
   Button,
   message,
   Spin,
-  Checkbox,
+  // Checkbox,
   Row,
   Col,
   DatePicker,
@@ -208,7 +208,7 @@ class RFPForm extends React.Component<Props, State> {
                   size="large"
                 />,
               )}
-              {getFieldDecorator('matching', {
+              {/* {getFieldDecorator('matching', {
                 initialValue: defaults.matching,
               })(
                 <Checkbox
@@ -218,7 +218,7 @@ class RFPForm extends React.Component<Props, State> {
                 >
                   Match community contributions for approved proposals
                 </Checkbox>,
-              )}
+              )} */}
             </Form.Item>
           </Col>
           <Col sm={12} xs={24}>
