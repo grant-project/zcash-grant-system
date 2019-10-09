@@ -30,7 +30,7 @@ interface CreateFormErrors {
   content?: string;
   payoutAddress?: string;
   milestones?: string[];
-  deadlineDuration?: string;
+  // deadlineDuration?: string;
 }
 
 export type KeyOfForm = keyof CreateFormErrors;
@@ -44,7 +44,7 @@ export const FIELD_NAME_MAP: { [key in KeyOfForm]: string } = {
   content: 'Details',
   payoutAddress: 'Payout address',
   milestones: 'Milestones',
-  deadlineDuration: 'Funding deadline',
+  // deadlineDuration: 'Funding deadline',
 };
 
 const requiredFields = [
@@ -54,7 +54,7 @@ const requiredFields = [
   'target',
   'content',
   'payoutAddress',
-  'deadlineDuration',
+  // 'deadlineDuration',
 ];
 
 export function getCreateErrors(
@@ -240,7 +240,7 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
     dateCreated: Date.now() / 1000,
     datePublished: Date.now() / 1000,
     dateApproved: Date.now() / 1000,
-    deadlineDuration: 86400 * 60,
+    // deadlineDuration: 86400 * 60,
     target: toZat(draft.target),
     funded: Zat('0'),
     contributionMatching: 0,
@@ -252,6 +252,7 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
     arbiter: {
       status: PROPOSAL_ARBITER_STATUS.ACCEPTED,
     },
+    acceptedWithFunding: null,
     version: '2',
     isVersionTwo: true,
     milestones: draft.milestones.map((m, idx) => ({

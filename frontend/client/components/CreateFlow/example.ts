@@ -47,7 +47,7 @@ const createExampleProposal = (): Partial<ProposalDraft> => {
         immediatePayout: false,
       },
     ],
-    deadlineDuration: 300,
+    // deadlineDuration: 300,
   };
 };
 

@@ -39,12 +39,12 @@ export interface ProposalDraft {
   stage: PROPOSAL_STAGE;
   target: string;
   payoutAddress: string;
-  deadlineDuration: number;
   milestones: CreateMilestone[];
   team: User[];
   invites: TeamInvite[];
   status: STATUS;
   isStaked: boolean;
+  deadlineDuration?: number;
   rfp?: RFP;
   rfpOptIn?: boolean;
 }
@@ -62,6 +62,7 @@ export interface Proposal extends Omit<ProposalDraft, 'target' | 'invites'> {
   datePublished: number | null;
   dateApproved: number | null;
   arbiter: ProposalProposalArbiter;
+  acceptedWithFunding: boolean | null;
   version: '2' | null;
   isTeamMember?: boolean; // FE derived
   isArbiter?: boolean; // FE derived

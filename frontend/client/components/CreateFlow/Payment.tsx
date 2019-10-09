@@ -1,14 +1,13 @@
 import React from 'react';
-import { Input, Form, Radio } from 'antd';
-import { RadioChangeEvent } from 'antd/lib/radio';
+import { Input, Form /* Radio */ } from 'antd';
+// import { RadioChangeEvent } from 'antd/lib/radio';
 import { ProposalDraft } from 'types';
 import { getCreateErrors } from 'modules/create/utils';
-import { ONE_DAY } from 'utils/time';
 import { DONATION } from 'utils/constants';
 
 interface State {
   payoutAddress: string;
-  deadlineDuration: number;
+  // deadlineDuration: number;
 }
 
 interface Props {
@@ -21,13 +20,13 @@ export default class CreateFlowPayment extends React.Component<Props, State> {
     super(props);
     this.state = {
       payoutAddress: '',
-      deadlineDuration: ONE_DAY * 60,
+      // deadlineDuration: ONE_DAY * 60,
       ...(props.initialState || {}),
     };
   }
 
   render() {
-    const { payoutAddress, deadlineDuration } = this.state;
+    const { payoutAddress /* deadlineDuration  */ } = this.state;
     const errors = getCreateErrors(this.state, true);
     const payoutHelp =
       errors.payoutAddress ||
@@ -53,7 +52,7 @@ export default class CreateFlowPayment extends React.Component<Props, State> {
           />
         </Form.Item>
 
-        <Form.Item label="Funding Deadline">
+        {/* <Form.Item label="Funding Deadline">
           <Radio.Group
             name="deadlineDuration"
             value={deadlineDuration}
@@ -76,7 +75,7 @@ export default class CreateFlowPayment extends React.Component<Props, State> {
               90 Days
             </Radio.Button>
           </Radio.Group>
-        </Form.Item>
+        </Form.Item> */}
       </Form>
     );
   }
@@ -90,10 +89,10 @@ export default class CreateFlowPayment extends React.Component<Props, State> {
     });
   };
 
-  private handleRadioChange = (event: RadioChangeEvent) => {
-    const { value, name } = event.target;
-    this.setState({ [name as string]: value } as any, () => {
-      this.props.updateForm(this.state);
-    });
-  };
+  // private handleRadioChange = (event: RadioChangeEvent) => {
+  //   const { value, name } = event.target;
+  //   this.setState({ [name as string]: value } as any, () => {
+  //     this.props.updateForm(this.state);
+  //   });
+  // };
 }
