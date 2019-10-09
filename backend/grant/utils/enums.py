@@ -34,7 +34,7 @@ ProposalSort = ProposalSortEnum()
 
 class ProposalStageEnum(CustomEnum):
     PREVIEW = 'PREVIEW'
-    FUNDING_REQUIRED = 'FUNDING_REQUIRED'
+    # FUNDING_REQUIRED = 'FUNDING_REQUIRED'
     WIP = 'WIP'
     COMPLETED = 'COMPLETED'
     FAILED = 'FAILED'

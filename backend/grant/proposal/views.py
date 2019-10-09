@@ -567,7 +567,8 @@ def post_contribution_confirmation(contribution_id, to, amount, txid):
             })
 
     # on funding target reached.
-    contribution.proposal.set_funded_when_ready()
+    # TODO: remove entire endpoint?
+    # contribution.proposal.set_funded_when_ready()
 
     db.session.commit()
     return {"message": "ok"}, 200
