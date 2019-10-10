@@ -13,6 +13,7 @@ import Markdown from 'components/Markdown';
 import ProposalCard from 'components/Proposals/ProposalCard';
 import UnitDisplay from 'components/UnitDisplay';
 import HeaderDetails from 'components/HeaderDetails';
+import { RFP_STATUS } from 'api/constants';
 import './index.less';
 
 interface OwnProps {
@@ -48,6 +49,7 @@ class RFPDetail extends React.Component<Props> {
       }
     }
 
+    const isLive = rfp.status === RFP_STATUS.LIVE;
     const tags = [];
 
     if (rfp.matching) {
@@ -117,23 +119,25 @@ class RFPDetail extends React.Component<Props> {
           </div>
         )}
 
-        <div className="RFPDetail-submit">
-          <Affix offsetBottom={0}>
-            <div className="RFPDetail-submit-inner">
-              <span>Ready to take on this request?</span>{' '}
-              <Link to={`/create?rfp=${rfp.id}`}>
-                <Button
-                  className="RFPDetail-submit-inner-button"
-                  type="primary"
-                  size="large"
-                >
-                  Start a Proposal
-                  <Icon type="right-circle" />
-                </Button>
-              </Link>
-            </div>
-          </Affix>
-        </div>
+        {isLive && (
+          <div className="RFPDetail-submit">
+            <Affix offsetBottom={0}>
+              <div className="RFPDetail-submit-inner">
+                <span>Ready to take on this request?</span>{' '}
+                <Link to={`/create?rfp=${rfp.id}`}>
+                  <Button
+                    className="RFPDetail-submit-inner-button"
+                    type="primary"
+                    size="large"
+                  >
+                    Start a Proposal
+                    <Icon type="right-circle" />
+                  </Button>
+                </Link>
+              </div>
+            </Affix>
+          </div>
+        )}
       </div>
     );
   }
