@@ -1,27 +1,14 @@
 import React from 'react';
 import moment from 'moment';
-// TODO: use/remove commented imports for tipjar
-import {
-  // Form,
-  // Input,
-  // Button,
-  Icon,
-  Popover,
-  // Tooltip,
-  // Radio
-} from 'antd';
-// import { RadioChangeEvent } from 'antd/lib/radio';
+import { Icon, Popover } from 'antd';
 import { Proposal, STATUS } from 'types';
 import classnames from 'classnames';
-// import { fromZat } from 'utils/units';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
 import { AppState } from 'store/reducers';
 import { withRouter } from 'react-router';
 import UnitDisplay from 'components/UnitDisplay';
-// import ContributionModal from 'components/ContributionModal';
 import Loader from 'components/Loader';
-// import { getAmountError } from 'utils/validators';
 import { CATEGORY_UI, PROPOSAL_STAGE } from 'api/constants';
 import './style.less';
 
@@ -55,11 +42,7 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
   }
 
   render() {
-    // TODO: adapt/remove commented code to tipjar
-
-    const { proposal /* isPreview, authUser */ } = this.props;
-    // const { amountToRaise, amountError, isPrivate, isContributing } = this.state;
-    // const amountFloat = parseFloat(amountToRaise) || 0;
+    const { proposal } = this.props;
     let content;
     if (proposal) {
       const { target, funded, percentFunded, isVersionTwo } = proposal;
@@ -76,8 +59,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
       const isFundingOver = deadline
         ? isRaiseGoalReached || deadline < Date.now() || isFrozen
         : null;
-      // const isDisabled = isFundingOver || !!amountError || !amountFloat || isPreview;
-      // const remainingTargetNum = parseFloat(fromZat(target.sub(funded)));
 
       // Get bounty from RFP. If it exceeds proposal target, show bounty as full amount
       let bounty;
@@ -199,7 +180,7 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
                 />
               </div>
 
-              {/* TODO: replace commented section below with tipjar */}
+              {/* TODO: use this as a base for tipjar? */}
 
               {/* <Form layout="vertical" className="ProposalCampaignBlock-contribute">
                 <Form.Item
@@ -281,7 +262,7 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
               </div>
             )}
 
-          {/* TODO: adapt below for tipjar */}
+          {/* TODO: adapt below for tipjar? */}
           {/* <ContributionModal
             isVisible={isContributing}
             proposalId={proposal.proposalId}
@@ -303,40 +284,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
       </div>
     );
   }
-
-  // TODO: adapt below for tipjar
-
-  // private handleAmountChange = (
-  //   event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  // ) => {
-  //   const { value } = event.currentTarget;
-  //   if (!value) {
-  //     this.setState({ amountToRaise: '', amountError: null });
-  //     return;
-  //   }
-
-  //   const { target, funded } = this.props.proposal;
-  //   const remainingTarget = target.sub(funded);
-  //   const amount = parseFloat(value);
-  //   let amountError = null;
-
-  //   if (Number.isNaN(amount)) {
-  //     // They're entering some garbage, they’ll work it out
-  //   } else {
-  //     const remainingTargetNum = parseFloat(fromZat(remainingTarget));
-  //     amountError = getAmountError(amount, remainingTargetNum);
-  //   }
-
-  //   this.setState({ amountToRaise: value, amountError });
-  // };
-
-  // private handleChangePrivate = (ev: RadioChangeEvent) => {
-  //   const isPrivate = ev.target.value === 'isPrivate';
-  //   this.setState({ isPrivate });
-  // };
-
-  // private openContributionModal = () => this.setState({ isContributing: true });
-  // private closeContributionModal = () => this.setState({ isContributing: false });
 }
 
 function mapStateToProps(state: AppState) {

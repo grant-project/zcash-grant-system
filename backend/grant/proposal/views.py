@@ -566,10 +566,6 @@ def post_contribution_confirmation(contribution_id, to, amount, txid):
                 'contributor_url': make_url(f'/profile/{contribution.user.id}') if contribution.user else '',
             })
 
-    # on funding target reached.
-    # TODO: remove entire endpoint?
-    # contribution.proposal.set_funded_when_ready()
-
     db.session.commit()
     return {"message": "ok"}, 200
 

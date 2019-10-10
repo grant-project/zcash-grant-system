@@ -412,13 +412,6 @@ class Proposal(db.Model):
 
     def update_rfp_opt_in(self, opt_in: bool):
         self.rfp_opt_in = opt_in
-        # add/remove matching and/or bounty values from RFP
-        # if opt_in and self.rfp:
-        #     self.set_contribution_matching(1 if self.rfp.matching else 0)
-        #     self.set_contribution_bounty(self.rfp.bounty or '0')
-        # else:
-        #     self.set_contribution_matching(0)
-        #     self.set_contribution_bounty('0')
 
     def create_contribution(
         self,
@@ -545,27 +538,6 @@ class Proposal(db.Model):
         self.date_published = datetime.datetime.now()
         self.status = ProposalStatus.LIVE
         self.stage = ProposalStage.WIP
-        # If we had a bounty that pushed us into funding, skip straight into WIP
-        # self.set_funded_when_ready()
-
-    # def set_funded_when_ready(self):
-    #     if self.status == ProposalStatus.LIVE and self.stage == ProposalStage.FUNDING_REQUIRED and self.is_funded:
-    #         self.set_funded()
-
-    # state: stage FUNDING_REQUIRED -> WIP
-    # def set_funded(self):
-    #     if self.status != ProposalStatus.LIVE:
-    #         raise ValidationException(f"Proposal status must be live in order transition to funded state")
-    #     if self.stage != ProposalStage.FUNDING_REQUIRED:
-    #         raise ValidationException(f"Proposal stage must be funding_required in order transition to funded state")
-    #     if not self.is_funded:
-    #         raise ValidationException(f"Proposal is not fully funded, cannot set to funded state")
-    #     self.send_admin_email('admin_arbiter')
-    #     self.stage = ProposalStage.WIP
-    #     db.session.add(self)
-    #     db.session.flush()
-    #     # check the first step, if immediate payout bump it to accepted
-    #     self.current_milestone.accept_immediate()
 
     def set_contribution_bounty(self, bounty: str):
         # do not allow changes on funded/WIP proposals
@@ -575,23 +547,9 @@ class Proposal(db.Model):
         self.contribution_bounty = str(Decimal(bounty))
         db.session.add(self)
         db.session.flush()
-        # self.set_funded_when_ready()
 
     def fully_fund_contibution_bounty(self):
         self.set_contribution_bounty(self.target)
-
-    # def set_contribution_matching(self, matching: float):
-    #     # do not allow on funded/WIP proposals
-    #     if self.is_funded:
-    #         raise ValidationException("Cannot set contribution matching on fully-funded proposal")
-    #     # enforce 1 or 0 for now
-    #     if matching == 0.0 or matching == 1.0:
-    #         self.contribution_matching = matching
-    #         db.session.add(self)
-    #         db.session.flush()
-    #         self.set_funded_when_ready()
-    #     else:
-    #         raise ValidationException("Bad value for contribution_matching, must be 1 or 0")
 
     def cancel(self):
         if self.status != ProposalStatus.LIVE:
