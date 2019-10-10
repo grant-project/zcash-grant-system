@@ -63,7 +63,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
       return m.datePaid ? prev - parseFloat(m.payoutPercent) : prev;
     }, 100);
 
-    const isVersionTwo = p.version === '2';
+    const { isVersionTwo } = p
     const shouldShowArbiter =
       !isVersionTwo ||
       (isVersionTwo && p.acceptedWithFunding === true);

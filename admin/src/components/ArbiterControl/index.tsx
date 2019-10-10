@@ -30,11 +30,10 @@ class ArbiterControlNaked extends React.Component<Props, State> {
   }, 1000);
 
   render() {
-    const { arbiter, version, acceptedWithFunding } = this.props;
+    const { arbiter, isVersionTwo, acceptedWithFunding } = this.props;
     const { showSearch, searching } = this.state;
     const { results, search, error } = store.arbitersSearch;
     const showEmpty = !results.length && !searching;
-    const isVersionTwo = version === '2'
     const buttonDisabled = isVersionTwo && acceptedWithFunding === false 
 
     const disp = {
