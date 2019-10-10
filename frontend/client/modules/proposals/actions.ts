@@ -31,15 +31,6 @@ function addProposalUserRoles(p: Proposal, state: AppState) {
   return p;
 }
 
-function addProposalVersionBool(p: Proposal) {
-  if (p.version === '2') {
-    p.isVersionTwo = true;
-  } else {
-    p.isVersionTwo = false;
-  }
-  return p;
-}
-
 export function requestPayout(proposalId: number, milestoneId: number) {
   return async (dispatch: Dispatch<any>) => {
     return dispatch({
@@ -117,7 +108,7 @@ export function fetchProposal(proposalId: Proposal['proposalId']) {
       const proposal = (await getProposal(proposalId)).data;
       return dispatch({
         type: types.PROPOSAL_DATA_FULFILLED,
-        payload: addProposalUserRoles(addProposalVersionBool(proposal), getState()),
+        payload: addProposalUserRoles(proposal, getState()),
       });
     } catch (error) {
       dispatch({
