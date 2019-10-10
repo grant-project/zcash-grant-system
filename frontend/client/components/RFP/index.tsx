@@ -68,6 +68,14 @@ class RFPDetail extends React.Component<Props> {
       );
     }
 
+    if (!isLive) {
+      tags.push(
+        <Tag key="closed" color="#f5222d">
+          Closed
+        </Tag>
+      );
+    }
+
     return (
       <div className="RFPDetail">
         <HeaderDetails title={rfp.title} description={rfp.brief} />
