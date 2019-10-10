@@ -1,13 +1,11 @@
 import React from 'react';
-import { Input, Form /* Radio */ } from 'antd';
-// import { RadioChangeEvent } from 'antd/lib/radio';
+import { Input, Form } from 'antd';
 import { ProposalDraft } from 'types';
 import { getCreateErrors } from 'modules/create/utils';
 import { DONATION } from 'utils/constants';
 
 interface State {
   payoutAddress: string;
-  // deadlineDuration: number;
 }
 
 interface Props {
@@ -20,13 +18,12 @@ export default class CreateFlowPayment extends React.Component<Props, State> {
     super(props);
     this.state = {
       payoutAddress: '',
-      // deadlineDuration: ONE_DAY * 60,
       ...(props.initialState || {}),
     };
   }
 
   render() {
-    const { payoutAddress /* deadlineDuration  */ } = this.state;
+    const { payoutAddress } = this.state;
     const errors = getCreateErrors(this.state, true);
     const payoutHelp =
       errors.payoutAddress ||
@@ -51,31 +48,6 @@ export default class CreateFlowPayment extends React.Component<Props, State> {
             onChange={this.handleInputChange}
           />
         </Form.Item>
-
-        {/* <Form.Item label="Funding Deadline">
-          <Radio.Group
-            name="deadlineDuration"
-            value={deadlineDuration}
-            onChange={this.handleRadioChange}
-            size="large"
-            style={{ display: 'flex', textAlign: 'center' }}
-          >
-            {deadlineDuration === 300 && (
-              <Radio.Button style={{ flex: 1 }} value={300}>
-                5 minutes
-              </Radio.Button>
-            )}
-            <Radio.Button style={{ flex: 1 }} value={ONE_DAY * 30}>
-              30 Days
-            </Radio.Button>
-            <Radio.Button style={{ flex: 1 }} value={ONE_DAY * 60}>
-              60 Days
-            </Radio.Button>
-            <Radio.Button style={{ flex: 1 }} value={ONE_DAY * 90}>
-              90 Days
-            </Radio.Button>
-          </Radio.Group>
-        </Form.Item> */}
       </Form>
     );
   }
@@ -88,11 +60,4 @@ export default class CreateFlowPayment extends React.Component<Props, State> {
       this.props.updateForm(this.state);
     });
   };
-
-  // private handleRadioChange = (event: RadioChangeEvent) => {
-  //   const { value, name } = event.target;
-  //   this.setState({ [name as string]: value } as any, () => {
-  //     this.props.updateForm(this.state);
-  //   });
-  // };
 }

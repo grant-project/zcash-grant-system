@@ -118,6 +118,7 @@ export interface Proposal {
   arbiter: ProposalArbiter;
   acceptedWithFunding: boolean | null;
   version: '2' | null;
+  isVersionTwo: boolean;
 }
 export interface Comment {
   id: number;
