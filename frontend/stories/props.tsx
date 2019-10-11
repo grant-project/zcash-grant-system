@@ -174,7 +174,6 @@ export function generateProposal({
       },
     },
     acceptedWithFunding: null,
-    version: '2',
     isVersionTwo: true,
     team: [
       {

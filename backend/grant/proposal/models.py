@@ -674,7 +674,6 @@ class ProposalSchema(ma.Schema):
             "rfp_opt_in",
             "arbiter",
             "accepted_with_funding",
-            "version",
             "is_version_two"
         )
 
@@ -723,7 +722,6 @@ user_fields = [
     "date_published",
     "reject_reason",
     "team",
-    "version",
     "is_version_two"
 ]
 user_proposal_schema = ProposalSchema(only=user_fields)
