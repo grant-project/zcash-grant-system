@@ -706,7 +706,6 @@ class ProposalSchema(ma.Schema):
             "rfp",
             "rfp_opt_in",
             "arbiter",
-            "version",
             "is_version_two"
         )
 
