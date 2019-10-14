@@ -71,8 +71,8 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
       const isAcceptedWithFunding = proposal.acceptedWithFunding === true;
       const isAcceptedWithoutFunding = proposal.acceptedWithFunding === false;
       const isAccepted = isAcceptedWithFunding || isAcceptedWithoutFunding;
-      const isRejected = proposal.status === STATUS.REJECTED;
-      const isJudged = isAccepted || isRejected;
+      const isCancelled = proposal.stage === PROPOSAL_STAGE.CANCELED;
+      const isJudged = isAccepted || isCancelled;
 
       const displayBountyFunding =
         !isVersionTwo || (isVersionTwo && isAcceptedWithFunding);
@@ -152,7 +152,7 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
                 ['is-success']: isRaiseGoalReached,
               })}
             >
-              {proposal.stage === PROPOSAL_STAGE.CANCELED ? (
+              {isCancelled ? (
                 <>
                   <Icon type="close-circle-o" />
                   <span>Proposal was canceled</span>
@@ -248,15 +248,10 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
                     <Icon type="close-circle-o" />
                     <span>Proposal was canceled</span>
                   </>
-                ) : isAccepted ? (
+                ) : (
                   <>
                     <Icon type="check-circle-o" />
                     <span>Proposal has been accepted</span>
-                  </>
-                ) : (
-                  <>
-                    <Icon type="close-circle-o" />
-                    <span>Proposal was rejected</span>
                   </>
                 )}
               </div>
