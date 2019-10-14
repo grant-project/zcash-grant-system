@@ -98,7 +98,7 @@ const ContentColumn: React.SFC<ContentColumnProps> = p => {
       <>
         {p.items.map(item => {
           const isProposal = (x: Proposal | RFP): x is Proposal =>
-            !!(x as Proposal).proposalUrlId !== undefined;
+            (x as Proposal).proposalUrlId !== undefined;
           const id = isProposal(item) ? item.proposalId : item.id;
           const urlId = isProposal(item) ? item.proposalUrlId : item.urlId;
 
