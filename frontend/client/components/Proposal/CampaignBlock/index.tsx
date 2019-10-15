@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { Form, Input, Button, Icon, Popover, Tooltip, Radio } from 'antd';
+import { Form, Input, Button, Icon, Popover, Tooltip, Radio, message } from 'antd';
 import { RadioChangeEvent } from 'antd/lib/radio';
 import { Proposal, STATUS } from 'types';
 import classnames from 'classnames';
@@ -14,6 +14,7 @@ import ContributionModal from 'components/ContributionModal';
 import Loader from 'components/Loader';
 import { getAmountError } from 'utils/validators';
 import { CATEGORY_UI, PROPOSAL_STAGE } from 'api/constants';
+import { subscribeToProposal } from 'modules/proposals/actions';
 import './style.less';
 
 interface OwnProps {
@@ -23,9 +24,14 @@ interface OwnProps {
 
 interface StateProps {
   authUser: AppState['auth']['user'];
+  isSubscribing: AppState['proposal']['isSubscribing'];
 }
 
-type Props = OwnProps & StateProps;
+interface DispatchProps {
+  subscribeToProposal: typeof subscribeToProposal;
+}
+
+type Props = OwnProps & StateProps & DispatchProps;
 
 interface State {
   amountToRaise: string;
@@ -223,6 +229,16 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
             </>
           )}
 
+          <Button
+            onClick={this.handleSubscribe}
+            size="large"
+            type="primary"
+            style={{ marginTop: '0.5rem' }}
+            block
+          >
+            {proposal.isSubscribed ? 'Unsubscribe from updates' : 'Subscribe to updates'}
+          </Button>
+
           <ContributionModal
             isVisible={isContributing}
             proposalId={proposal.proposalId}
@@ -276,15 +292,45 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
 
   private openContributionModal = () => this.setState({ isContributing: true });
   private closeContributionModal = () => this.setState({ isContributing: false });
+
+  private handleSubscribe = async () => {
+    const {
+      proposal: { isSubscribed, proposalId },
+      isSubscribing,
+    } = this.props;
+    if (isSubscribing) {
+      return;
+    }
+    const shouldSubscribe = !isSubscribed;
+    const res = await this.props.subscribeToProposal(proposalId, shouldSubscribe);
+
+    if ((res as any).error) {
+      message.error(`Problem subscribing: ${(res as any).payload}`);
+    } else {
+      message.success(
+        shouldSubscribe
+          ? 'Subscribed to proposal updates'
+          : 'Unsubscribed from proposal updates',
+      );
+    }
+  };
 }
 
 function mapStateToProps(state: AppState) {
   return {
     authUser: state.auth.user,
+    isSubscribing: state.proposal.isSubscribing,
   };
 }
 
-const withConnect = connect(mapStateToProps);
+const mapDispatchToProps = {
+  subscribeToProposal,
+};
+
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
 const ConnectedProposalCampaignBlock = compose<Props, OwnProps>(
   withRouter,

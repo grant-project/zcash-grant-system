@@ -350,6 +350,20 @@ export function getProposalStakingContribution(
   return axios.get(`/api/v1/proposals/${proposalId}/stake`);
 }
 
+export function postProposalSubscribe(proposalId: number): Promise<{ data: Proposal }> {
+  return axios.post(`/api/v1/proposals/${proposalId}/subscribe`).then(res => {
+    res.data = formatProposalFromGet(res.data);
+    return res;
+  });
+}
+
+export function deleteProposalSubscribe(proposalId: number): Promise<{ data: Proposal }> {
+  return axios.delete(`/api/v1/proposals/${proposalId}/subscribe`).then(res => {
+    res.data = formatProposalFromGet(res.data);
+    return res;
+  });
+}
+
 export function getRFPs(): Promise<{ data: RFP[] }> {
   return axios.get('/api/v1/rfps/').then(res => {
     res.data = res.data.map(formatRFPFromGet);

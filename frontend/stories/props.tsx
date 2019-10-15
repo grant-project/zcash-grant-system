@@ -174,6 +174,7 @@ export function generateProposal({
       },
     },
     isVersionTwo: true,
+    isSubscribed: false,
     team: [
       {
         userid: 123,
@@ -206,6 +207,8 @@ export function generateProposal({
   const props = {
     sendLoading: false,
     proposal,
+    isSubscribing: false,
+    subscribeToProposal: (() => null) as any,
     ...proposal, // yeah...
   };
 

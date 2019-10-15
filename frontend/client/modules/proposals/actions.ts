@@ -10,6 +10,8 @@ import {
   requestProposalPayout,
   acceptProposalPayout,
   rejectProposalPayout,
+  postProposalSubscribe,
+  deleteProposalSubscribe,
 } from 'api/api';
 import { Dispatch } from 'redux';
 import { Proposal, Comment, ProposalPageParams } from 'types';
@@ -224,6 +226,33 @@ export function reportProposalComment(
     } catch (err) {
       return dispatch({
         type: types.REPORT_PROPOSAL_COMMENT_REJECTED,
+        payload: err.message || err.toString(),
+        error: true,
+      });
+    }
+  };
+}
+
+export function subscribeToProposal(
+  proposalId: Proposal['proposalId'],
+  shouldSubscribe: boolean,
+) {
+  return async (dispatch: Dispatch<any>, getState: GetState) => {
+    const subscribe = shouldSubscribe ? postProposalSubscribe : deleteProposalSubscribe;
+    dispatch({ type: types.PROPOSAL_SUBSCRIBE_PENDING });
+
+    try {
+      const proposal = (await subscribe(proposalId)).data;
+      dispatch({
+        type: types.PROPOSAL_SUBSCRIBE_FULFILLED,
+      });
+      return dispatch({
+        type: types.PROPOSAL_DATA_FULFILLED,
+        payload: addProposalUserRoles(proposal, getState()),
+      });
+    } catch (err) {
+      return dispatch({
+        type: types.PROPOSAL_SUBSCRIBE_REJECTED,
         payload: err.message || err.toString(),
         error: true,
       });
