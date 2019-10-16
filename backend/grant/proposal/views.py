@@ -685,6 +685,9 @@ def reject_milestone_payout_request(proposal_id, milestone_id, reason):
 @requires_auth
 def subscribe_to_proposal(proposal_id):
     proposal = Proposal.query.filter_by(id=proposal_id).first()
+
+    if not g.current_user.email_verification.has_verified:
+        return {"message": "You must first verify your email"}, 404
     if not proposal:
         return {"message": "No proposal matching id"}, 404
 
