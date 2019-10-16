@@ -65,6 +65,18 @@ class EmailSubscription(Enum):
         'bit': 14,
         'key': 'admin_payout'
     }
+    SUBSCRIPTION_UPDATE = {
+        'bit': 15,
+        'key': 'subscription_update'
+    }
+    SUBSCRIPTION_MILESTONE_ACCEPT = {
+        'bit': 16,
+        'key': 'subscription_milestone_accept'
+    }
+    SUBSCRIPTION_PROPOSAL_CANCELLED = {
+        'bit': 17,
+        'key': 'subscription_proposal_cancelled'
+    }
 
 
 def is_email_sub_key(k: str):
