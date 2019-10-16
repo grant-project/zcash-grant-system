@@ -1,0 +1,5 @@
+A proposal you're subscribed to, "{{ args.proposal.title }}", has posted an update
+entitled "{{ args.proposal_update.title }}".
+
+Go here to read it: {{ args.update_url }}
+
