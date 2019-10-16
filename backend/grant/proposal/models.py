@@ -597,7 +597,7 @@ class Proposal(db.Model):
         db.session.add(self)
         db.session.flush()
 
-        # Send emails to team & contributors
+        # Send emails to team & contributors & subscribers
         for u in self.team:
             send_email(u.email_address, 'proposal_canceled', {
                 'proposal': self,
@@ -609,8 +609,11 @@ class Proposal(db.Model):
                 'refund_address': u.settings.refund_address,
                 'account_settings_url': make_url('/profile/settings?tab=account')
             })
-
-        # TODO - hook into cancel
+        for u in self.subscribers:
+            send_email(u.email_address, 'subscription_proposal_cancelled', {
+                'proposal': self,
+                'proposal_url': make_url(f'/proposals/{self.id}'),
+            })
 
     @hybrid_property
     def contributed(self):
