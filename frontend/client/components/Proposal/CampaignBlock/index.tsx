@@ -48,10 +48,10 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
   }
 
   render() {
-    const { proposal } = this.props;
+    const { proposal, authUser } = this.props;
     let content;
     if (proposal) {
-      const { target, funded, percentFunded, isVersionTwo } = proposal;
+      const { target, funded, percentFunded, isVersionTwo, isTeamMember } = proposal;
       const datePublished = proposal.datePublished || Date.now() / 1000;
       const isRaiseGoalReached = funded.gte(target);
       const deadline = proposal.deadlineDuration
@@ -82,6 +82,9 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
 
       const displayBountyFunding =
         !isVersionTwo || (isVersionTwo && isAcceptedWithFunding);
+
+      const isSignedIn = authUser !== null;
+      const shouldDisplaySubscribe = isSignedIn && !isTeamMember && !isCancelled;
 
       content = (
         <React.Fragment>
@@ -241,15 +244,19 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
             </>
           )}
 
-          <Button
-            onClick={this.handleSubscribe}
-            size="large"
-            type="primary"
-            style={{ marginTop: '0.5rem' }}
-            block
-          >
-            {proposal.isSubscribed ? 'Unsubscribe from updates' : 'Subscribe to updates'}
-          </Button>
+          {shouldDisplaySubscribe && (
+            <Button
+              onClick={this.handleSubscribe}
+              size="large"
+              type="primary"
+              style={{ marginTop: '0.5rem' }}
+              block
+            >
+              {proposal.isSubscribed
+                ? 'Unsubscribe from updates'
+                : 'Subscribe to updates'}
+            </Button>
+          )}
 
           {isVersionTwo &&
             isJudged && (
