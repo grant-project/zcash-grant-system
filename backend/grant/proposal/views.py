@@ -687,6 +687,8 @@ def subscribe_to_proposal(proposal_id):
         return {"message": "You must first verify your email"}, 404
     if not proposal:
         return {"message": "No proposal matching id"}, 404
+    if g.current_user in proposal.team:
+        return {"message": "Team members can't subscribe to their own proposal"}, 404
 
     if proposal.is_subscribed(g.current_user):
         return {"message": "User is already subscribed to this proposal"}, 404
