@@ -577,7 +577,7 @@ class Proposal(db.Model):
                 'account_settings_url': make_url('/profile/settings?tab=account')
             })
         for u in self.subscribers:
-            send_email(u.email_address, 'subscription_proposal_cancelled', {
+            send_email(u.email_address, 'subscription_proposal_canceled', {
                 'proposal': self,
                 'proposal_url': make_url(f'/proposals/{self.id}'),
             })

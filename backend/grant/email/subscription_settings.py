@@ -73,9 +73,9 @@ class EmailSubscription(Enum):
         'bit': 16,
         'key': 'subscription_milestone_accept'
     }
-    SUBSCRIPTION_PROPOSAL_CANCELLED = {
+    SUBSCRIPTION_PROPOSAL_CANCELED = {
         'bit': 17,
-        'key': 'subscription_proposal_cancelled'
+        'key': 'subscription_proposal_canceled'
     }
 
 
