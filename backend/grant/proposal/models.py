@@ -572,7 +572,7 @@ class Proposal(db.Model):
         db.session.add(self)
         db.session.flush()
 
-        # Send emails to team & contributors & followers
+        # Send emails to team & contributors
         for u in self.team:
             send_email(u.email_address, 'proposal_canceled', {
                 'proposal': self,
@@ -756,7 +756,6 @@ class ProposalSchema(ma.Schema):
 
     def get_is_version_two(self, obj):
         return True if obj.version == '2' else False
-
 
 proposal_schema = ProposalSchema()
 proposals_schema = ProposalSchema(many=True)
