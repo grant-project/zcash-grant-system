@@ -584,11 +584,6 @@ class Proposal(db.Model):
                 'refund_address': u.settings.refund_address,
                 'account_settings_url': make_url('/profile/settings?tab=account')
             })
-        for u in self.followers:
-            send_email(u.email_address, 'follower_proposal_canceled', {
-                'proposal': self,
-                'proposal_url': make_url(f'/proposals/{self.id}'),
-            })
 
     def follow(self, user, is_follow):
         if is_follow:
@@ -596,6 +591,19 @@ class Proposal(db.Model):
         else:
             self.followers.remove(user)
         db.session.flush()
+
+    def send_follower_email(self, type: str, email_args={}, url_suffix=""):
+        for u in self.followers:
+            send_email(
+                u.email_address,
+                type,
+                {
+                    "user": u,
+                    "proposal": self,
+                    "proposal_url": make_url(f"/proposals/{self.id}{url_suffix}"),
+                    **email_args,
+                },
+            )
 
     @hybrid_property
     def contributed(self):

@@ -1,5 +1,0 @@
-A proposal you're following, "{{ args.proposal.title }}", has been canceled.
-
-View the proposal here:
-{{ args.proposal_url }}
-

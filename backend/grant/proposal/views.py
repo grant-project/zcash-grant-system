@@ -363,7 +363,7 @@ def post_proposal_update(proposal_id, title, content):
     db.session.add(update)
     db.session.commit()
 
-    # Send email to all contributors & followers
+    # Send email to all contributors
     for u in g.current_proposal.contributors:
         send_email(u.email_address, 'contribution_update', {
             'proposal': g.current_proposal,
@@ -371,12 +371,10 @@ def post_proposal_update(proposal_id, title, content):
             'update_url': make_url(f'/proposals/{proposal_id}?tab=updates&update={update.id}'),
         })
 
-    for u in g.current_proposal.followers:
-        send_email(u.email_address, 'follower_update', {
-            'proposal': g.current_proposal,
-            'proposal_update': update,
-            'update_url': make_url(f'/proposals/{proposal_id}?tab=updates&update={update.id}'),
-        })
+    # Send email to all followers
+    g.current_proposal.send_follower_email(
+        "followed_proposal_update", url_suffix="?tab=updates"
+    )
 
     dumped_update = proposal_update_schema.dump(update)
     return dumped_update, 201
@@ -639,12 +637,6 @@ def accept_milestone_payout_request(proposal_id, milestone_id):
                 send_email(member.email_address, 'milestone_accept', {
                     'proposal': g.current_proposal,
                     'amount': amount,
-                    'proposal_milestones_url': make_url(f'/proposals/{g.current_proposal.id}?tab=milestones'),
-                })
-            # email proposal followers that a milestone has been completed
-            for subscriber in g.current_proposal.followers:
-                send_email(subscriber.email_address, 'follower_milestone_accept', {
-                    'proposal': g.current_proposal,
                     'proposal_milestones_url': make_url(f'/proposals/{g.current_proposal.id}?tab=milestones'),
                 })
             return proposal_schema.dump(g.current_proposal), 200

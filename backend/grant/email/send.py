@@ -307,30 +307,24 @@ def admin_payout(email_args):
     }
 
 
-def follower_update(email_args):
+def followed_proposal_milestone(email_args):
+    p = email_args["proposal"]
+    ms = email_args["milestone"]
     return {
-        'subject': f'Proposal {email_args["proposal"].title} has an update',
-        'title': 'Update Posted',
-        'preview': f'A proposal you\'re following, {email_args["proposal"].title}, has an update',
-        'subscription': EmailSubscription.FOLLOWER_UPDATE
+        "subject": f"Milestone accepted for {p.title}",
+        "title": f"Milestone Accepted",
+        "preview": f"Followed proposal {p.title} has passed a milestone",
+        "subscription": EmailSubscription.FOLLOWED_PROPOSAL,
     }
 
 
-def follower_milestone_accept(email_args):
+def followed_proposal_update(email_args):
+    p = email_args["proposal"]
     return {
-        'subject': f'Proposal {email_args["proposal"].title} has completed a milestone',
-        'title': 'Milestone Completed',
-        'preview': f'A proposal you\'re following, {email_args["proposal"].title}, has completed a milestone',
-        'subscription': EmailSubscription.FOLLOWER_MILESTONE_ACCEPT
-    }
-
-
-def follower_proposal_canceled(email_args):
-    return {
-        'subject': f'Proposal {email_args["proposal"].title} has been canceled',
-        'title': 'Proposal Canceled',
-        'preview': f'A proposal you\'re following, {email_args["proposal"].title}, has been canceled',
-        'subscription': EmailSubscription.FOLLOWER_PROPOSAL_CANCELED
+        "subject": f"Proposal update for {p.title}",
+        "title": f"Proposal Update",
+        "preview": f"Followed proposal {p.title} has an update",
+        "subscription": EmailSubscription.FOLLOWED_PROPOSAL,
     }
 
 
@@ -363,9 +357,8 @@ get_info_lookup = {
     'admin_approval': admin_approval,
     'admin_arbiter': admin_arbiter,
     'admin_payout': admin_payout,
-    'follower_update': follower_update,
-    'follower_milestone_accept': follower_milestone_accept,
-    'follower_proposal_canceled': follower_proposal_canceled
+    'followed_proposal_milestone': followed_proposal_milestone,
+    'followed_proposal_update': followed_proposal_update
 }
 
 
