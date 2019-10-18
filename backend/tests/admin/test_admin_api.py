@@ -278,7 +278,8 @@ class TestAdminAPI(BaseProposalCreatorConfig):
         self.assertEqual(resp.json["acceptedWithFunding"], False)
         self.assertEqual(resp.json["contributionBounty"], "0")
 
-    def test_change_proposal_to_accepted_with_funding(self):
+    @patch('requests.get', side_effect=mock_blockchain_api_requests)
+    def test_change_proposal_to_accepted_with_funding(self, mock_get):
         self.login_admin()
 
         # proposal needs to be PENDING
