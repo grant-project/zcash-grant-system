@@ -716,3 +716,18 @@ def unsubscribe_to_proposal(proposal_id):
 
     return proposal_schema.dump(proposal), 200
 
+
+@blueprint.route("/<proposal_id>/follow", methods=["PUT"])
+@requires_auth
+@body({"isFollow": fields.Bool(required=True)})
+def follow_proposal(proposal_id, is_follow):
+    user = g.current_user
+    # Make sure proposal exists
+    proposal = Proposal.query.filter_by(id=proposal_id).first()
+    if not proposal:
+        return {"message": "No proposal matching id"}, 404
+
+    proposal.follow(user, is_follow)
+    db.session.commit()
+    return {"message": "ok"}, 200
+

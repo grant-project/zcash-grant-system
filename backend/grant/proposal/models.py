@@ -4,8 +4,9 @@ from functools import reduce
 
 from flask_security.core import current_user
 from marshmallow import post_dump
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import column_property
 
 from grant.comment.models import Comment
 from grant.email.send import send_email
@@ -35,6 +36,13 @@ proposal_subscribers = db.Table(
     'proposal_subscribers', db.Model.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('proposal_id', db.Integer, db.ForeignKey('proposal.id'))
+)
+
+proposal_follower = db.Table(
+    "proposal_follower",
+    db.Model.metadata,
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("proposal_id", db.Integer, db.ForeignKey("proposal.id")),
 )
 
 class ProposalTeamInvite(db.Model):
@@ -255,6 +263,15 @@ class Proposal(db.Model):
     invites = db.relationship(ProposalTeamInvite, backref="proposal", lazy=True, cascade="all, delete-orphan")
     arbiter = db.relationship(ProposalArbiter, uselist=False, back_populates="proposal", cascade="all, delete-orphan")
     subscribers = db.relationship("User", secondary=proposal_subscribers)
+
+    followers = db.relationship(
+        "User", secondary=proposal_follower, back_populates="followed_proposals"
+    )
+    followers_count = column_property(
+        select([func.count(proposal_follower.c.proposal_id)])
+        .where(proposal_follower.c.proposal_id == id)
+        .correlate_except(proposal_follower)
+    )
 
     def __init__(
             self,
@@ -582,6 +599,13 @@ class Proposal(db.Model):
                 'proposal_url': make_url(f'/proposals/{self.id}'),
             })
 
+    def follow(self, user, is_follow):
+        if is_follow:
+            self.followers.append(user)
+        else:
+            self.followers.remove(user)
+        db.session.flush()
+
     @hybrid_property
     def contributed(self):
         contributions = ProposalContribution.query \
@@ -656,6 +680,22 @@ class Proposal(db.Model):
         except ValueError:
             return False
 
+    @hybrid_property
+    def authed_follows(self):
+        from grant.utils.auth import get_authed_user
+
+        authed = get_authed_user()
+        if not authed:
+            return False
+        res = (
+            db.session.query(proposal_follower)
+            .filter_by(user_id=authed.id, proposal_id=self.id)
+            .count()
+        )
+        if res:
+            return True
+        return False
+
 
 class ProposalSchema(ma.Schema):
     class Meta:
@@ -692,7 +732,9 @@ class ProposalSchema(ma.Schema):
             "arbiter",
             "is_version_two",
             "accepted_with_funding",
-            "is_subscribed"
+            "is_subscribed",
+            "authed_follows",
+            "followers_count"
         )
 
     date_created = ma.Method("get_date_created")
@@ -748,7 +790,8 @@ user_fields = [
     "date_published",
     "reject_reason",
     "team",
-    "is_version_two"
+    "is_version_two",
+    "authed_follows"
 ]
 user_proposal_schema = ProposalSchema(only=user_fields)
 user_proposals_schema = ProposalSchema(many=True, only=user_fields)
