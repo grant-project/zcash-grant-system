@@ -173,7 +173,6 @@ export function generateProposal({
         socialMedias: [],
       },
     },
-    isSubscribed: false,
     acceptedWithFunding: null,
     isVersionTwo: false,
     team: [
@@ -208,8 +207,6 @@ export function generateProposal({
   const props = {
     sendLoading: false,
     proposal,
-    isSubscribing: false,
-    subscribeToProposal: (() => null) as any,
     ...proposal, // yeah...
   };
 

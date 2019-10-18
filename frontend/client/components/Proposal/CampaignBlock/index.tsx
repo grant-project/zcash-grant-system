@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { Button, Icon, Popover, message } from 'antd';
+import { Icon, Popover } from 'antd';
 import { Proposal, STATUS } from 'types';
 import classnames from 'classnames';
 import { connect } from 'react-redux';
@@ -10,7 +10,6 @@ import { withRouter } from 'react-router';
 import UnitDisplay from 'components/UnitDisplay';
 import Loader from 'components/Loader';
 import { CATEGORY_UI, PROPOSAL_STAGE } from 'api/constants';
-import { subscribeToProposal } from 'modules/proposals/actions';
 import './style.less';
 
 interface OwnProps {
@@ -20,14 +19,9 @@ interface OwnProps {
 
 interface StateProps {
   authUser: AppState['auth']['user'];
-  isSubscribing: AppState['proposal']['isSubscribing'];
 }
 
-interface DispatchProps {
-  subscribeToProposal: typeof subscribeToProposal;
-}
-
-type Props = OwnProps & StateProps & DispatchProps;
+type Props = OwnProps & StateProps;
 
 interface State {
   amountToRaise: string;
@@ -48,10 +42,10 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
   }
 
   render() {
-    const { proposal, authUser } = this.props;
+    const { proposal } = this.props;
     let content;
     if (proposal) {
-      const { target, funded, percentFunded, isVersionTwo, isTeamMember } = proposal;
+      const { target, funded, percentFunded, isVersionTwo } = proposal;
       const datePublished = proposal.datePublished || Date.now() / 1000;
       const isRaiseGoalReached = funded.gte(target);
       const deadline = proposal.deadlineDuration
@@ -82,9 +76,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
 
       const displayBountyFunding =
         !isVersionTwo || (isVersionTwo && isAcceptedWithFunding);
-
-      const isSignedIn = authUser !== null;
-      const shouldDisplaySubscribe = isSignedIn && !isTeamMember && !isCancelled;
 
       content = (
         <React.Fragment>
@@ -244,20 +235,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
             </>
           )}
 
-          {shouldDisplaySubscribe && (
-            <Button
-              onClick={this.handleSubscribe}
-              size="large"
-              type="primary"
-              style={{ marginTop: '0.5rem' }}
-              block
-            >
-              {proposal.isSubscribed
-                ? 'Unsubscribe from updates'
-                : 'Subscribe to updates'}
-            </Button>
-          )}
-
           {isVersionTwo &&
             isJudged && (
               <div
@@ -302,45 +279,15 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
       </div>
     );
   }
-
-  private handleSubscribe = async () => {
-    const {
-      proposal: { isSubscribed, proposalId },
-      isSubscribing,
-    } = this.props;
-    if (isSubscribing) {
-      return;
-    }
-    const shouldSubscribe = !isSubscribed;
-    const res = await this.props.subscribeToProposal(proposalId, shouldSubscribe);
-
-    if ((res as any).error) {
-      message.error(`Problem subscribing: ${(res as any).payload}`);
-    } else {
-      message.success(
-        shouldSubscribe
-          ? 'Subscribed to proposal updates'
-          : 'Unsubscribed from proposal updates',
-      );
-    }
-  };
 }
 
 function mapStateToProps(state: AppState) {
   return {
     authUser: state.auth.user,
-    isSubscribing: state.proposal.isSubscribing,
   };
 }
 
-const mapDispatchToProps = {
-  subscribeToProposal,
-};
-
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-);
+const withConnect = connect(mapStateToProps);
 
 const ConnectedProposalCampaignBlock = compose<Props, OwnProps>(
   withRouter,

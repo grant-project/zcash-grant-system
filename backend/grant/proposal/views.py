@@ -678,45 +678,6 @@ def reject_milestone_payout_request(proposal_id, milestone_id, reason):
     return {"message": "No milestone matching id"}, 404
 
 
-@blueprint.route("/<proposal_id>/subscribe", methods=["POST"])
-@requires_auth
-def subscribe_to_proposal(proposal_id):
-    proposal = Proposal.query.filter_by(id=proposal_id).first()
-
-    if not g.current_user.email_verification.has_verified:
-        return {"message": "You must first verify your email"}, 404
-    if not proposal:
-        return {"message": "No proposal matching id"}, 404
-    if g.current_user in proposal.team:
-        return {"message": "Team members can't subscribe to their own proposal"}, 404
-
-    if proposal.is_subscribed(g.current_user):
-        return {"message": "User is already subscribed to this proposal"}, 404
-
-    proposal.subscribers.append(g.current_user)
-    db.session.add(proposal)
-    db.session.commit()
-
-    return proposal_schema.dump(proposal), 200
-
-
-@blueprint.route("/<proposal_id>/subscribe", methods=["DELETE"])
-@requires_auth
-def unsubscribe_to_proposal(proposal_id):
-    proposal = Proposal.query.filter_by(id=proposal_id).first()
-    if not proposal:
-        return {"message": "No proposal matching id"}, 404
-
-    if not proposal.is_subscribed(g.current_user):
-        return {"message": "User is not subscribed to this proposal"}, 404
-
-    proposal.subscribers.remove(g.current_user)
-    db.session.add(proposal)
-    db.session.commit()
-
-    return proposal_schema.dump(proposal), 200
-
-
 @blueprint.route("/<proposal_id>/follow", methods=["PUT"])
 @requires_auth
 @body({"isFollow": fields.Bool(required=True)})

@@ -42,9 +42,6 @@ export interface ProposalState {
 
   isDeletingContribution: boolean;
   deleteContributionError: null | string;
-
-  isSubscribing: boolean;
-  subscribingError: null | string;
 }
 
 export const PROPOSAL_DETAIL_INITIAL_STATE = {
@@ -107,9 +104,6 @@ export const INITIAL_STATE: ProposalState = {
 
   isDeletingContribution: false,
   deleteContributionError: null,
-
-  isSubscribing: false,
-  subscribingError: null,
 };
 
 function addUpdates(state: ProposalState, payload: ProposalUpdates) {
@@ -424,24 +418,6 @@ export default (state = INITIAL_STATE, action: any) => {
         ...state,
         isPostCommentPending: false,
         postCommentError: payload,
-      };
-    case types.PROPOSAL_SUBSCRIBE_PENDING:
-      return {
-        ...state,
-        isSubscribing: true,
-        subscribingError: null,
-      };
-    case types.PROPOSAL_SUBSCRIBE_FULFILLED:
-      return {
-        ...state,
-        isSubscribing: false,
-        subscribingError: null,
-      };
-    case types.PROPOSAL_SUBSCRIBE_REJECTED:
-      return {
-        ...state,
-        isSubscribing: false,
-        subscribingError: payload,
       };
 
     default:

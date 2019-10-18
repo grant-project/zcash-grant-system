@@ -2,7 +2,6 @@ import datetime
 from decimal import Decimal, ROUND_DOWN
 from functools import reduce
 
-from flask_security.core import current_user
 from marshmallow import post_dump
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -28,12 +27,6 @@ from grant.utils.stubs import anonymous_user
 
 proposal_team = db.Table(
     'proposal_team', db.Model.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('proposal_id', db.Integer, db.ForeignKey('proposal.id'))
-)
-
-proposal_subscribers = db.Table(
-    'proposal_subscribers', db.Model.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('proposal_id', db.Integer, db.ForeignKey('proposal.id'))
 )
@@ -262,8 +255,6 @@ class Proposal(db.Model):
                                  order_by="asc(Milestone.index)", lazy=True, cascade="all, delete-orphan")
     invites = db.relationship(ProposalTeamInvite, backref="proposal", lazy=True, cascade="all, delete-orphan")
     arbiter = db.relationship(ProposalArbiter, uselist=False, back_populates="proposal", cascade="all, delete-orphan")
-    subscribers = db.relationship("User", secondary=proposal_subscribers)
-
     followers = db.relationship(
         "User", secondary=proposal_follower, back_populates="followed_proposals"
     )
@@ -673,13 +664,6 @@ class Proposal(db.Model):
         d = {c.user.id: c.user for c in self.contributions if c.user and c.status == ContributionStatus.CONFIRMED}
         return d.values()
 
-    def is_subscribed(self, user):
-        try:
-            self.subscribers.index(user)
-            return True
-        except ValueError:
-            return False
-
     @hybrid_property
     def authed_follows(self):
         from grant.utils.auth import get_authed_user
@@ -730,9 +714,8 @@ class ProposalSchema(ma.Schema):
             "rfp",
             "rfp_opt_in",
             "arbiter",
-            "is_version_two",
             "accepted_with_funding",
-            "is_subscribed",
+            "is_version_two",
             "authed_follows",
             "followers_count"
         )
@@ -742,7 +725,6 @@ class ProposalSchema(ma.Schema):
     date_published = ma.Method("get_date_published")
     proposal_id = ma.Method("get_proposal_id")
     is_version_two = ma.Method("get_is_version_two")
-    is_subscribed = ma.Method("get_is_subscribed")
 
     updates = ma.Nested("ProposalUpdateSchema", many=True)
     team = ma.Nested("UserSchema", many=True)
@@ -766,12 +748,6 @@ class ProposalSchema(ma.Schema):
 
     def get_is_version_two(self, obj):
         return True if obj.version == '2' else False
-
-    def get_is_subscribed(self, obj):
-        if current_user.is_authenticated and not current_user.banned:
-            return obj.is_subscribed(current_user)
-        else:
-            return False
 
 
 proposal_schema = ProposalSchema()
