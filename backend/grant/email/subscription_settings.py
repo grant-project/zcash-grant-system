@@ -65,17 +65,17 @@ class EmailSubscription(Enum):
         'bit': 14,
         'key': 'admin_payout'
     }
-    SUBSCRIPTION_UPDATE = {
+    FOLLOWER_UPDATE = {
         'bit': 15,
-        'key': 'subscription_update'
+        'key': 'follower_update'
     }
-    SUBSCRIPTION_MILESTONE_ACCEPT = {
+    FOLLOWER_MILESTONE_ACCEPT = {
         'bit': 16,
-        'key': 'subscription_milestone_accept'
+        'key': 'follower_milestone_accept'
     }
-    SUBSCRIPTION_PROPOSAL_CANCELED = {
+    FOLLOWER_PROPOSAL_CANCELED = {
         'bit': 17,
-        'key': 'subscription_proposal_canceled'
+        'key': 'follower_proposal_canceled'
     }
 
 

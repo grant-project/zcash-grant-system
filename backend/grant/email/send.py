@@ -307,30 +307,30 @@ def admin_payout(email_args):
     }
 
 
-def subscription_update(email_args):
+def follower_update(email_args):
     return {
         'subject': f'Proposal {email_args["proposal"].title} has an update',
         'title': 'Update Posted',
-        'preview': f'A proposal you\'re subscribed to, {email_args["proposal"].title}, has an update',
-        'subscription': EmailSubscription.SUBSCRIPTION_UPDATE
+        'preview': f'A proposal you\'re following, {email_args["proposal"].title}, has an update',
+        'subscription': EmailSubscription.FOLLOWER_UPDATE
     }
 
 
-def subscription_milestone_accept(email_args):
+def follower_milestone_accept(email_args):
     return {
         'subject': f'Proposal {email_args["proposal"].title} has completed a milestone',
         'title': 'Milestone Completed',
-        'preview': f'A proposal you\'re subscribed to, {email_args["proposal"].title}, has completed a milestone',
-        'subscription': EmailSubscription.SUBSCRIPTION_MILESTONE_ACCEPT
+        'preview': f'A proposal you\'re following, {email_args["proposal"].title}, has completed a milestone',
+        'subscription': EmailSubscription.FOLLOWER_MILESTONE_ACCEPT
     }
 
 
-def subscription_proposal_canceled(email_args):
+def follower_proposal_canceled(email_args):
     return {
         'subject': f'Proposal {email_args["proposal"].title} has been canceled',
         'title': 'Proposal Canceled',
-        'preview': f'A proposal you\'re subscribed to, {email_args["proposal"].title}, has been canceled',
-        'subscription': EmailSubscription.SUBSCRIPTION_PROPOSAL_CANCELED
+        'preview': f'A proposal you\'re following, {email_args["proposal"].title}, has been canceled',
+        'subscription': EmailSubscription.FOLLOWER_PROPOSAL_CANCELED
     }
 
 
@@ -363,9 +363,9 @@ get_info_lookup = {
     'admin_approval': admin_approval,
     'admin_arbiter': admin_arbiter,
     'admin_payout': admin_payout,
-    'subscription_update': subscription_update,
-    'subscription_milestone_accept': subscription_milestone_accept,
-    'subscription_proposal_canceled': subscription_proposal_canceled
+    'follower_update': follower_update,
+    'follower_milestone_accept': follower_milestone_accept,
+    'follower_proposal_canceled': follower_proposal_canceled
 }
 
 

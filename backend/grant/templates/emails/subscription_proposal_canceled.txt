@@ -1,6 +1,0 @@
-A proposal you're subscribed to, "{{ args.proposal.title }}",
-has been canceled.
-
-View the proposal here:
-{{ args.proposal_url }}
-
