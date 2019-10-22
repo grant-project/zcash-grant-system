@@ -26,6 +26,7 @@ import classnames from 'classnames';
 import { withRouter } from 'react-router';
 import SocialShare from 'components/SocialShare';
 import Follow from 'components/Follow';
+import Like from 'components/Like';
 import './index.less';
 
 interface OwnProps {
@@ -201,6 +202,7 @@ export class ProposalDetail extends React.Component<Props, State> {
                       </Button>
                     </Dropdown>
                   )}
+                  <Like proposal={proposal} />
                   <Follow proposal={proposal} />
                 </div>
               )}
