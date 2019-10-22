@@ -684,3 +684,18 @@ def follow_proposal(proposal_id, is_follow):
     db.session.commit()
     return {"message": "ok"}, 200
 
+
+@blueprint.route("/<proposal_id>/like", methods=["PUT"])
+@requires_auth
+@body({"isLiked": fields.Bool(required=True)})
+def like_proposal(proposal_id, is_liked):
+    user = g.current_user
+    # Make sure proposal exists
+    proposal = Proposal.query.filter_by(id=proposal_id).first()
+    if not proposal:
+        return {"message": "No proposal matching id"}, 404
+
+    proposal.like(user, is_liked)
+    db.session.commit()
+    return {"message": "ok"}, 200
+
