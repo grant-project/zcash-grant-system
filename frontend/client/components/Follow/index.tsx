@@ -34,7 +34,7 @@ class Follow extends React.Component<Props, State> {
     const { loading } = this.state;
     return (
       <Input.Group className="Follow" compact>
-        <AuthButton loading={loading} onClick={this.handleFollow}>
+        <AuthButton onClick={this.handleFollow}>
           <Icon
             theme={authedFollows ? 'filled' : 'outlined'}
             type={loading ? 'loading' : 'star'}
