@@ -14,7 +14,7 @@ blueprint = Blueprint("comment", __name__, url_prefix="/api/v1/comment")
 def like_comment(comment_id, is_liked):
 
     user = g.current_user
-    # Make sure rfp exists
+    # Make sure comment exists
     comment = Comment.query.filter_by(id=comment_id).first()
     if not comment:
         return {"message": "No comment matching id"}, 404

@@ -695,6 +695,9 @@ def like_proposal(proposal_id, is_liked):
     if not proposal:
         return {"message": "No proposal matching id"}, 404
 
+    if not proposal.status == ProposalStatus.LIVE:
+        return {"message": "Cannot like a proposal that's not live"}, 404
+
     proposal.like(user, is_liked)
     db.session.commit()
     return {"message": "ok"}, 200
