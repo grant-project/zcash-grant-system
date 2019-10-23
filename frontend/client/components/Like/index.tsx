@@ -37,9 +37,12 @@ class Follow extends React.Component<Props, State> {
   state: State = { ...STATE };
 
   render() {
-    const { likesCount, authedLiked, mode } = this.deriveInfo();
+    const { likesCount, authedLiked } = this.deriveInfo();
+    const { proposal, rfp, comment } = this.props;
     const { loading } = this.state;
-    const zoom = mode === 'comment' ? 0.8 : 1;
+    const zoom = comment ? 0.8 : 1;
+    const shouldShowLikeText = !!proposal || !!rfp;
+
     return (
       <Input.Group className="Like" compact style={{ zoom }}>
         <AuthButton onClick={this.handleLike}>
@@ -47,7 +50,7 @@ class Follow extends React.Component<Props, State> {
             theme={authedLiked ? 'filled' : 'outlined'}
             type={loading ? 'loading' : 'like'}
           />
-          {mode !== 'comment' && (
+          {shouldShowLikeText && (
             <span className="Like-label">{authedLiked ? ' Unlike' : ' Like'}</span>
           )}
         </AuthButton>
@@ -61,43 +64,37 @@ class Follow extends React.Component<Props, State> {
   private deriveInfo = () => {
     let authedLiked = false;
     let likesCount = 0;
-    let mode: 'comment' | 'proposal' | 'rfp' | null = null;
 
     const { proposal, comment, rfp } = this.props;
 
     if (comment) {
       authedLiked = comment.authedLiked;
       likesCount = comment.likesCount;
-      mode = 'comment';
     } else if (proposal) {
       authedLiked = proposal.authedLiked;
       likesCount = proposal.likesCount;
-      mode = 'proposal';
     } else if (rfp) {
       authedLiked = rfp.authedLiked;
       likesCount = rfp.likesCount;
-      mode = 'rfp';
     }
 
     return {
       authedLiked,
       likesCount,
-      mode,
     };
   };
 
   private handleLike = () => {
     if (this.state.loading) return;
+    const { proposal, rfp, comment } = this.props;
 
-    const { mode } = this.deriveInfo();
-
-    if (mode === 'proposal') {
+    if (proposal) {
       return this.handleProposalLike();
     }
-    if (mode === 'comment') {
+    if (comment) {
       return this.handleCommentLike();
     }
-    if (mode === 'rfp') {
+    if (rfp) {
       return this.handleRfpLike();
     }
   };
@@ -105,11 +102,15 @@ class Follow extends React.Component<Props, State> {
   private handleProposalLike = async () => {
     if (!this.props.proposal) return;
 
-    const { proposalId, authedLiked } = this.props.proposal;
+    const {
+      proposal: { proposalId, authedLiked },
+      fetchProposal,
+    } = this.props;
+
     this.setState({ loading: true });
     try {
       await likeProposal(proposalId, !authedLiked);
-      await this.props.fetchProposal(proposalId);
+      await fetchProposal(proposalId);
       message.success(<>Proposal {authedLiked ? 'unliked' : 'liked'}</>);
     } catch (error) {
       // tslint:disable:no-console
@@ -122,12 +123,15 @@ class Follow extends React.Component<Props, State> {
   private handleCommentLike = async () => {
     if (!this.props.comment) return;
 
-    // const { proposalId } = this.props.proposal;
-    const { id, authedLiked } = this.props.comment;
+    const {
+      comment: { id, authedLiked },
+      updateComment,
+    } = this.props;
+
     this.setState({ loading: true });
     try {
       const updatedComment = await likeComment(id, !authedLiked);
-      this.props.updateComment(this.props.comment.id, updatedComment);
+      updateComment(id, updatedComment);
       message.success(<>Comment {authedLiked ? 'unliked' : 'liked'}</>);
     } catch (error) {
       // tslint:disable:no-console
@@ -140,11 +144,15 @@ class Follow extends React.Component<Props, State> {
   private handleRfpLike = async () => {
     if (!this.props.rfp) return;
 
-    const { id, authedLiked } = this.props.rfp;
+    const {
+      rfp: { id, authedLiked },
+      fetchRfp,
+    } = this.props;
+
     this.setState({ loading: true });
     try {
       await likeRfp(id, !authedLiked);
-      await this.props.fetchRfp(id);
+      await fetchRfp(id);
       message.success(<>Request for proposal {authedLiked ? 'unliked' : 'liked'}</>);
     } catch (error) {
       // tslint:disable:no-console

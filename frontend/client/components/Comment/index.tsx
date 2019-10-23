@@ -50,7 +50,7 @@ class Comment extends React.Component<Props> {
   }
 
   public render(): React.ReactNode {
-    const { comment, isSignedIn, isPostCommentPending, detail: proposal } = this.props;
+    const { comment, isSignedIn, isPostCommentPending } = this.props;
     const { isReplying, reply } = this.state;
     const authorPath = `/profile/${comment.author.userid}`;
     return (
@@ -75,7 +75,7 @@ class Comment extends React.Component<Props> {
 
         <div className="Comment-controls">
           <div className="Comment-controls-button">
-            <Like comment={comment} proposal={proposal} />
+            <Like comment={comment} />
           </div>
           {isSignedIn && (
             <a className="Comment-controls-button" onClick={this.toggleReply}>
