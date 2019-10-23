@@ -178,6 +178,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
             <div>
               <p>Please review this proposal and render your judgment.</p>
               <Button
+                className="ProposalDetail-review"
                 loading={store.proposalDetailApproving}
                 icon="check"
                 type="primary"
@@ -186,6 +187,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                 Approve With Funding
               </Button>
               <Button
+                className="ProposalDetail-review"
                 loading={store.proposalDetailApproving}
                 icon="check"
                 type="default"
@@ -194,6 +196,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                 Approve Without Funding
               </Button>
               <Button
+                className="ProposalDetail-review"
                 loading={store.proposalDetailApproving}
                 icon="close"
                 type="danger"
