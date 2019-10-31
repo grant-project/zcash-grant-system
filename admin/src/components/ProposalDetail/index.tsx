@@ -391,9 +391,18 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                     extra={`${milestone.payoutPercent}% Payout`}
                     key={i}
                   >
-                    <p>
-                      <b>Estimated Date:</b> {formatDateSeconds(milestone.dateEstimated)}{' '}
-                    </p>
+                    {!p.isVersionTwo &&
+                      milestone.dateEstimated && (
+                        <p>
+                          <b>Estimated Date:</b>{' '}
+                          {formatDateSeconds(milestone.dateEstimated)}{' '}
+                        </p>
+                      )}
+                    {p.isVersionTwo && (
+                      <p>
+                        <b>Estimated days to complete:</b> {milestone.daysEstimated}{' '}
+                      </p>
+                    )}
                     <p>{milestone.content}</p>
                   </Card>
                 ))}
