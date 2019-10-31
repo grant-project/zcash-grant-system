@@ -20,6 +20,7 @@ import 'styles/style.less';
 const opts = { fallback: <Loader size="large" /> };
 const Home = loadable(() => import('pages/index'), opts);
 const Create = loadable(() => import('pages/create'), opts);
+const CreateRequest = loadable(() => import('pages/create-request'), opts);
 const ProposalEdit = loadable(() => import('pages/proposal-edit'), opts);
 const Proposals = loadable(() => import('pages/proposals'), opts);
 const Proposal = loadable(() => import('pages/proposal'), opts);
@@ -71,6 +72,17 @@ const routeConfigs: RouteConfig[] = [
     },
     template: {
       title: 'Create a Proposal',
+    },
+    onlyLoggedIn: true,
+  },
+  {
+    // Create proposal
+    route: {
+      path: '/create-request',
+      component: CreateRequest,
+    },
+    template: {
+      title: 'Create a Request',
     },
     onlyLoggedIn: true,
   },

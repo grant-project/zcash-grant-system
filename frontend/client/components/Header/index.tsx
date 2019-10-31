@@ -6,6 +6,8 @@ import HeaderDrawer from './Drawer';
 import MenuIcon from 'static/images/menu.svg';
 import Logo from 'static/images/logo-name.svg';
 import './style.less';
+import { Button } from 'antd';
+
 
 interface Props {
   isTransparent?: boolean;
@@ -39,9 +41,7 @@ export default class Header extends React.Component<Props, State> {
             <Link to="/requests" className="Header-links-link">
               Requests
             </Link>
-            <Link to="/create" className="Header-links-link">
-              Start a Proposal
-            </Link>
+
           </div>
 
           <div className="Header-links is-left is-mobile">
@@ -55,6 +55,17 @@ export default class Header extends React.Component<Props, State> {
           </Link>
 
           <div className="Header-links is-right">
+            <div className="Header-links-button is-desktop">
+              <Link to="/create">
+                <Button>Start a Proposal</Button>
+              </Link>
+            </div>
+            <div className="Header-links-button is-desktop">
+              <Link to="/create-request">
+                <Button type="primary">Create a Request</Button>
+              </Link>
+            </div>
+
             <HeaderAuth />
           </div>
 
