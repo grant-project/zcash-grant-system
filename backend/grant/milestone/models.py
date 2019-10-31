@@ -5,6 +5,7 @@ from grant.utils.enums import MilestoneStage
 from grant.utils.exceptions import ValidationException
 from grant.utils.ma_fields import UnixDate
 from grant.utils.misc import gen_random_id
+from grant.task.jobs import MilestoneDeadline
 
 
 class MilestoneException(Exception):
@@ -22,7 +23,8 @@ class Milestone(db.Model):
     content = db.Column(db.Text, nullable=False)
     payout_percent = db.Column(db.String(255), nullable=False)
     immediate_payout = db.Column(db.Boolean)
-    date_estimated = db.Column(db.DateTime, nullable=False)
+    date_estimated = db.Column(db.DateTime, nullable=True)
+    days_estimated = db.Column(db.String(255), nullable=True)
 
     stage = db.Column(db.String(255), nullable=False)
 
@@ -46,7 +48,7 @@ class Milestone(db.Model):
             index: int,
             title: str,
             content: str,
-            date_estimated: datetime,
+            days_estimated: str,
             payout_percent: str,
             immediate_payout: bool,
             stage: str = MilestoneStage.IDLE,
@@ -56,12 +58,14 @@ class Milestone(db.Model):
         self.title = title[:255]
         self.content = content[:255]
         self.stage = stage
-        self.date_estimated = date_estimated
+        self.days_estimated = days_estimated[:255]
         self.payout_percent = payout_percent[:255]
         self.immediate_payout = immediate_payout
         self.proposal_id = proposal_id
         self.date_created = datetime.datetime.now()
         self.index = index
+
+    # TODO: maybe provide some validation for milestones?
 
     @staticmethod
     def make(milestones_data, proposal):
@@ -72,13 +76,50 @@ class Milestone(db.Model):
                 m = Milestone(
                     title=milestone_data["title"][:255],
                     content=milestone_data["content"][:255],
-                    date_estimated=datetime.datetime.fromtimestamp(milestone_data["date_estimated"]),
+                    days_estimated=str(milestone_data["days_estimated"])[:255],
                     payout_percent=str(milestone_data["payout_percent"])[:255],
                     immediate_payout=milestone_data["immediate_payout"],
                     proposal_id=proposal.id,
                     index=i
                 )
                 db.session.add(m)
+
+    @staticmethod
+    def set_v2_date_estimates(proposal):
+        if not proposal.date_approved:
+            raise MilestoneException(f'Cannot estimate milestone dates because proposal has no date_approved set')
+
+        # the milestone being actively worked on
+        current_milestone = proposal.current_milestone
+
+        if current_milestone.stage == MilestoneStage.PAID:
+            raise MilestoneException(f'Cannot estimate milestone dates because they are all completed')
+
+        # we add days_estimated to base_date to calculate date_estimated
+        base_date = None
+
+        for index, milestone in enumerate(proposal.milestones):
+            if index == 0:
+                # if it's the first milestone, use the proposal approval
+                # date as a base_date
+                base_date = proposal.date_approved
+
+            if milestone.date_paid:
+                # if milestone has been paid, set base_date for
+                # the next milestone and noop out
+                base_date = milestone.date_paid
+                continue
+
+            date_estimated = base_date + datetime.timedelta(days=int(milestone.days_estimated))
+            milestone.date_estimated = date_estimated
+
+            # set the base_date for the next milestone
+            base_date = date_estimated
+            db.session.add(milestone)
+
+        # create milestone deadline task for the current milestone
+        task = MilestoneDeadline(proposal, current_milestone)
+        task.make_task()
 
     def request_payout(self, user_id: int):
         if self.stage not in [MilestoneStage.IDLE, MilestoneStage.REJECTED]:
@@ -140,6 +181,7 @@ class MilestoneSchema(ma.Schema):
             "date_rejected",
             "date_accepted",
             "date_paid",
+            "days_estimated"
         )
 
     date_created = UnixDate(attribute='date_created')
