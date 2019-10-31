@@ -235,7 +235,6 @@ class TestProposalAPI(BaseProposalCreatorConfig):
             for team_member in each_proposal["team"]:
                 self.assertIsNone(team_member.get('email_address'))
 
-
     def test_follow_proposal(self):
         # not logged in
         resp = self.app.put(

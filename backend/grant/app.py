@@ -10,7 +10,7 @@ from flask_security import SQLAlchemyUserDatastore
 from flask_sslify import SSLify
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
-from grant import commands, proposal, user, comment, milestone, admin, email, blockchain, task, rfp, e2e
+from grant import commands, proposal, user, ccr, comment, milestone, admin, email, blockchain, task, rfp, e2e
 from grant.extensions import bcrypt, migrate, db, ma, security, limiter
 from grant.settings import SENTRY_RELEASE, ENV, E2E_TESTING, DEBUG, CORS_DOMAINS
 from grant.utils.auth import AuthException, handle_auth_error, get_authed_user
@@ -129,6 +129,7 @@ def register_extensions(app):
 
 def register_blueprints(app):
     """Register Flask blueprints."""
+    app.register_blueprint(ccr.views.blueprint)
     app.register_blueprint(comment.views.blueprint)
     app.register_blueprint(proposal.views.blueprint)
     app.register_blueprint(user.views.blueprint)

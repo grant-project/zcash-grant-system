@@ -233,6 +233,8 @@ class Proposal(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     date_created = db.Column(db.DateTime)
     rfp_id = db.Column(db.Integer(), db.ForeignKey('rfp.id'), nullable=True)
+    ccr_id = db.Column(db.Integer(), db.ForeignKey('ccr.id'), nullable=True)
+
     version = db.Column(db.String(255), nullable=True)
 
     # Content info
