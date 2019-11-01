@@ -23,6 +23,7 @@ import {
   formatProposalPageParamsForGet,
   formatProposalPageFromGet,
 } from 'utils/api';
+import { CCRDraft } from 'types/ccr';
 
 export function getProposals(page?: ProposalPageParams): Promise<{ data: ProposalPage }> {
   let serverParams;
@@ -385,3 +386,38 @@ export function getRFP(rfpId: number | string): Promise<{ data: RFP }> {
 export function resendEmailVerification(): Promise<{ data: void }> {
   return axios.put(`/api/v1/users/me/resend-verification`);
 }
+
+// CCRs
+export function getCCRDrafts(): Promise<{ data: CCRDraft[] }> {
+  return axios.get('/api/v1/ccrs/drafts');
+}
+
+export function postCCRDraft(): Promise<{ data: CCRDraft }> {
+  return axios.post('/api/v1/ccrs/drafts');
+}
+
+export function deleteCCRDraft(ccrId: number): Promise<any> {
+  return axios.delete(`/api/v1/ccrs/${ccrId}`);
+}
+
+export function putCCR(ccr: CCRDraft): Promise<{ data: CCRDraft }> {
+  // Exclude some keys
+  const { ccrId, author, dateCreated, status, ...rest } = ccr;
+  return axios.put(`/api/v1/ccrs/${ccrId}`, rest);
+}
+
+export function getCCR(ccrId: number | string): Promise<{ data: any }> {
+  return axios.get(`/api/v1/ccr/${ccrId}`).then(res => {
+    return res;
+  });
+}
+// export async function putProposalSubmitForApproval(
+//   proposal: ProposalDraft,
+// ): Promise<{ data: Proposal }> {
+//   return axios
+//     .put(`/api/v1/proposals/${proposal.proposalId}/submit_for_approval`)
+//     .then(res => {
+//       res.data = formatProposalFromGet(res.data);
+//       return res;
+//     });
+// }
