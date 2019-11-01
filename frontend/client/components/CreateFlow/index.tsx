@@ -285,7 +285,7 @@ class CreateFlow extends React.Component<Props, State> {
   };
 
   private startSteps = () => {
-    this.setState({ step: CREATE_STEP.BASICS, isExplaining: false, showFooter: true });
+    this.setState({ step: CREATE_STEP.BASICS, isExplaining: false });
   };
 
   private setStep = (step: CREATE_STEP, skipHistory?: boolean) => {
