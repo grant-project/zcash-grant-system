@@ -6,7 +6,8 @@ from grant.extensions import limiter
 from grant.parser import body
 from grant.utils.auth import (
     requires_auth,
-    requires_email_verified_auth
+    requires_email_verified_auth,
+    get_authed_user
 )
 from grant.utils.auth import requires_ccr_owner_auth
 from grant.utils.enums import CCRStatus
@@ -14,6 +15,22 @@ from grant.utils.exceptions import ValidationException
 from .models import CCR, ccr_schema, ccrs_schema, db
 
 blueprint = Blueprint("ccr", __name__, url_prefix="/api/v1/ccrs")
+
+
+@blueprint.route("/<ccr_id>", methods=["GET"])
+def get_ccr(ccr_id):
+    ccr = CCR.query.filter_by(id=ccr_id).first()
+    if ccr:
+        if ccr.status != CCR.LIVE:
+            if CCR.status == CCR.DELETED:
+                return {"message": "Proposal was deleted"}, 404
+            authed_user = get_authed_user()
+
+            if authed_user.id != ccr.author.id:
+                return {"message": "User cannot view this CCR"}, 404
+        return ccr_schema.dump(ccr)
+    else:
+        return {"message": "No CCR matching id"}, 404
 
 
 @blueprint.route("/drafts", methods=["POST"])
@@ -63,23 +80,6 @@ def update_ccr(ccr_id, **kwargs):
     # Commit
     db.session.commit()
     return ccr_schema.dump(g.current_ccr), 200
-
-
-@blueprint.route("/<ccr_id>/like", methods=["PUT"])
-@requires_auth
-@body({"isLiked": fields.Bool(required=True)})
-def like_ccr(ccr_id, is_liked):
-    user = g.current_user
-    # Make sure rfp exists
-    ccr = CCR.query.filter_by(id=ccr_id).first()
-    if not ccr:
-        return {"message": "No CCR matching id"}, 404
-    if not ccr.status == CCRStatus.LIVE:
-        return {"message": "CCR is not live"}, 404
-
-    ccr.like(user, is_liked)
-    db.session.commit()
-    return {"message": "ok"}, 200
 
 # @blueprint.route("/<ccr_id>/submit_for_approval", methods=["PUT"])
 # def submit_for_approval_proposal(ccr_id):

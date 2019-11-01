@@ -1,20 +1,11 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import func, select
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import column_property
 
 from grant.extensions import ma, db
 from grant.utils.enums import CCRStatus
 from grant.utils.misc import gen_random_id
-
-ccr_liker = db.Table(
-    "ccr_liker",
-    db.Model.metadata,
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
-    db.Column("ccr_id", db.Integer, db.ForeignKey("ccr.id")),
-)
 
 
 class CCR(db.Model):
@@ -31,16 +22,6 @@ class CCR(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     author = db.relationship("User", back_populates="ccrs")
-
-    # Relationships
-    likes = db.relationship(
-        "User", secondary=ccr_liker, back_populates="liked_ccrs"
-    )
-    likes_count = column_property(
-        select([func.count(ccr_liker.c.ccr_id)])
-            .where(ccr_liker.c.ccr_id == id)
-            .correlate_except(ccr_liker)
-    )
 
     @staticmethod
     def create(**kwargs):
@@ -64,29 +45,6 @@ class CCR(db.Model):
             self._bounty = bounty
         else:
             self._bounty = None
-
-    @hybrid_property
-    def authed_liked(self):
-        from grant.utils.auth import get_authed_user
-
-        authed = get_authed_user()
-        if not authed:
-            return False
-        res = (
-            db.session.query(ccr_liker)
-                .filter_by(user_id=authed.id, ccr_id=self.id)
-                .count()
-        )
-        if res:
-            return True
-        return False
-
-    def like(self, user, is_liked):
-        if is_liked:
-            self.likes.append(user)
-        else:
-            self.likes.remove(user)
-        db.session.flush()
 
     def __init__(
             self,
@@ -125,6 +83,7 @@ class CCRSchema(ma.Schema):
         model = CCR
         # Fields to expose
         fields = (
+            "author"
             "id",
             "title",
             "brief",

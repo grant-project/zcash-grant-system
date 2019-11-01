@@ -147,9 +147,6 @@ class User(db.Model, UserMixin):
     liked_rfps = db.relationship(
         "RFP", secondary="rfp_liker", back_populates="likes"
     )
-    liked_ccrs = db.relationship(
-        "CCR", secondary="ccr_liker", back_populates="likes"
-    )
 
     def __init__(
             self,
