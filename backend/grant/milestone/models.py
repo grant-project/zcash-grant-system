@@ -110,12 +110,17 @@ class Milestone(db.Model):
                 base_date = milestone.date_paid
                 continue
 
-            date_estimated = base_date + datetime.timedelta(days=int(milestone.days_estimated))
+            days_estimated = milestone.days_estimated if not milestone.immediate_payout else "0"
+            date_estimated = base_date + datetime.timedelta(days=int(days_estimated))
             milestone.date_estimated = date_estimated
 
             # set the base_date for the next milestone
             base_date = date_estimated
             db.session.add(milestone)
+
+        # skip task creation if current milestone has an immediate payout
+        if current_milestone.immediate_payout:
+            return
 
         # create milestone deadline task for the current milestone
         task = MilestoneDeadline(proposal, current_milestone)

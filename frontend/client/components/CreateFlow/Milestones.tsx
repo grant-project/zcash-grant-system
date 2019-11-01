@@ -149,6 +149,7 @@ const MilestoneFields = ({
     <div style={{ display: 'flex' }}>
       <Input
         value={milestone.daysEstimated}
+        disabled={milestone.immediatePayout}
         placeholder="Estimated days to complete"
         onChange={ev =>{
           return onChange(index, {

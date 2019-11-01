@@ -160,16 +160,18 @@ export function getCreateErrors(
         return 'Description can only be 200 characters maximum';
       }
 
-      if (!ms.daysEstimated) {
-        return 'Estimate in days is required';
-      } else if (Number.isNaN(parseInt(ms.daysEstimated, 10))) {
-        return 'Days estimated must be a valid number';
-      } else if (parseInt(ms.daysEstimated, 10) !== parseFloat(ms.daysEstimated)) {
-        return 'Days estimated must be a whole number, no decimals';
-      } else if (parseInt(ms.daysEstimated, 10) <= 0) {
-        return 'Days estimated must be greater than 0';
-      } else if (parseInt(ms.daysEstimated, 10) > 365) {
-        return 'Days estimated must be less than or equal to 365';
+      if (!ms.immediatePayout) {
+        if (!ms.daysEstimated) {
+          return 'Estimate in days is required';
+        } else if (Number.isNaN(parseInt(ms.daysEstimated, 10))) {
+          return 'Days estimated must be a valid number';
+        } else if (parseInt(ms.daysEstimated, 10) !== parseFloat(ms.daysEstimated)) {
+          return 'Days estimated must be a whole number, no decimals';
+        } else if (parseInt(ms.daysEstimated, 10) <= 0) {
+          return 'Days estimated must be greater than 0';
+        } else if (parseInt(ms.daysEstimated, 10) > 365) {
+          return 'Days estimated must be less than or equal to 365';
+        }
       }
 
       if (
