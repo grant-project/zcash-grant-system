@@ -1,11 +1,4 @@
-import {
-  ProposalDraft,
-  STATUS,
-  MILESTONE_STAGE,
-  PROPOSAL_ARBITER_STATUS,
-  CreateMilestone,
-} from 'types';
-import moment from 'moment';
+import { ProposalDraft, STATUS, MILESTONE_STAGE, PROPOSAL_ARBITER_STATUS } from 'types';
 import { User } from 'types';
 import {
   getAmountError,

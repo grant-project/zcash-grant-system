@@ -41,7 +41,7 @@ export interface ProposalMilestone extends Milestone {
 export interface CreateMilestone {
   title: string;
   content: string;
-  daysEstimated: string;
+  daysEstimated?: string;
   payoutPercent: string;
   immediatePayout: boolean;
 }
