@@ -7,6 +7,7 @@ from grant.utils import totp_2fa
 from grant.task.jobs import MilestoneDeadline
 
 from ..config import BaseProposalCreatorConfig
+from ..test_data import mock_blockchain_api_requests
 
 from mock import patch, Mock
 
@@ -70,7 +71,8 @@ class TestTaskAPI(BaseProposalCreatorConfig):
 
     @patch('grant.task.jobs.send_email')
     @patch('grant.task.views.datetime')
-    def test_milestone_deadline(self, mock_datetime, mock_send_email):
+    @patch('requests.get', side_effect=mock_blockchain_api_requests)
+    def test_milestone_deadline(self, mock_get, mock_datetime, mock_send_email):
         tasks = Task.query.filter_by(completed=False).all()
         self.assertEqual(len(tasks), 0)
 
