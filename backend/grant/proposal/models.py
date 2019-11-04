@@ -547,6 +547,11 @@ class Proposal(db.Model):
             self.status = ProposalStatus.LIVE
             self.date_approved = datetime.datetime.now()
             self.accepted_with_funding = with_funding
+
+            # also update date_published and stage since publish() is no longer called by user
+            self.date_published = datetime.datetime.now()
+            self.stage = ProposalStage.WIP
+
             with_or_out = 'without'
             if with_funding:
                 self.fully_fund_contibution_bounty()
