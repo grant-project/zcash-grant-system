@@ -14,7 +14,7 @@ import {
   isValidSproutAddress,
 } from 'utils/validators';
 import { Zat, toZat } from 'utils/units';
-import { PROPOSAL_CATEGORY, PROPOSAL_STAGE } from 'api/constants';
+import { PROPOSAL_STAGE } from 'api/constants';
 import {
   ProposalDetail,
   PROPOSAL_DETAIL_INITIAL_STATE,
@@ -24,7 +24,6 @@ interface CreateFormErrors {
   rfpOptIn?: string;
   title?: string;
   brief?: string;
-  category?: string;
   target?: string;
   team?: string[];
   content?: string;
@@ -37,7 +36,6 @@ export const FIELD_NAME_MAP: { [key in KeyOfForm]: string } = {
   rfpOptIn: 'RFP KYC',
   title: 'Title',
   brief: 'Brief',
-  category: 'Category',
   target: 'Target amount',
   team: 'Team',
   content: 'Details',
@@ -48,7 +46,6 @@ export const FIELD_NAME_MAP: { [key in KeyOfForm]: string } = {
 const requiredFields = [
   'title',
   'brief',
-  'category',
   'target',
   'content',
   'payoutAddress',
@@ -243,7 +240,6 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
     contributionBounty: Zat('0'),
     percentFunded: 0,
     stage: PROPOSAL_STAGE.PREVIEW,
-    category: draft.category || PROPOSAL_CATEGORY.CORE_DEV,
     isStaked: true,
     arbiter: {
       status: PROPOSAL_ARBITER_STATUS.ACCEPTED,
