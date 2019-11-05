@@ -18,7 +18,7 @@ class CCR(db.Model):
     brief = db.Column(db.String(255), nullable=True)
     content = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(255), nullable=False)
-    _bounty = db.Column("bounty", db.String(255), nullable=True)
+    _target = db.Column("target", db.String(255), nullable=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     author = db.relationship("User", back_populates="ccrs")
@@ -36,15 +36,15 @@ class CCR(db.Model):
         return ccr
 
     @hybrid_property
-    def bounty(self):
-        return self._bounty
+    def target(self):
+        return self._target
 
-    @bounty.setter
-    def bounty(self, bounty: str):
-        if bounty and Decimal(bounty) > 0:
-            self._bounty = bounty
+    @target.setter
+    def target(self, target: str):
+        if target and Decimal(target) > 0:
+            self._target = target
         else:
-            self._bounty = None
+            self._target = None
 
     def __init__(
             self,
@@ -52,7 +52,7 @@ class CCR(db.Model):
             title: str = '',
             brief: str = '',
             content: str = '',
-            bounty: str = '0',
+            target: str = '0',
             status: str = CCRStatus.DRAFT,
     ):
         assert CCRStatus.includes(status)
@@ -61,7 +61,7 @@ class CCR(db.Model):
         self.title = title[:255]
         self.brief = brief[:255]
         self.content = content
-        self.bounty = bounty
+        self.target = target
         self.status = status
         self.user_id = user_id
 
@@ -70,12 +70,13 @@ class CCR(db.Model):
             title: str = '',
             brief: str = '',
             content: str = '',
-            bounty: str = '0',
+            target: str = '0',
     ):
+        print(target)
         self.title = title[:255]
         self.brief = brief[:255]
         self.content = content[:300000]
-        self._bounty = bounty[:255] if bounty != '' else '0'
+        self._target = target[:255] if target != '' else '0'
 
 
 class CCRSchema(ma.Schema):
@@ -90,7 +91,7 @@ class CCRSchema(ma.Schema):
             "ccr_id",
             "content",
             "status",
-            "bounty",
+            "target",
             "date_created",
         )
 
@@ -115,7 +116,7 @@ ccrs_schema = CCRSchema(many=True)
 #             "content",
 #             "category",
 #             "status",
-#             "bounty",
+#             "target",
 #             "date_created",
 #             "proposals",
 #         )

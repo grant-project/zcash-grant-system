@@ -82,7 +82,7 @@ def delete_proposal(ccr_id):
     "title": fields.Str(required=True),
     "brief": fields.Str(required=True),
     "content": fields.Str(required=True),
-    "bounty": fields.Str(required=True),
+    "target": fields.Str(required=True),
 })
 def update_ccr(ccr_id, **kwargs):
     try:
