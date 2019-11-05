@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
-// import CreateFlow from 'components/CreateFlow';
+import CCRFlow from 'components/CCRFlow';
 import { initializeForm } from 'modules/ccr/actions';
 import { AppState } from 'store/reducers';
 import Loader from 'components/Loader';
@@ -27,7 +27,7 @@ class RequestEdit extends React.Component<Props> {
   render() {
     const { form, initializeFormError } = this.props;
     if (form) {
-      return <h1>Hi, this is the flow</h1>;
+      return <CCRFlow />;
     } else if (initializeFormError) {
       return <h1>{initializeFormError}</h1>;
     } else {

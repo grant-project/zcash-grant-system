@@ -1,6 +1,6 @@
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
-import CreateRequestDraftList from 'components/CreateRequestDraftList';
+import CreateRequestDraftList from 'components/CCRDraftList';
 
 type Props = RouteComponentProps<{}>;
 

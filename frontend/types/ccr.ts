@@ -16,8 +16,8 @@ export interface CCRDraft {
   brief: string;
   ccrId: number;
   status: CCRSTATUS;
-  bounty: string;
+  target: string;
   dateCreated: number;
   content: string;
-  // isStaked: boolean;
+  isStaked: boolean;
 }
