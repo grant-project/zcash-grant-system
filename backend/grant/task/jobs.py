@@ -162,6 +162,9 @@ class PruneDraft:
         if proposal.title or proposal.brief or proposal.content or proposal.category or proposal.target != "0":
             return
 
+        if proposal.payout_address or proposal.milestones:
+            return
+
         # Otherwise, delete the empty proposal
         db.session.delete(proposal)
         db.session.commit()

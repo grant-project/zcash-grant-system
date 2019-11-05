@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 
 from grant.task.models import Task, db
 from grant.task.jobs import PruneDraft
+from grant.milestone.models import Milestone
 from grant.proposal.models import Proposal
-from grant.utils.enums import ProposalStatus
+from grant.utils.enums import ProposalStatus, Category
 
 from mock import patch, Mock
 
@@ -63,55 +64,72 @@ class TestTaskAPI(BaseProposalCreatorConfig):
         proposal = Proposal.query.get(proposal_id)
         self.assertIsNone(proposal)
 
-    @patch('grant.task.views.datetime')
-    def test_proposal_pruning_skip_status(self, mock_datetime):
-        # make sure proposals that are not drafts are not deleted
-        mock_datetime.now = Mock(return_value=datetime.now())
-        self.login_default_user()
-        resp = self.app.post(
-            "/api/v1/proposals/drafts"
-        )
-        proposal_id = resp.json["proposalId"]
-        proposal = Proposal.query.get(proposal_id)
-        proposal.status = ProposalStatus.LIVE
-        db.session.add(proposal)
-        db.session.commit()
-        after_time = datetime.now() + timedelta(seconds=PruneDraft.PRUNE_TIME + 100)
-        mock_datetime.now = Mock(return_value=after_time)
+    def test_proposal_pruning_noops(self):
+        # ensure all proposal noop states work as expected
 
-        resp = self.app.get("/api/v1/task")
-        self.assert200(resp)
+        def status(p):
+            p.status = ProposalStatus.LIVE
 
-        tasks = Task.query.all()
-        self.assertEqual(len(tasks), 1)
-        task = tasks[0]
-        self.assertTrue(task.completed)
-        proposal = Proposal.query.get(proposal_id)
-        self.assertIsNotNone(proposal)
+        def title(p):
+            p.title = 'title'
 
-    @patch('grant.task.views.datetime')
-    def test_proposal_pruning_skip_content(self, mock_datetime):
-        # make sure proposals that have populated fields are not deleted
-        mock_datetime.now = Mock(return_value=datetime.now())
-        self.login_default_user()
-        resp = self.app.post(
-            "/api/v1/proposals/drafts"
-        )
-        proposal_id = resp.json["proposalId"]
-        proposal = Proposal.query.get(proposal_id)
-        proposal.content = "content"
-        db.session.add(proposal)
-        db.session.commit()
-        after_time = datetime.now() + timedelta(seconds=PruneDraft.PRUNE_TIME + 100)
-        mock_datetime.now = Mock(return_value=after_time)
+        def brief(p):
+            p.brief = 'brief'
 
-        resp = self.app.get("/api/v1/task")
-        self.assert200(resp)
+        def content(p):
+            p.content = 'content'
 
-        tasks = Task.query.all()
-        self.assertEqual(len(tasks), 1)
-        task = tasks[0]
-        self.assertTrue(task.completed)
-        proposal = Proposal.query.get(proposal_id)
-        self.assertIsNotNone(proposal)
+        def category(p):
+            p.category = Category.DEV_TOOL
 
+        def target(p):
+            p.target = '100'
+
+        def payout_address(p):
+            p.payout_address = 'address'
+
+        def milestones(p):
+            milestones_data = [
+                {
+                    "title": "All the money straightaway",
+                    "content": "cool stuff with it",
+                    "date_estimated": 1549505307,
+                    "payout_percent": "100",
+                    "immediate_payout": False
+                }
+            ]
+            Milestone.make(milestones_data, p)
+
+        modifiers = [
+            status,
+            title,
+            brief,
+            content,
+            category,
+            target,
+            payout_address,
+            milestones
+        ]
+
+        for modifier in modifiers:
+            proposal = Proposal.create(status=ProposalStatus.DRAFT)
+            proposal_id = proposal.id
+            modifier(proposal)
+
+            db.session.add(proposal)
+            db.session.commit()
+
+            blob = {
+                "proposal_id": proposal_id,
+            }
+
+            task = Task(
+                job_type=PruneDraft.JOB_TYPE,
+                blob=blob,
+                execute_after=datetime.now()
+            )
+
+            PruneDraft.process_task(task)
+
+            proposal = Proposal.query.get(proposal_id)
+            self.assertIsNotNone(proposal)
