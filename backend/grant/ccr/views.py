@@ -39,6 +39,7 @@ def get_ccr(ccr_id):
 def make_ccr_draft():
     user = g.current_user
     ccr = CCR.create(status=CCRStatus.DRAFT, user_id=user.id)
+    db.session.commit()
     return ccr_schema.dump(ccr), 201
 
 
@@ -55,6 +56,24 @@ def get_proposal_drafts():
             .all()
     )
     return ccrs_schema.dump(ccrs), 200
+
+
+@blueprint.route("/<ccr_id>", methods=["DELETE"])
+@requires_ccr_owner_auth
+def delete_proposal(ccr_id):
+    deleteable_statuses = [
+        CCRStatus.DRAFT,
+        CCRStatus.PENDING,
+        CCRStatus.APPROVED,
+        CCRStatus.REJECTED,
+        CCRStatus.STAKING,
+    ]
+    status = g.current_ccr.status
+    if status not in deleteable_statuses:
+        return {"message": "Cannot delete CCRs with %s status" % status}, 400
+    db.session.delete(g.current_ccr)
+    db.session.commit()
+    return {"message": "ok"}, 202
 
 
 @blueprint.route("/<ccr_id>", methods=["PUT"])

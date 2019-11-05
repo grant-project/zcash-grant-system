@@ -83,7 +83,7 @@ class CCRSchema(ma.Schema):
         model = CCR
         # Fields to expose
         fields = (
-            "author"
+            "author",
             "id",
             "title",
             "brief",
@@ -92,10 +92,9 @@ class CCRSchema(ma.Schema):
             "status",
             "bounty",
             "date_created",
-            "authed_liked",
-            "likes_count"
         )
 
+    author = ma.Nested("UserSchema")
     ccr_id = ma.Method("get_ccr_id")
 
     def get_ccr_id(self, obj):
