@@ -65,7 +65,6 @@ class Milestone(db.Model):
         self.date_created = datetime.datetime.now()
         self.index = index
 
-    # TODO: maybe provide some validation for milestones?
 
     @staticmethod
     def make(milestones_data, proposal):
