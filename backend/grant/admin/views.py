@@ -475,7 +475,6 @@ def get_rfps():
     "title": fields.Str(required=True),
     "brief": fields.Str(required=True),
     "content": fields.Str(required=True),
-    "category": fields.Str(required=True, validate=validate.OneOf(choices=Category.list())),
     "bounty": fields.Str(required=False, missing=0),
     "matching": fields.Bool(required=False, missing=False),
     "dateCloses": fields.Int(required=False, missing=None)
