@@ -17,22 +17,14 @@ import {
 } from './actions';
 import types from './types';
 
-export function* handleCreateDraft(
-  action: ReturnType<typeof createCCRDraft>,
-): SagaIterator {
+export function* handleCreateDraft(): SagaIterator {
   try {
     const res: Yielded<typeof postCCRDraft> = yield call(postCCRDraft);
     yield put({
       type: types.CREATE_CCR_DRAFT_FULFILLED,
       payload: res.data,
     });
-
-    if (action) {
-      console.log('eventually this will redirect once you add back in `opts`');
-    }
-    // if (action.payload.redirect) {
-    //   yield put(replace(`/ccrs/${res.data.ccrId}/edit`));
-    // }
+    yield put(replace(`/ccrs/${res.data.ccrId}/edit`));
   } catch (err) {
     yield put({
       type: types.CREATE_CCR_DRAFT_REJECTED,

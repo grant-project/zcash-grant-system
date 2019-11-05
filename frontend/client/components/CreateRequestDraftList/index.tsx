@@ -1,184 +1,177 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import {Link} from 'react-router-dom';
-import {Button, Divider, List, message, Popconfirm, Spin} from 'antd';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { Button, Divider, List, message, Popconfirm, Spin } from 'antd';
 import Placeholder from 'components/Placeholder';
-import {getIsVerified} from 'modules/auth/selectors';
+import { getIsVerified } from 'modules/auth/selectors';
 import Loader from 'components/Loader';
-import {ProposalDraft, STATUS} from 'types';
-import {createDraft, deleteDraft, fetchAndCreateDrafts, fetchDrafts,} from 'modules/create/actions';
-import {AppState} from 'store/reducers';
+import { CCRDraft, CCRSTATUS } from 'types';
+import {
+  createCCRDraft,
+  deleteCCRDraft,
+  fetchAndCreateCCRDrafts,
+} from 'modules/ccr/actions';
+import { AppState } from 'store/reducers';
 import './style.less';
 
 interface StateProps {
-    drafts: AppState['create']['drafts'];
-    isFetchingDrafts: AppState['create']['isFetchingDrafts'];
-    fetchDraftsError: AppState['create']['fetchDraftsError'];
-    isCreatingDraft: AppState['create']['isCreatingDraft'];
-    createDraftError: AppState['create']['createDraftError'];
-    isDeletingDraft: AppState['create']['isDeletingDraft'];
-    deleteDraftError: AppState['create']['deleteDraftError'];
-    isVerified: ReturnType<typeof getIsVerified>;
+  drafts: AppState['ccr']['drafts'];
+  isFetchingDrafts: AppState['ccr']['isFetchingDrafts'];
+  fetchDraftsError: AppState['ccr']['fetchDraftsError'];
+  isCreatingDraft: AppState['ccr']['isCreatingDraft'];
+  createDraftError: AppState['ccr']['createDraftError'];
+  isDeletingDraft: AppState['ccr']['isDeletingDraft'];
+  deleteDraftError: AppState['ccr']['deleteDraftError'];
+  isVerified: ReturnType<typeof getIsVerified>;
 }
 
 interface DispatchProps {
-    fetchDrafts: typeof fetchDrafts;
-    createDraft: typeof createDraft;
-    deleteDraft: typeof deleteDraft;
-    fetchAndCreateDrafts: typeof fetchAndCreateDrafts;
+  createCCRDraft: typeof createCCRDraft;
+  deleteCCRDraft: typeof deleteCCRDraft;
+  fetchAndCreateCCRDrafts: typeof fetchAndCreateCCRDrafts;
 }
 
 interface OwnProps {
-    createIfNone?: boolean;
-    createWithRfpId?: number;
+  createIfNone?: boolean;
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
 
 interface State {
-    deletingId: number | null;
+  deletingId: number | null;
 }
 
-class DraftList extends React.Component<Props, State> {
-    state: State = {
-        deletingId: null,
-    };
+class CCRDraftList extends React.Component<Props, State> {
+  state: State = {
+    deletingId: null,
+  };
 
-    componentDidMount() {
-        const {createIfNone, createWithRfpId} = this.props;
-        if (createIfNone || createWithRfpId) {
-            this.props.fetchAndCreateDrafts({
-                rfpId: createWithRfpId,
-                redirect: true,
-            });
-        } else {
-            this.props.fetchDrafts();
-        }
+  componentDidMount() {
+    this.props.fetchAndCreateCCRDrafts();
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    const { isDeletingDraft, deleteDraftError, createDraftError } = this.props;
+    if (prevProps.isDeletingDraft && !isDeletingDraft) {
+      this.setState({ deletingId: null });
+    }
+    if (deleteDraftError && prevProps.deleteDraftError !== deleteDraftError) {
+      message.error(deleteDraftError, 3);
+    }
+    if (createDraftError && prevProps.createDraftError !== createDraftError) {
+      message.error(createDraftError, 3);
+    }
+  }
+
+  render() {
+    const { drafts, isCreatingDraft, isFetchingDrafts, isVerified } = this.props;
+    const { deletingId } = this.state;
+
+    if (!isVerified) {
+      return (
+        <div className="CreateRequestDraftList">
+          <Placeholder
+            title="Your email is not verified"
+            subtitle="Please confirm your email before making a ccr."
+          />
+        </div>
+      );
     }
 
-    componentDidUpdate(prevProps: Props) {
-        const {isDeletingDraft, deleteDraftError, createDraftError} = this.props;
-        if (prevProps.isDeletingDraft && !isDeletingDraft) {
-            this.setState({deletingId: null});
-        }
-        if (deleteDraftError && prevProps.deleteDraftError !== deleteDraftError) {
-            message.error(deleteDraftError, 3);
-        }
-        if (createDraftError && prevProps.createDraftError !== createDraftError) {
-            message.error(createDraftError, 3);
-        }
+    if (!drafts || isCreatingDraft) {
+      return <Loader size="large" />;
     }
 
-    render() {
-        const {drafts, isCreatingDraft, isFetchingDrafts, isVerified} = this.props;
-        const {deletingId} = this.state;
-
-        if (!isVerified) {
+    let draftsEl;
+    if (drafts.length) {
+      draftsEl = (
+        <List
+          itemLayout="horizontal"
+          dataSource={drafts}
+          loading={isFetchingDrafts}
+          renderItem={(d: CCRDraft) => {
+            const actions = [
+              <Link key="edit" to={`/ccrs/${d.ccrId}/edit`}>
+                Edit
+              </Link>,
+              <Popconfirm
+                key="delete"
+                title="Are you sure?"
+                onConfirm={() => this.deleteDraft(d.ccrId)}
+              >
+                <a>Delete</a>
+              </Popconfirm>,
+            ];
             return (
-                <div className="DraftList">
-                    <Placeholder
-                        title="Your email is not verified"
-                        subtitle="Please confirm your email before making a proposal."
-                    />
-                </div>
+              <Spin tip="deleting..." spinning={deletingId === d.ccrId}>
+                <List.Item actions={actions}>
+                  <List.Item.Meta
+                    title={
+                      <>
+                        {d.title || <em>Untitled Request</em>}
+                        {d.status === CCRSTATUS.REJECTED && <em> (rejected)</em>}
+                      </>
+                    }
+                    description={d.brief || <em>No description</em>}
+                  />
+                </List.Item>
+              </Spin>
             );
-        }
-
-        if (!drafts || isCreatingDraft) {
-            return <Loader size="large"/>;
-        }
-
-        let draftsEl;
-        if (drafts.length) {
-            draftsEl = (
-                <List
-                    itemLayout="horizontal"
-                    dataSource={drafts}
-                    loading={isFetchingDrafts}
-                    renderItem={(d: ProposalDraft) => {
-                        const actions = [
-                            <Link key="edit" to={`/proposals/${d.proposalId}/edit`}>
-                                Edit
-                            </Link>,
-                            <Popconfirm
-                                key="delete"
-                                title="Are you sure?"
-                                onConfirm={() => this.deleteDraft(d.proposalId)}
-                            >
-                                <a>Delete</a>
-                            </Popconfirm>,
-                        ];
-                        return (
-                            <Spin tip="deleting..." spinning={deletingId === d.proposalId}>
-                                <List.Item actions={actions}>
-                                    <List.Item.Meta
-                                        title={
-                                            <>
-                                                {d.title || <em>Untitled proposal</em>}
-                                                {d.status === STATUS.REJECTED && <em> (rejected)</em>}
-                                            </>
-                                        }
-                                        description={d.brief || <em>No description</em>}
-                                    />
-                                </List.Item>
-                            </Spin>
-                        );
-                    }}
-                />
-            );
-        } else {
-            draftsEl = (
-                <Placeholder
-                    title="You have no drafts"
-                    subtitle="Why not make one now? Click below to start."
-                />
-            );
-        }
-
-        return (
-            <div className="DraftList">
-                <h2 className="DraftList-title">Your drafts</h2>
-                {draftsEl}
-                <Divider>or</Divider>
-                <Button
-                    className="DraftList-create"
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={() => this.createDraft()}
-                    loading={isCreatingDraft}
-                >
-                    Create a new Proposal
-                </Button>
-            </div>
-        );
+          }}
+        />
+      );
+    } else {
+      draftsEl = (
+        <Placeholder
+          title="You have no drafts"
+          subtitle="Why not make one now? Click below to start."
+        />
+      );
     }
 
-    private createDraft = (rfpId?: number) => {
-        this.props.createDraft({rfpId, redirect: true});
-    };
+    return (
+      <div className="CreateRequestDraftList">
+        <h2 className="CreateRequestDraftList-title">Your Request Drafts</h2>
+        {draftsEl}
+        <Divider>or</Divider>
+        <Button
+          className="CreateRequestDraftList-create"
+          type="primary"
+          size="large"
+          block
+          onClick={() => this.createDraft()}
+          loading={isCreatingDraft}
+        >
+          Create a new Request
+        </Button>
+      </div>
+    );
+  }
 
-    private deleteDraft = (proposalId: number) => {
-        this.props.deleteDraft(proposalId);
-        this.setState({deletingId: proposalId});
-    };
+  private createDraft = () => {
+    this.props.createCCRDraft();
+  };
+
+  private deleteDraft = (ccrId: number) => {
+    this.props.deleteCCRDraft(ccrId);
+    this.setState({ deletingId: ccrId });
+  };
 }
 
 export default connect<StateProps, DispatchProps, OwnProps, AppState>(
-    state => ({
-        drafts: state.create.drafts,
-        isFetchingDrafts: state.create.isFetchingDrafts,
-        fetchDraftsError: state.create.fetchDraftsError,
-        isCreatingDraft: state.create.isCreatingDraft,
-        createDraftError: state.create.createDraftError,
-        isDeletingDraft: state.create.isDeletingDraft,
-        deleteDraftError: state.create.deleteDraftError,
-        isVerified: getIsVerified(state),
-    }),
-    {
-        fetchDrafts,
-        createDraft,
-        deleteDraft,
-        fetchAndCreateDrafts,
-    },
-)(DraftList);
+  state => ({
+    drafts: state.ccr.drafts,
+    isFetchingDrafts: state.ccr.isFetchingDrafts,
+    fetchDraftsError: state.ccr.fetchDraftsError,
+    isCreatingDraft: state.ccr.isCreatingDraft,
+    createDraftError: state.ccr.createDraftError,
+    isDeletingDraft: state.ccr.isDeletingDraft,
+    deleteDraftError: state.ccr.deleteDraftError,
+    isVerified: getIsVerified(state),
+  }),
+  {
+    createCCRDraft,
+    deleteCCRDraft,
+    fetchAndCreateCCRDrafts,
+  },
+)(CCRDraftList);
