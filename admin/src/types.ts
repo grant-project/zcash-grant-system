@@ -41,7 +41,6 @@ export interface RFP {
   title: string;
   brief: string;
   content: string;
-  category: string;
   status: string;
   proposals: Proposal[];
   matching: boolean;
@@ -52,7 +51,6 @@ export interface RFPArgs {
   title: string;
   brief: string;
   content: string;
-  category: string;
   matching: boolean;
   dateCloses: number | null | undefined;
   bounty: string | null | undefined;
