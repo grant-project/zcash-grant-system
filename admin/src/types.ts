@@ -100,7 +100,6 @@ export interface Proposal {
   title: string;
   content: string;
   stage: PROPOSAL_STAGE;
-  category: string;
   milestones: Milestone[];
   currentMilestone?: Milestone;
   team: User[];
