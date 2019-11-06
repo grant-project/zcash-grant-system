@@ -77,16 +77,16 @@ class CCRReview extends React.Component<Props> {
             {s.fields.map(
               f =>
                 !f.isHide && (
-                  <div className="ReviewField" key={f.key}>
-                    <div className="ReviewField-label">
+                  <div className="CCRReviewField" key={f.key}>
+                    <div className="CCRReviewField-label">
                       {FIELD_NAME_MAP[f.key]}
                       {f.error && (
-                        <div className="ReviewField-label-error">{f.error}</div>
+                        <div className="CCRReviewField-label-error">{f.error}</div>
                       )}
                     </div>
-                    <div className="ReviewField-content">
+                    <div className="CCRReviewField-content">
                       {this.isEmpty(form[f.key]) ? (
-                        <div className="ReviewField-content-empty">N/A</div>
+                        <div className="CCRReviewField-content-empty">N/A</div>
                       ) : (
                         f.content
                       )}
@@ -94,11 +94,11 @@ class CCRReview extends React.Component<Props> {
                   </div>
                 ),
             )}
-            <div className="ReviewField">
-              <div className="ReviewField-label" />
-              <div className="ReviewField-content">
+            <div className="CCRReviewField">
+              <div className="CCRReviewField-label" />
+              <div className="CCRReviewField-content">
                 <button
-                  className="ReviewField-content-edit"
+                  className="CCRReviewField-content-edit"
                   onClick={() => this.setStep(s.step)}
                 >
                   Edit {s.name}

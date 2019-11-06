@@ -1,10 +1,5 @@
-import { CCRDraft, User } from 'types';
+import { CCRDraft } from 'types';
 import { getAmountError } from 'utils/validators';
-// import { PROPOSAL_CATEGORY, PROPOSAL_STAGE } from 'api/constants';
-// import {
-//   ProposalDetail,
-//   PROPOSAL_DETAIL_INITIAL_STATE,
-// } from 'modules/proposals/reducers';
 
 interface CCRFormErrors {
   title?: string;
@@ -66,48 +61,3 @@ export function getCCRErrors(
 
   return errors;
 }
-
-export function validateUserProfile(user: User) {
-  if (user.displayName.length > 50) {
-    return 'Display name can only be 50 characters maximum';
-  } else if (user.title.length > 50) {
-    return 'Title can only be 50 characters maximum';
-  }
-
-  return '';
-}
-
-// This is kind of a disgusting function, sorry.
-// export function makeProposalPreviewFromDraft(draft: CCRDraft): ProposalDetail {
-//   const { invites, ...rest } = draft;
-//   const target = parseFloat(draft.target);
-//
-//   return {
-//     ...rest,
-//     ccrId: 0,
-//     status: CCRSTATUS.DRAFT,
-//     proposalUrlId: '0-title',
-//     proposalAddress: '0x0',
-//     payoutAddress: '0x0',
-//     dateCreated: Date.now() / 1000,
-//     datePublished: Date.now() / 1000,
-//     dateApproved: Date.now() / 1000,
-//     target: toZat(draft.target),
-//     funded: Zat('0'),
-//     contributionMatching: 0,
-//     contributionBounty: Zat('0'),
-//     percentFunded: 0,
-//     stage: PROPOSAL_STAGE.PREVIEW,
-//     category: draft.category || PROPOSAL_CATEGORY.CORE_DEV,
-//     isStaked: true,
-//     arbiter: {
-//       status: PROPOSAL_ARBITER_STATUS.ACCEPTED,
-//     },
-//     acceptedWithFunding: false,
-//     authedFollows: false,
-//     followersCount: 0,
-//     authedLiked: false,
-//     likesCount: 0,
-//     ...PROPOSAL_DETAIL_INITIAL_STATE,
-//   };
-// }
