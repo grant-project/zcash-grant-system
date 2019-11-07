@@ -1,10 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { SocialMedia } from 'types';
 import { UserState } from 'modules/users/reducers';
 import UserAvatar from 'components/UserAvatar';
+import TipJarModal from 'components/TipJarModal';
 import { SOCIAL_INFO } from 'utils/social';
 import { AppState } from 'store/reducers';
 import './ProfileUser.less';
@@ -19,7 +20,15 @@ interface StateProps {
 
 type Props = OwnProps & StateProps;
 
-class ProfileUser extends React.Component<Props> {
+const STATE = {
+  tipJarModalOpen: false,
+};
+
+type State = typeof STATE;
+
+class ProfileUser extends React.Component<Props, State> {
+  state = STATE;
+
   render() {
     const {
       authUser,
@@ -27,7 +36,11 @@ class ProfileUser extends React.Component<Props> {
       user: { socialMedias },
     } = this.props;
 
+    const { tipJarModalOpen } = this.state;
+
     const isSelf = !!authUser && authUser.userid === user.userid;
+    const tipJarDisabled = !user.tipJarAddress;
+    const tipJarTooltip = tipJarDisabled ? 'User has not set a tip jar address' : '';
 
     return (
       <div className="ProfileUser">
@@ -51,10 +64,38 @@ class ProfileUser extends React.Component<Props> {
               </Link>
             </div>
           )}
+          {!isSelf && (
+            <div>
+              <Tooltip placement={'bottomLeft'} title={tipJarTooltip}>
+                <Button onClick={this.handleTipJarModalOpen} disabled={tipJarDisabled}>
+                  Send tip
+                </Button>
+              </Tooltip>
+            </div>
+          )}
         </div>
+
+        {!!user.tipJarAddress && (
+          <TipJarModal
+            isOpen={tipJarModalOpen}
+            onClose={this.handleTipJarModalClose}
+            type={'user'}
+            address={user.tipJarAddress}
+          />
+        )}
       </div>
     );
   }
+
+  private handleTipJarModalOpen = () =>
+    this.setState({
+      tipJarModalOpen: true,
+    });
+
+  private handleTipJarModalClose = () =>
+    this.setState({
+      tipJarModalOpen: false,
+    });
 }
 
 const Social = ({ socialMedia }: { socialMedia: SocialMedia }) => {

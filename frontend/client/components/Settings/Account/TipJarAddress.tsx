@@ -9,35 +9,35 @@ interface Props {
   isFetching: boolean;
   errorFetching: boolean;
   userid: number;
-  onAddressSet: (refundAddress: UserSettings['refundAddress']) => void;
+  onAddressSet: (refundAddress: UserSettings['tipJarAddress']) => void;
 }
 
 const STATE = {
   isSaving: false,
-  refundAddress: '',
-  refundAddressRemote: '',
+  tipJarAddress: '',
+  tipJarAddressRemote: '',
 };
 
 type State = typeof STATE;
 
-export default class RefundAddress extends React.Component<Props, State> {
+export default class TipJarAddress extends React.Component<Props, State> {
   state: State = { ...STATE };
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const { userSettings } = nextProps;
-    const { refundAddress, refundAddressRemote } = prevState;
+    const { tipJarAddress, tipJarAddressRemote } = prevState;
 
     let ret: Partial<State> = {};
 
-    if (!userSettings || !userSettings.refundAddress) {
+    if (!userSettings || !userSettings.tipJarAddress) {
       return ret;
     }
 
-    if (userSettings.refundAddress !== refundAddressRemote) {
-      ret.refundAddressRemote = userSettings.refundAddress;
+    if (userSettings.tipJarAddress !== tipJarAddressRemote) {
+      ret.tipJarAddressRemote = userSettings.tipJarAddress;
 
-      if (!refundAddress) {
-        ret.refundAddress = userSettings.refundAddress;
+      if (!tipJarAddress) {
+        ret.tipJarAddress = userSettings.tipJarAddress;
       }
     }
 
@@ -45,24 +45,24 @@ export default class RefundAddress extends React.Component<Props, State> {
   }
 
   render() {
-    const { isSaving, refundAddress, refundAddressRemote } = this.state;
+    const { isSaving, tipJarAddress, tipJarAddressRemote } = this.state;
     const { isFetching, errorFetching } = this.props;
-    const addressChanged = refundAddress !== refundAddressRemote;
+    const addressChanged = tipJarAddress !== tipJarAddressRemote;
 
     let status: 'validating' | 'error' | undefined;
     let help;
     if (isFetching) {
       status = 'validating';
-    } else if (refundAddress && !isValidAddress(refundAddress)) {
+    } else if (tipJarAddress && !isValidAddress(tipJarAddress)) {
       status = 'error';
       help = 'That doesn’t look like a valid address';
     }
 
     return (
       <Form className="RefundAddress" layout="vertical" onSubmit={this.handleSubmit}>
-        <Form.Item label="Refund address" validateStatus={status} help={help}>
+        <Form.Item label="Tip jar address" validateStatus={status} help={help}>
           <Input
-            value={refundAddress}
+            value={tipJarAddress}
             placeholder="Z or T address"
             onChange={this.handleChange}
             disabled={isFetching || isSaving || errorFetching}
@@ -74,36 +74,36 @@ export default class RefundAddress extends React.Component<Props, State> {
           htmlType="submit"
           size="large"
           disabled={
-            !refundAddress || isSaving || !!status || errorFetching || !addressChanged
+            !tipJarAddress || isSaving || !!status || errorFetching || !addressChanged
           }
           loading={isSaving}
           block
         >
-          Change refund address
+          Change tip jar address
         </Button>
       </Form>
     );
   }
 
   private handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ refundAddress: ev.currentTarget.value });
+    this.setState({ tipJarAddress: ev.currentTarget.value });
   };
 
   private handleSubmit = async (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
     const { userid } = this.props;
-    const { refundAddress } = this.state;
-    if (!refundAddress) {
+    const { tipJarAddress } = this.state;
+    if (!tipJarAddress) {
       return;
     }
 
     this.setState({ isSaving: true });
     try {
-      const res = await updateUserSettings(userid, { refundAddress });
+      const res = await updateUserSettings(userid, { tipJarAddress });
       message.success('Settings saved');
-      const refundAddressNew = res.data.refundAddress || '';
-      this.setState({ refundAddress: refundAddressNew });
-      this.props.onAddressSet(refundAddressNew);
+      const tipJarAddressNew = res.data.tipJarAddress || '';
+      this.setState({ tipJarAddress: tipJarAddressNew });
+      this.props.onAddressSet(tipJarAddressNew);
     } catch (err) {
       console.error(err);
       message.error(err.message || err.toString(), 5);
