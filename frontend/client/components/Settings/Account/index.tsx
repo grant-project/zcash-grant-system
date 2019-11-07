@@ -14,7 +14,7 @@ interface StateProps {
 }
 
 type Props = StateProps;
-type State = {
+interface State {
   userSettings: UserSettings | undefined;
   isFetching: boolean;
   errorFetching: boolean;

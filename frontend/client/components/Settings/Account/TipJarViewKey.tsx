@@ -20,13 +20,12 @@ const STATE = {
 type State = typeof STATE;
 
 export default class TipJarViewKey extends React.Component<Props, State> {
-  state: State = { ...STATE };
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const { userSettings } = nextProps;
     const { tipJarViewKey, tipJarViewKeyRemote } = prevState;
 
-    let ret: Partial<State> = {};
+    const ret: Partial<State> = {};
 
     if (!userSettings || !userSettings.tipJarViewKey) {
       return ret;
@@ -42,6 +41,8 @@ export default class TipJarViewKey extends React.Component<Props, State> {
 
     return ret;
   }
+
+  state: State = { ...STATE };
 
   render() {
     const { isSaving, tipJarViewKey, tipJarViewKeyRemote } = this.state;

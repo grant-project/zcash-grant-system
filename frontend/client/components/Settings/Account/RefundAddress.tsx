@@ -21,13 +21,12 @@ const STATE = {
 type State = typeof STATE;
 
 export default class RefundAddress extends React.Component<Props, State> {
-  state: State = { ...STATE };
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const { userSettings } = nextProps;
     const { refundAddress, refundAddressRemote } = prevState;
 
-    let ret: Partial<State> = {};
+    const ret: Partial<State> = {};
 
     if (!userSettings || !userSettings.refundAddress) {
       return ret;
@@ -43,6 +42,8 @@ export default class RefundAddress extends React.Component<Props, State> {
 
     return ret;
   }
+
+  state: State = { ...STATE };
 
   render() {
     const { isSaving, refundAddress, refundAddressRemote } = this.state;
