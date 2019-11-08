@@ -352,43 +352,41 @@ def delete_proposal(id):
     return {"message": "Not implemented."}, 400
 
 
-@blueprint.route('/proposals/<id>', methods=['PUT'])
+@blueprint.route('/proposals/<id>/accept', methods=['PUT'])
 @body({
-    "contributionMatching": fields.Int(required=False, missing=None),
-    "contributionBounty": fields.Str(required=False, missing=None)
-})
-@admin.admin_auth_required
-def update_proposal(id, contribution_matching, contribution_bounty):
-    proposal = Proposal.query.filter(Proposal.id == id).first()
-    if not proposal:
-        return {"message": f"Could not find proposal with id {id}"}, 404
-
-    if contribution_matching is not None:
-        proposal.set_contribution_matching(contribution_matching)
-
-    if contribution_bounty is not None:
-        proposal.set_contribution_bounty(contribution_bounty)
-
-    db.session.add(proposal)
-    db.session.commit()
-
-    return proposal_schema.dump(proposal)
-
-
-@blueprint.route('/proposals/<id>/approve', methods=['PUT'])
-@body({
-    "isApprove": fields.Bool(required=True),
+    "isAccepted": fields.Bool(required=True),
+    "withFunding": fields.Bool(required=True),
     "rejectReason": fields.Str(required=False, missing=None)
 })
 @admin.admin_auth_required
-def approve_proposal(id, is_approve, reject_reason=None):
+def approve_proposal(id, is_accepted, with_funding, reject_reason=None):
     proposal = Proposal.query.filter_by(id=id).first()
     if proposal:
-        proposal.approve_pending(is_approve, reject_reason)
+        proposal.approve_pending(is_accepted, with_funding, reject_reason)
         db.session.commit()
         return proposal_schema.dump(proposal)
 
     return {"message": "No proposal found."}, 404
+
+
+@blueprint.route('/proposals/<id>/accept/fund', methods=['PUT'])
+@admin.admin_auth_required
+def change_proposal_to_accepted_with_funding(id):
+    proposal = Proposal.query.filter_by(id=id).first()
+    if not proposal:
+        return {"message": "No proposal found."}, 404
+    if proposal.accepted_with_funding:
+        return {"message": "Proposal already accepted with funding."}, 404
+    if proposal.version != '2':
+        return {"message": "Only version two proposals can be accepted with funding"}, 404
+    if proposal.status != ProposalStatus.LIVE and proposal.status != ProposalStatus.APPROVED:
+        return {"message": "Only live or approved proposals can be modified by this endpoint"}, 404
+
+    proposal.update_proposal_with_funding()
+    db.session.add(proposal)
+    db.session.commit()
+
+    return proposal_schema.dump(proposal)
 
 
 @blueprint.route('/proposals/<id>/cancel', methods=['PUT'])
@@ -437,6 +435,13 @@ def paid_milestone_payout_request(id, mid, tx_id):
                     'tx_explorer_url': make_explore_url(tx_id),
                     'proposal_milestones_url': make_url(f'/proposals/{proposal.id}?tab=milestones'),
                 })
+
+            # email FOLLOWERS that milestone was accepted
+            proposal.send_follower_email(
+                "followed_proposal_milestone",
+                email_args={"milestone": ms},
+                url_suffix="?tab=milestones",
+            )
             return proposal_schema.dump(proposal), 200
 
     return {"message": "No milestone matching id"}, 404
@@ -587,8 +592,8 @@ def create_contribution(proposal_id, user_id, status, amount, tx_id):
     db.session.add(contribution)
     db.session.flush()
 
+    #TODO: should this stay? 
     contribution.proposal.set_pending_when_ready()
-    contribution.proposal.set_funded_when_ready()
 
     db.session.commit()
     return admin_proposal_contribution_schema.dump(contribution), 200
@@ -660,8 +665,8 @@ def edit_contribution(contribution_id, proposal_id, user_id, status, amount, tx_
     db.session.add(contribution)
     db.session.flush()
 
+    # TODO: should this stay?
     contribution.proposal.set_pending_when_ready()
-    contribution.proposal.set_funded_when_ready()
 
     db.session.commit()
     return admin_proposal_contribution_schema.dump(contribution), 200

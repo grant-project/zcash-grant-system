@@ -129,9 +129,15 @@ async function deleteProposal(id: number) {
   return data;
 }
 
-async function approveProposal(id: number, isApprove: boolean, rejectReason?: string) {
-  const { data } = await api.put(`/admin/proposals/${id}/approve`, {
-    isApprove,
+async function approveProposal(
+  id: number,
+  isAccepted: boolean,
+  withFunding: boolean,
+  rejectReason?: string,
+) {
+  const { data } = await api.put(`/admin/proposals/${id}/accept`, {
+    isAccepted,
+    withFunding,
     rejectReason,
   });
   return data;
@@ -140,6 +146,11 @@ async function approveProposal(id: number, isApprove: boolean, rejectReason?: st
 async function cancelProposal(id: number) {
   const { data } = await api.put(`/admin/proposals/${id}/cancel`);
   return data;
+}
+
+async function changeProposalToAcceptedWithFunding(id: number) {
+  const { data } = await api.put(`/admin/proposals/${id}/accept/fund`)
+  return data
 }
 
 async function fetchComments(params: Partial<PageQuery>) {
@@ -282,6 +293,7 @@ const app = store({
   proposalDetailCanceling: false,
   proposalDetailUpdating: false,
   proposalDetailUpdated: false,
+  proposalDetailChangingToAcceptedWithFunding: false,
 
   comments: {
     page: createDefaultPageData<Comment>('CREATED:DESC'),
@@ -536,7 +548,7 @@ const app = store({
     }
   },
 
-  async approveProposal(isApprove: boolean, rejectReason?: string) {
+  async approveProposal(isAccepted: boolean, withFunding: boolean, rejectReason?: string) {
     if (!app.proposalDetail) {
       const m = 'store.approveProposal(): Expected proposalDetail to be populated!';
       app.generalError.push(m);
@@ -546,7 +558,7 @@ const app = store({
     app.proposalDetailApproving = true;
     try {
       const { proposalId } = app.proposalDetail;
-      const res = await approveProposal(proposalId, isApprove, rejectReason);
+      const res = await approveProposal(proposalId, isAccepted, withFunding, rejectReason);
       app.updateProposalInStore(res);
     } catch (e) {
       handleApiError(e);
@@ -563,6 +575,19 @@ const app = store({
       handleApiError(e);
     }
     app.proposalDetailCanceling = false;
+  },
+
+  async changeProposalToAcceptedWithFunding(id: number) {
+    app.proposalDetailChangingToAcceptedWithFunding = true
+
+    try {
+      const res = await changeProposalToAcceptedWithFunding(id)
+      app.updateProposalInStore(res)
+    } catch (e) {
+      handleApiError(e)
+    }
+
+    app.proposalDetailChangingToAcceptedWithFunding = false
   },
 
   async markMilestonePaid(proposalId: number, milestoneId: number, txId: string) {

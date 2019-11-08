@@ -162,6 +162,10 @@ export function generateProposal({
     stage: PROPOSAL_STAGE.WIP,
     category: PROPOSAL_CATEGORY.COMMUNITY,
     isStaked: true,
+    authedFollows: false,
+    followersCount: 0,
+    authedLiked: false,
+    likesCount: 0,
     arbiter: {
       status: PROPOSAL_ARBITER_STATUS.ACCEPTED,
       user: {
@@ -173,7 +177,8 @@ export function generateProposal({
         socialMedias: [],
       },
     },
-    isVersionTwo: true,
+    acceptedWithFunding: null,
+    isVersionTwo: false,
     team: [
       {
         userid: 123,

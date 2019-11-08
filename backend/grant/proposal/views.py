@@ -14,7 +14,7 @@ from grant.milestone.models import Milestone
 from grant.parser import body, query, paginated_fields
 from grant.rfp.models import RFP
 from grant.settings import PROPOSAL_STAKING_AMOUNT
-from grant.task.jobs import ProposalDeadline
+from grant.task.jobs import ProposalDeadline, PruneDraft
 from grant.user.models import User
 from grant.utils import pagination
 from grant.utils.auth import (
@@ -196,6 +196,9 @@ def make_proposal_draft(rfp_id):
         rfp.proposals.append(proposal)
         db.session.add(rfp)
 
+    task = PruneDraft(proposal)
+    task.make_task()
+
     db.session.add(proposal)
     db.session.commit()
     return proposal_schema.dump(proposal), 201
@@ -370,6 +373,11 @@ def post_proposal_update(proposal_id, title, content):
             'proposal_update': update,
             'update_url': make_url(f'/proposals/{proposal_id}?tab=updates&update={update.id}'),
         })
+
+    # Send email to all followers
+    g.current_proposal.send_follower_email(
+        "followed_proposal_update", url_suffix="?tab=updates"
+    )
 
     dumped_update = proposal_update_schema.dump(update)
     return dumped_update, 201
@@ -570,9 +578,6 @@ def post_contribution_confirmation(contribution_id, to, amount, txid):
                 'contributor_url': make_url(f'/profile/{contribution.user.id}') if contribution.user else '',
             })
 
-    # on funding target reached.
-    contribution.proposal.set_funded_when_ready()
-
     db.session.commit()
     return {"message": "ok"}, 200
 
@@ -666,3 +671,37 @@ def reject_milestone_payout_request(proposal_id, milestone_id, reason):
             return proposal_schema.dump(g.current_proposal), 200
 
     return {"message": "No milestone matching id"}, 404
+
+
+@blueprint.route("/<proposal_id>/follow", methods=["PUT"])
+@requires_auth
+@body({"isFollow": fields.Bool(required=True)})
+def follow_proposal(proposal_id, is_follow):
+    user = g.current_user
+    # Make sure proposal exists
+    proposal = Proposal.query.filter_by(id=proposal_id).first()
+    if not proposal:
+        return {"message": "No proposal matching id"}, 404
+
+    proposal.follow(user, is_follow)
+    db.session.commit()
+    return {"message": "ok"}, 200
+
+
+@blueprint.route("/<proposal_id>/like", methods=["PUT"])
+@requires_auth
+@body({"isLiked": fields.Bool(required=True)})
+def like_proposal(proposal_id, is_liked):
+    user = g.current_user
+    # Make sure proposal exists
+    proposal = Proposal.query.filter_by(id=proposal_id).first()
+    if not proposal:
+        return {"message": "No proposal matching id"}, 404
+
+    if not proposal.status == ProposalStatus.LIVE:
+        return {"message": "Cannot like a proposal that's not live"}, 404
+
+    proposal.like(user, is_liked)
+    db.session.commit()
+    return {"message": "ok"}, 200
+

@@ -2,12 +2,11 @@ import datetime
 from decimal import Decimal, ROUND_DOWN
 from functools import reduce
 
-from flask import current_app
 from marshmallow import post_dump
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import column_property
 
-from flask import current_app
 from grant.comment.models import Comment
 from grant.email.send import send_email
 from grant.extensions import ma, db
@@ -30,6 +29,20 @@ proposal_team = db.Table(
     'proposal_team', db.Model.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('proposal_id', db.Integer, db.ForeignKey('proposal.id'))
+)
+
+proposal_follower = db.Table(
+    "proposal_follower",
+    db.Model.metadata,
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("proposal_id", db.Integer, db.ForeignKey("proposal.id")),
+)
+
+proposal_liker = db.Table(
+    "proposal_liker",
+    db.Model.metadata,
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("proposal_id", db.Integer, db.ForeignKey("proposal.id")),
 )
 
 
@@ -145,6 +158,8 @@ class ProposalContribution(db.Model):
             raise ValidationException('Proposal ID is required')
         # User ID (must belong to an existing user)
         if user_id:
+            from grant.user.models import User
+
             user = User.query.filter(User.id == user_id).first()
             if not user:
                 raise ValidationException('No user matching that ID')
@@ -230,6 +245,7 @@ class Proposal(db.Model):
     date_approved = db.Column(db.DateTime)
     date_published = db.Column(db.DateTime)
     reject_reason = db.Column(db.String())
+    accepted_with_funding = db.Column(db.Boolean(), nullable=True)
 
     # Payment info
     target = db.Column(db.String(255), nullable=False)
@@ -249,6 +265,22 @@ class Proposal(db.Model):
                                  order_by="asc(Milestone.index)", lazy=True, cascade="all, delete-orphan")
     invites = db.relationship(ProposalTeamInvite, backref="proposal", lazy=True, cascade="all, delete-orphan")
     arbiter = db.relationship(ProposalArbiter, uselist=False, back_populates="proposal", cascade="all, delete-orphan")
+    followers = db.relationship(
+        "User", secondary=proposal_follower, back_populates="followed_proposals"
+    )
+    followers_count = column_property(
+        select([func.count(proposal_follower.c.proposal_id)])
+        .where(proposal_follower.c.proposal_id == id)
+        .correlate_except(proposal_follower)
+    )
+    likes = db.relationship(
+        "User", secondary=proposal_liker, back_populates="liked_proposals"
+    )
+    likes_count = column_property(
+        select([func.count(proposal_liker.c.proposal_id)])
+        .where(proposal_liker.c.proposal_id == id)
+        .correlate_except(proposal_liker)
+    )
 
     def __init__(
             self,
@@ -411,13 +443,6 @@ class Proposal(db.Model):
 
     def update_rfp_opt_in(self, opt_in: bool):
         self.rfp_opt_in = opt_in
-        # add/remove matching and/or bounty values from RFP
-        if opt_in and self.rfp:
-            self.set_contribution_matching(1 if self.rfp.matching else 0)
-            self.set_contribution_bounty(self.rfp.bounty or '0')
-        else:
-            self.set_contribution_matching(0)
-            self.set_contribution_bounty('0')
 
     def create_contribution(
         self,
@@ -500,22 +525,27 @@ class Proposal(db.Model):
         db.session.add(self)
         db.session.flush()
 
-    # state: status PENDING -> (APPROVED || REJECTED)
-    def approve_pending(self, is_approve, reject_reason=None):
+    # state: status PENDING -> (LIVE || REJECTED)
+    def approve_pending(self, is_approve, with_funding, reject_reason=None):
         self.validate_publishable()
         # specific validation
         if not self.status == ProposalStatus.PENDING:
             raise ValidationException(f"Proposal must be pending to approve or reject")
 
         if is_approve:
-            self.status = ProposalStatus.APPROVED
+            self.status = ProposalStatus.LIVE
             self.date_approved = datetime.datetime.now()
+            self.accepted_with_funding = with_funding
+            with_or_out = 'without'
+            if with_funding:
+                self.fully_fund_contibution_bounty()
+                with_or_out = 'with'
             for t in self.team:
                 send_email(t.email_address, 'proposal_approved', {
                     'user': t,
                     'proposal': self,
                     'proposal_url': make_url(f'/proposals/{self.id}'),
-                    'admin_note': 'Congratulations! Your proposal has been approved.'
+                    'admin_note': f'Congratulations! Your proposal has been accepted {with_or_out} funding.'
                 })
         else:
             if not reject_reason:
@@ -530,6 +560,10 @@ class Proposal(db.Model):
                     'admin_note': reject_reason
                 })
 
+    def update_proposal_with_funding(self):
+        self.accepted_with_funding = True
+        self.fully_fund_contibution_bounty()
+
     # state: status APPROVE -> LIVE, stage PREVIEW -> FUNDING_REQUIRED
     def publish(self):
         self.validate_publishable()
@@ -538,28 +572,7 @@ class Proposal(db.Model):
             raise ValidationException(f"Proposal status must be approved")
         self.date_published = datetime.datetime.now()
         self.status = ProposalStatus.LIVE
-        self.stage = ProposalStage.FUNDING_REQUIRED
-        # If we had a bounty that pushed us into funding, skip straight into WIP
-        self.set_funded_when_ready()
-
-    def set_funded_when_ready(self):
-        if self.status == ProposalStatus.LIVE and self.stage == ProposalStage.FUNDING_REQUIRED and self.is_funded:
-            self.set_funded()
-
-    # state: stage FUNDING_REQUIRED -> WIP
-    def set_funded(self):
-        if self.status != ProposalStatus.LIVE:
-            raise ValidationException(f"Proposal status must be live in order transition to funded state")
-        if self.stage != ProposalStage.FUNDING_REQUIRED:
-            raise ValidationException(f"Proposal stage must be funding_required in order transition to funded state")
-        if not self.is_funded:
-            raise ValidationException(f"Proposal is not fully funded, cannot set to funded state")
-        self.send_admin_email('admin_arbiter')
         self.stage = ProposalStage.WIP
-        db.session.add(self)
-        db.session.flush()
-        # check the first step, if immediate payout bump it to accepted
-        self.current_milestone.accept_immediate()
 
     def set_contribution_bounty(self, bounty: str):
         # do not allow changes on funded/WIP proposals
@@ -569,20 +582,9 @@ class Proposal(db.Model):
         self.contribution_bounty = str(Decimal(bounty))
         db.session.add(self)
         db.session.flush()
-        self.set_funded_when_ready()
 
-    def set_contribution_matching(self, matching: float):
-        # do not allow on funded/WIP proposals
-        if self.is_funded:
-            raise ValidationException("Cannot set contribution matching on fully-funded proposal")
-        # enforce 1 or 0 for now
-        if matching == 0.0 or matching == 1.0:
-            self.contribution_matching = matching
-            db.session.add(self)
-            db.session.flush()
-            self.set_funded_when_ready()
-        else:
-            raise ValidationException("Bad value for contribution_matching, must be 1 or 0")
+    def fully_fund_contibution_bounty(self):
+        self.set_contribution_bounty(self.target)
 
     def cancel(self):
         if self.status != ProposalStatus.LIVE:
@@ -604,6 +606,33 @@ class Proposal(db.Model):
                 'refund_address': u.settings.refund_address,
                 'account_settings_url': make_url('/profile/settings?tab=account')
             })
+
+    def follow(self, user, is_follow):
+        if is_follow:
+            self.followers.append(user)
+        else:
+            self.followers.remove(user)
+        db.session.flush()
+
+    def like(self, user, is_liked):
+        if is_liked:
+            self.likes.append(user)
+        else:
+            self.likes.remove(user)
+        db.session.flush()
+
+    def send_follower_email(self, type: str, email_args={}, url_suffix=""):
+        for u in self.followers:
+            send_email(
+                u.email_address,
+                type,
+                {
+                    "user": u,
+                    "proposal": self,
+                    "proposal_url": make_url(f"/proposals/{self.id}{url_suffix}"),
+                    **email_args,
+                },
+            )
 
     @hybrid_property
     def contributed(self):
@@ -672,6 +701,38 @@ class Proposal(db.Model):
         d = {c.user.id: c.user for c in self.contributions if c.user and c.status == ContributionStatus.CONFIRMED}
         return d.values()
 
+    @hybrid_property
+    def authed_follows(self):
+        from grant.utils.auth import get_authed_user
+
+        authed = get_authed_user()
+        if not authed:
+            return False
+        res = (
+            db.session.query(proposal_follower)
+            .filter_by(user_id=authed.id, proposal_id=self.id)
+            .count()
+        )
+        if res:
+            return True
+        return False
+
+    @hybrid_property
+    def authed_liked(self):
+        from grant.utils.auth import get_authed_user
+
+        authed = get_authed_user()
+        if not authed:
+            return False
+        res = (
+            db.session.query(proposal_liker)
+            .filter_by(user_id=authed.id, proposal_id=self.id)
+            .count()
+        )
+        if res:
+            return True
+        return False
+
 
 class ProposalSchema(ma.Schema):
     class Meta:
@@ -706,7 +767,12 @@ class ProposalSchema(ma.Schema):
             "rfp",
             "rfp_opt_in",
             "arbiter",
-            "is_version_two"
+            "accepted_with_funding",
+            "is_version_two",
+            "authed_follows",
+            "followers_count",
+            "authed_liked",
+            "likes_count"
         )
 
     date_created = ma.Method("get_date_created")
@@ -754,7 +820,9 @@ user_fields = [
     "date_published",
     "reject_reason",
     "team",
-    "is_version_two"
+    "is_version_two",
+    "authed_follows",
+    "authed_liked"
 ]
 user_proposal_schema = ProposalSchema(only=user_fields)
 user_proposals_schema = ProposalSchema(many=True, only=user_fields)

@@ -25,6 +25,8 @@ import CancelModal from './CancelModal';
 import classnames from 'classnames';
 import { withRouter } from 'react-router';
 import SocialShare from 'components/SocialShare';
+import Follow from 'components/Follow';
+import Like from 'components/Like';
 import './index.less';
 
 interface OwnProps {
@@ -101,6 +103,10 @@ export class ProposalDetail extends React.Component<Props, State> {
 
     const isTrustee = !!proposal.team.find(tm => tm.userid === (user && user.userid));
     const isLive = proposal.status === STATUS.LIVE;
+    const milestonesDisabled = proposal.isVersionTwo
+      ? !proposal.acceptedWithFunding
+      : false;
+    const defaultTab = milestonesDisabled ? 'discussions' : 'milestones';
 
     const adminMenu = (
       <Menu>
@@ -184,9 +190,28 @@ export class ProposalDetail extends React.Component<Props, State> {
             </div>
           )}
           <div className="Proposal-top-main">
-            <h1 className="Proposal-top-main-title">
-              {proposal ? proposal.title : <span>&nbsp;</span>}
-            </h1>
+            <div className="Proposal-top-main-title">
+              <h1>{proposal ? proposal.title : <span>&nbsp;</span>}</h1>
+              {isLive && (
+                <div className="Proposal-top-main-title-menu">
+                  {isTrustee && (
+                    <Dropdown
+                      overlay={adminMenu}
+                      trigger={['click']}
+                      placement="bottomRight"
+                    >
+                      <Button>
+                        <span>Actions</span>
+                        <Icon type="down" style={{ marginRight: '-0.25rem' }} />
+                      </Button>
+                    </Dropdown>
+                  )}
+                  <Like proposal={proposal} style={{ marginLeft: '0.5rem' }} />
+                  <Follow proposal={proposal} style={{ marginLeft: '0.5rem' }} />
+                </div>
+              )}
+            </div>
+
             <div className="Proposal-top-main-block" style={{ flexGrow: 1 }}>
               <div
                 ref={el => (this.bodyEl = el)}
@@ -206,21 +231,6 @@ export class ProposalDetail extends React.Component<Props, State> {
                 </button>
               )}
             </div>
-            {isLive &&
-              isTrustee && (
-                <div className="Proposal-top-main-menu">
-                  <Dropdown
-                    overlay={adminMenu}
-                    trigger={['click']}
-                    placement="bottomRight"
-                  >
-                    <Button>
-                      <span>Actions</span>
-                      <Icon type="down" style={{ marginRight: '-0.25rem' }} />
-                    </Button>
-                  </Dropdown>
-                </div>
-              )}
           </div>
           <div className="Proposal-top-side">
             <CampaignBlock proposal={proposal} isPreview={!isLive} />
@@ -230,7 +240,7 @@ export class ProposalDetail extends React.Component<Props, State> {
         </div>
 
         <div className="Proposal-bottom">
-          <LinkableTabs scrollToTabs defaultActiveKey="milestones">
+          <LinkableTabs scrollToTabs defaultActiveKey={defaultTab}>
             <Tabs.TabPane tab="Milestones" key="milestones">
               <div style={{ marginTop: '1.5rem', padding: '0 2rem' }}>
                 <Milestones proposal={proposal} />

@@ -62,7 +62,12 @@ export interface Proposal extends Omit<ProposalDraft, 'target' | 'invites'> {
   datePublished: number | null;
   dateApproved: number | null;
   arbiter: ProposalProposalArbiter;
+  acceptedWithFunding: boolean | null;
   isVersionTwo: boolean;
+  authedFollows: boolean;
+  followersCount: number;
+  authedLiked: boolean;
+  likesCount: number;
   isTeamMember?: boolean; // FE derived
   isArbiter?: boolean; // FE derived
 }
