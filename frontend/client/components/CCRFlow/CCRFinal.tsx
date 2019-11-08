@@ -7,7 +7,7 @@ import Loader from 'components/Loader';
 import { createActions } from 'modules/create';
 import { AppState } from 'store/reducers';
 import { getProposalStakingContribution } from 'api/api';
-import './Final.less';
+import './CCRFinal.less';
 import PaymentInfo from 'components/ContributionModal/PaymentInfo';
 import { ContributionWithAddresses } from 'types';
 

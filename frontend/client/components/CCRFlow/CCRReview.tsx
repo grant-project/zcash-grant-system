@@ -5,7 +5,7 @@ import Markdown from 'components/Markdown';
 import { AppState } from 'store/reducers';
 import { CCR_STEP } from './index';
 import { CCRDraft } from 'types';
-import './Review.less';
+import './CCRReview.less';
 
 interface OwnProps {
   setStep(step: CCR_STEP): void;
