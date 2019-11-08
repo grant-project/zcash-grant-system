@@ -3,6 +3,7 @@ import { Modal, Icon, Button, Form, Input } from 'antd';
 import classnames from 'classnames';
 import QRCode from 'qrcode.react';
 import { formatZcashCLI, formatZcashURI } from 'utils/formatters';
+import { getAmountErrorFromString } from 'utils/validators'
 import Loader from 'components/Loader';
 import './TipJarModal.less';
 import CopyInput from 'components/CopyInput';
@@ -12,24 +13,34 @@ interface Props {
   onClose: () => void;
   type: 'user' | 'proposal';
   address: string;
+  amount: string;
 }
 
-const STATE = {
-  amount: '0',
-};
-type State = typeof STATE;
+interface State {
+  amount: string | null;
+}
 
-export default class TipJarModal extends React.Component<Props, State> {
-  state = STATE;
+export class TipJarModal extends React.Component<Props, State> {
+  static getDerivedStateFromProps = (nextProps: Props, prevState: State) => {
+    return prevState.amount === null ? { amount: nextProps.amount } : {};
+  };
+
+  state: State = {
+    amount: null,
+  };
 
   render() {
     const { isOpen, onClose, type, address } = this.props;
     const { amount } = this.state;
 
-    const amountIsValid = this.simpleAmountValidate(amount)
+    // should not be possible due to derived state, but makes TS happy
+    if (amount === null) return;
 
-    const cli = amountIsValid ? formatZcashCLI(address, amount) : ''
-    const uri = amountIsValid ? formatZcashURI(address, amount) : ''
+    const amountError = getAmountErrorFromString(amount)
+    const amountIsValid = !amountError
+
+    const cli = amountIsValid ? formatZcashCLI(address, amount) : '';
+    const uri = amountIsValid ? formatZcashURI(address, amount) : '';
 
     const content = (
       <div className="TipJarModal">
@@ -47,6 +58,7 @@ export default class TipJarModal extends React.Component<Props, State> {
               validateStatus={amountIsValid ? undefined : 'error'}
               label="Amount"
               className="TipJarModal-uri-info-input CopyInput"
+              help={amountError}
             >
               <Input
                 type="number"
@@ -91,12 +103,14 @@ export default class TipJarModal extends React.Component<Props, State> {
         title={`Tip a ${type}`}
         visible={isOpen}
         okText={'Done'}
+        onCancel={onClose}
         centered
         footer={
           <Button type="primary" onClick={onClose}>
             Done
           </Button>
         }
+        afterClose={this.handleAfterClose}
       >
         {content}
       </Modal>
@@ -108,18 +122,5 @@ export default class TipJarModal extends React.Component<Props, State> {
       amount: e.currentTarget.value,
     });
 
-  private simpleAmountValidate = (amount: string) => {
-    const target = parseFloat(amount)
-    if (Number.isNaN(target)) {
-      return false
-    }
-    if (target < 0) {
-      return false
-    }
-    // prevents "-0" from being valid...
-    if (amount[0] === '-') {
-      return false
-    }
-    return true
-  };
+    private handleAfterClose = () => this.setState({ amount: null });
 }

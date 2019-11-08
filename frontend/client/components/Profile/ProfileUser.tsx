@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 import { SocialMedia } from 'types';
 import { UserState } from 'modules/users/reducers';
 import UserAvatar from 'components/UserAvatar';
-import TipJarModal from 'components/TipJarModal';
+import { TipJarBlock } from 'components/TipJar';
 import { SOCIAL_INFO } from 'utils/social';
 import { AppState } from 'store/reducers';
 import './ProfileUser.less';
@@ -36,11 +36,7 @@ class ProfileUser extends React.Component<Props, State> {
       user: { socialMedias },
     } = this.props;
 
-    const { tipJarModalOpen } = this.state;
-
     const isSelf = !!authUser && authUser.userid === user.userid;
-    const tipJarDisabled = !user.tipJarAddress;
-    const tipJarTooltip = tipJarDisabled ? 'User has not set a tip jar address' : '';
 
     return (
       <div className="ProfileUser">
@@ -64,38 +60,11 @@ class ProfileUser extends React.Component<Props, State> {
               </Link>
             </div>
           )}
-          {!isSelf && (
-            <div>
-              <Tooltip placement={'bottomLeft'} title={tipJarTooltip}>
-                <Button onClick={this.handleTipJarModalOpen} disabled={tipJarDisabled}>
-                  Send tip
-                </Button>
-              </Tooltip>
-            </div>
-          )}
         </div>
-
-        {!!user.tipJarAddress && (
-          <TipJarModal
-            isOpen={tipJarModalOpen}
-            onClose={this.handleTipJarModalClose}
-            type={'user'}
-            address={user.tipJarAddress}
-          />
-        )}
+        <TipJarBlock address={user.tipJarAddress} type="user" isCard />
       </div>
     );
   }
-
-  private handleTipJarModalOpen = () =>
-    this.setState({
-      tipJarModalOpen: true,
-    });
-
-  private handleTipJarModalClose = () =>
-    this.setState({
-      tipJarModalOpen: false,
-    });
 }
 
 const Social = ({ socialMedia }: { socialMedia: SocialMedia }) => {

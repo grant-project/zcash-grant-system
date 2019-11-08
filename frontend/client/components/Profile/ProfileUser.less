@@ -2,8 +2,10 @@
   display: flex;
   align-items: center;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 
   &-avatar {
+    margin-bottom: 2rem;
     position: relative;
     flex: 0 0 auto;
     height: 10.5rem;
@@ -20,6 +22,8 @@
   &-info {
     // no overflow of flexbox
     min-width: 0;
+    margin-bottom: 2rem;
+    flex-grow: 1;
 
     &-name {
       font-size: 1.6rem;
