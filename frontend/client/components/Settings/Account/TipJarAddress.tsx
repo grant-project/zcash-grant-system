@@ -12,19 +12,18 @@ interface Props {
   onAddressSet: (refundAddress: UserSettings['tipJarAddress']) => void;
 }
 
-const STATE = {
-  isSaving: false,
-  tipJarAddress: '',
-  tipJarAddressRemote: '',
-};
 
-type State = typeof STATE;
+interface State {
+  isSaving: boolean
+  tipJarAddress: string | null
+  tipJarAddressSet: string | null
+}
 
 export default class TipJarAddress extends React.Component<Props, State> {
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const { userSettings } = nextProps;
-    const { tipJarAddress, tipJarAddressRemote } = prevState;
+    const { tipJarAddress, tipJarAddressSet } = prevState;
 
     const ret: Partial<State> = {};
 
@@ -32,10 +31,10 @@ export default class TipJarAddress extends React.Component<Props, State> {
       return ret;
     }
 
-    if (userSettings.tipJarAddress !== tipJarAddressRemote) {
-      ret.tipJarAddressRemote = userSettings.tipJarAddress;
+    if (userSettings.tipJarAddress !== tipJarAddressSet) {
+      ret.tipJarAddressSet = userSettings.tipJarAddress;
 
-      if (!tipJarAddress) {
+      if (tipJarAddress === null) {
         ret.tipJarAddress = userSettings.tipJarAddress;
       }
     }
@@ -43,12 +42,16 @@ export default class TipJarAddress extends React.Component<Props, State> {
     return ret;
   }
   
-  state: State = { ...STATE };
+  state: State = { 
+    isSaving: false,
+    tipJarAddress: null,
+    tipJarAddressSet: null
+   };
 
   render() {
-    const { isSaving, tipJarAddress, tipJarAddressRemote } = this.state;
+    const { isSaving, tipJarAddress, tipJarAddressSet } = this.state;
     const { isFetching, errorFetching } = this.props;
-    const addressChanged = tipJarAddress !== tipJarAddressRemote;
+    const addressChanged = tipJarAddress !== tipJarAddressSet;
 
     let status: 'validating' | 'error' | undefined;
     let help;
@@ -63,7 +66,7 @@ export default class TipJarAddress extends React.Component<Props, State> {
       <Form className="RefundAddress" layout="vertical" onSubmit={this.handleSubmit}>
         <Form.Item label="Tip jar address" validateStatus={status} help={help}>
           <Input
-            value={tipJarAddress}
+            value={tipJarAddress || ''}
             placeholder="Z or T address"
             onChange={this.handleChange}
             disabled={isFetching || isSaving || errorFetching}

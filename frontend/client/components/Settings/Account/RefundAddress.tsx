@@ -12,19 +12,18 @@ interface Props {
   onAddressSet: (refundAddress: UserSettings['refundAddress']) => void;
 }
 
-const STATE = {
-  isSaving: false,
-  refundAddress: '',
-  refundAddressRemote: '',
-};
+interface State {
+  isSaving: boolean
+  refundAddress: string | null
+  refundAddressSet: string | null
+}
 
-type State = typeof STATE;
 
 export default class RefundAddress extends React.Component<Props, State> {
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const { userSettings } = nextProps;
-    const { refundAddress, refundAddressRemote } = prevState;
+    const { refundAddress, refundAddressSet } = prevState;
 
     const ret: Partial<State> = {};
 
@@ -32,10 +31,10 @@ export default class RefundAddress extends React.Component<Props, State> {
       return ret;
     }
 
-    if (userSettings.refundAddress !== refundAddressRemote) {
-      ret.refundAddressRemote = userSettings.refundAddress;
+    if (userSettings.refundAddress !== refundAddressSet) {
+      ret.refundAddressSet = userSettings.refundAddress;
 
-      if (!refundAddress) {
+      if (refundAddress === null) {
         ret.refundAddress = userSettings.refundAddress;
       }
     }
@@ -43,12 +42,16 @@ export default class RefundAddress extends React.Component<Props, State> {
     return ret;
   }
 
-  state: State = { ...STATE };
+  state: State = { 
+    isSaving: false,
+    refundAddress: null,
+    refundAddressSet: null
+   };
 
   render() {
-    const { isSaving, refundAddress, refundAddressRemote } = this.state;
+    const { isSaving, refundAddress, refundAddressSet } = this.state;
     const { isFetching, errorFetching } = this.props;
-    const addressChanged = refundAddress !== refundAddressRemote;
+    const addressChanged = refundAddress !== refundAddressSet;
 
     let status: 'validating' | 'error' | undefined;
     let help;
@@ -63,7 +66,7 @@ export default class RefundAddress extends React.Component<Props, State> {
       <Form className="RefundAddress" layout="vertical" onSubmit={this.handleSubmit}>
         <Form.Item label="Refund address" validateStatus={status} help={help}>
           <Input
-            value={refundAddress}
+            value={refundAddress || ''}
             placeholder="Z or T address"
             onChange={this.handleChange}
             disabled={isFetching || isSaving || errorFetching}
