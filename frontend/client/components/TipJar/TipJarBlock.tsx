@@ -7,7 +7,8 @@ import '../Proposal/index.less';
 
 interface Props {
   isCard?: boolean;
-  address?: string;
+  hideTitle?: boolean;
+  address?: string | null;
   type: 'user' | 'proposal';
 }
 
@@ -22,7 +23,7 @@ export class TipJarBlock extends React.Component<Props, State> {
   state = STATE;
 
   render() {
-    const { isCard, address, type } = this.props;
+    const { isCard, address, type, hideTitle } = this.props;
     const { tipAmount, modalOpen } = this.state;
     const amountError = tipAmount ? getAmountErrorFromString(tipAmount) : '';
 
@@ -35,7 +36,7 @@ export class TipJarBlock extends React.Component<Props, State> {
     return (
       <div className={isCard ? 'Proposal-top-main-block' : undefined}>
         <Form layout="vertical" className="TipJarBlock">
-          <h1 className="TipJarBlock-title">Tip</h1>
+          {!hideTitle && <h1 className="TipJarBlock-title">Tip</h1>}
           <Form.Item
             validateStatus={amountError ? 'error' : undefined}
             help={amountError}
@@ -70,7 +71,7 @@ export class TipJarBlock extends React.Component<Props, State> {
           <TipJarModal
             isOpen={modalOpen}
             onClose={this.handleTipJarModalClose}
-            type={'user'}
+            type={type}
             address={address}
             amount={tipAmount}
           />
