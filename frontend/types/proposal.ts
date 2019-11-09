@@ -68,6 +68,8 @@ export interface Proposal extends Omit<ProposalDraft, 'target' | 'invites'> {
   followersCount: number;
   authedLiked: boolean;
   likesCount: number;
+  tipJarAddress: string | null;
+  tipJarViewKey: string | null;
   isTeamMember?: boolean; // FE derived
   isArbiter?: boolean; // FE derived
 }
