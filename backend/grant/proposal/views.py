@@ -258,6 +258,23 @@ def update_proposal(milestones, proposal_id, rfp_opt_in, **kwargs):
     return proposal_schema.dump(g.current_proposal), 200
 
 
+@blueprint.route("/<proposal_id>/tips", methods=["PUT"])
+@requires_team_member_auth
+@body({
+    "address": fields.Str(required=False, missing=None),
+    "viewKey": fields.Str(required=False, missing=None)
+})
+def update_proposal_tip_jar(proposal_id, address, view_key):
+    if address is not None:
+        g.current_proposal.tip_jar_address = address
+    if view_key is not None:
+        g.current_proposal.tip_jar_view_key = view_key
+
+    db.session.add(g.current_proposal)
+    db.session.commit()
+    return proposal_schema.dump(g.current_proposal), 200
+
+
 @blueprint.route("/<proposal_id>/rfp", methods=["DELETE"])
 @requires_team_member_auth
 def unlink_proposal_from_rfp(proposal_id):
@@ -351,7 +368,7 @@ def get_proposal_update(proposal_id, update_id):
 
 
 @blueprint.route("/<proposal_id>/updates", methods=["POST"])
-@limiter.limit("5/day;1/minute")
+# @limiter.limit("5/day;1/minute")
 @requires_team_member_auth
 @body({
     "title": fields.Str(required=True, validate=validate.Length(min=3, max=60)),

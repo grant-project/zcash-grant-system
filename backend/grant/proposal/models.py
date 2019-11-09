@@ -255,6 +255,8 @@ class Proposal(db.Model):
     contribution_bounty = db.Column(db.String(255), nullable=False, default='0', server_default=db.text("'0'"))
     rfp_opt_in = db.Column(db.Boolean(), nullable=True)
     contributed = db.column_property()
+    tip_jar_address = db.Column(db.String(255), nullable=True)
+    tip_jar_view_key = db.Column(db.String(255), nullable=True)
 
     # Relations
     team = db.relationship("User", secondary=proposal_team)
@@ -733,6 +735,16 @@ class Proposal(db.Model):
             return True
         return False
 
+    @hybrid_property
+    def get_tip_jar_view_key(self):
+        from grant.utils.auth import get_authed_user
+
+        authed = get_authed_user()
+        if authed not in self.team:
+            return None
+        else:
+            return self.tip_jar_view_key
+
 
 class ProposalSchema(ma.Schema):
     class Meta:
@@ -772,7 +784,9 @@ class ProposalSchema(ma.Schema):
             "authed_follows",
             "followers_count",
             "authed_liked",
-            "likes_count"
+            "likes_count",
+            "tip_jar_address",
+            "tip_jar_view_key"
         )
 
     date_created = ma.Method("get_date_created")
@@ -780,6 +794,7 @@ class ProposalSchema(ma.Schema):
     date_published = ma.Method("get_date_published")
     proposal_id = ma.Method("get_proposal_id")
     is_version_two = ma.Method("get_is_version_two")
+    tip_jar_view_key = ma.Method("get_tip_jar_view_key")
 
     updates = ma.Nested("ProposalUpdateSchema", many=True)
     team = ma.Nested("UserSchema", many=True)
@@ -803,6 +818,9 @@ class ProposalSchema(ma.Schema):
 
     def get_is_version_two(self, obj):
         return True if obj.version == '2' else False
+
+    def get_tip_jar_view_key(self, obj):
+        return obj.get_tip_jar_view_key
 
 proposal_schema = ProposalSchema()
 proposals_schema = ProposalSchema(many=True)
