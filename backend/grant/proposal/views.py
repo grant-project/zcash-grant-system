@@ -368,7 +368,7 @@ def get_proposal_update(proposal_id, update_id):
 
 
 @blueprint.route("/<proposal_id>/updates", methods=["POST"])
-# @limiter.limit("5/day;1/minute")
+@limiter.limit("5/day;1/minute")
 @requires_team_member_auth
 @body({
     "title": fields.Str(required=True, validate=validate.Length(min=3, max=60)),
