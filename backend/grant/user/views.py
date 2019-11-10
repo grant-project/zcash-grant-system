@@ -368,9 +368,9 @@ def set_user_settings(user_id, email_subscriptions, refund_address, tip_jar_addr
         g.current_user.settings.refund_address = refund_address
 
     # TODO: is additional validation needed similar to refund_address?
-    if tip_jar_address:
+    if tip_jar_address is not None:
         g.current_user.settings.tip_jar_address = tip_jar_address
-    if tip_jar_view_key:
+    if tip_jar_view_key is not None:
         g.current_user.settings.tip_jar_view_key = tip_jar_view_key
 
     db.session.commit()
