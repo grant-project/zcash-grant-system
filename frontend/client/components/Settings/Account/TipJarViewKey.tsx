@@ -12,21 +12,19 @@ interface Props {
 }
 
 interface State {
-  isSaving: boolean
-  tipJarViewKey: string | null
-  tipJarViewKeySet: string | null
+  isSaving: boolean;
+  tipJarViewKey: string | null;
+  tipJarViewKeySet: string | null;
 }
 
-
 export default class TipJarViewKey extends React.Component<Props, State> {
-
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const { userSettings } = nextProps;
     const { tipJarViewKey, tipJarViewKeySet } = prevState;
 
     const ret: Partial<State> = {};
 
-    if (!userSettings || !userSettings.tipJarViewKey) {
+    if (!userSettings || userSettings.tipJarViewKey === undefined) {
       return ret;
     }
 
@@ -44,7 +42,7 @@ export default class TipJarViewKey extends React.Component<Props, State> {
   state: State = {
     isSaving: false,
     tipJarViewKey: null,
-    tipJarViewKeySet: null
+    tipJarViewKeySet: null,
   };
 
   render() {
@@ -80,7 +78,11 @@ export default class TipJarViewKey extends React.Component<Props, State> {
           htmlType="submit"
           size="large"
           disabled={
-            !tipJarViewKey || isSaving || !!status || errorFetching || !viewKeyChanged
+            tipJarViewKey === null ||
+            isSaving ||
+            !!status ||
+            errorFetching ||
+            !viewKeyChanged
           }
           loading={isSaving}
           block
@@ -99,9 +101,8 @@ export default class TipJarViewKey extends React.Component<Props, State> {
     ev.preventDefault();
     const { userid } = this.props;
     const { tipJarViewKey } = this.state;
-    if (!tipJarViewKey) {
-      return;
-    }
+
+    if (tipJarViewKey === null) return;
 
     this.setState({ isSaving: true });
     try {

@@ -12,22 +12,20 @@ interface Props {
   onAddressSet: (refundAddress: UserSettings['tipJarAddress']) => void;
 }
 
-
 interface State {
-  isSaving: boolean
-  tipJarAddress: string | null
-  tipJarAddressSet: string | null
+  isSaving: boolean;
+  tipJarAddress: string | null;
+  tipJarAddressSet: string | null;
 }
 
 export default class TipJarAddress extends React.Component<Props, State> {
-
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const { userSettings } = nextProps;
     const { tipJarAddress, tipJarAddressSet } = prevState;
 
     const ret: Partial<State> = {};
 
-    if (!userSettings || !userSettings.tipJarAddress) {
+    if (!userSettings || userSettings.tipJarAddress === undefined) {
       return ret;
     }
 
@@ -41,25 +39,37 @@ export default class TipJarAddress extends React.Component<Props, State> {
 
     return ret;
   }
-  
-  state: State = { 
+
+  state: State = {
     isSaving: false,
     tipJarAddress: null,
-    tipJarAddressSet: null
-   };
+    tipJarAddressSet: null,
+  };
 
   render() {
     const { isSaving, tipJarAddress, tipJarAddressSet } = this.state;
-    const { isFetching, errorFetching } = this.props;
+    const { isFetching, errorFetching, userSettings } = this.props;
     const addressChanged = tipJarAddress !== tipJarAddressSet;
+    const hasViewKeySet = userSettings && userSettings.tipJarViewKey
 
+    let addressIsValid;
     let status: 'validating' | 'error' | undefined;
     let help;
+
+    if (tipJarAddress !== null) {
+      addressIsValid = tipJarAddress === '' || isValidAddress(tipJarAddress);
+    }
+
     if (isFetching) {
       status = 'validating';
-    } else if (tipJarAddress && !isValidAddress(tipJarAddress)) {
+    } else if (tipJarAddress !== null && !addressIsValid) {
       status = 'error';
       help = 'That doesn’t look like a valid address';
+    }
+
+    if (tipJarAddress === '' && hasViewKeySet) {
+      status = 'error';
+      help = 'You must unset your view key before unsetting your address'
     }
 
     return (
@@ -78,7 +88,11 @@ export default class TipJarAddress extends React.Component<Props, State> {
           htmlType="submit"
           size="large"
           disabled={
-            !tipJarAddress || isSaving || !!status || errorFetching || !addressChanged
+            tipJarAddress === null ||
+            isSaving ||
+            !!status ||
+            errorFetching ||
+            !addressChanged
           }
           loading={isSaving}
           block
@@ -97,15 +111,15 @@ export default class TipJarAddress extends React.Component<Props, State> {
     ev.preventDefault();
     const { userid } = this.props;
     const { tipJarAddress } = this.state;
-    if (!tipJarAddress) {
-      return;
-    }
+
+    if (tipJarAddress === null) return;
 
     this.setState({ isSaving: true });
     try {
       const res = await updateUserSettings(userid, { tipJarAddress });
       message.success('Settings saved');
-      const tipJarAddressNew = res.data.tipJarAddress || '';
+      const tipJarAddressNew =
+        res.data.tipJarAddress === undefined ? null : res.data.tipJarAddress;
       this.setState({ tipJarAddress: tipJarAddressNew });
       this.props.onAddressSet(tipJarAddressNew);
     } catch (err) {
