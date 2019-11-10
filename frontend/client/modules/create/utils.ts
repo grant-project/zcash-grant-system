@@ -248,6 +248,8 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
     arbiter: {
       status: PROPOSAL_ARBITER_STATUS.ACCEPTED,
     },
+    tipJarAddress: null,
+    tipJarViewKey: null,
     acceptedWithFunding: false,
     authedFollows: false,
     followersCount: 0,
