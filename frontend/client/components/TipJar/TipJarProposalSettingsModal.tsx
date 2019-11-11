@@ -99,7 +99,11 @@ class TipJarProposalSettingsModalBase extends React.Component<Props, State> {
     const content = (
       <>
         <Form layout="vertical" onSubmit={this.handleTipJarAddressSubmit}>
-          <Form.Item label="Tip Address" validateStatus={addressStatus} help={addressHelp}>
+          <Form.Item
+            label="Tip Address"
+            validateStatus={addressStatus}
+            help={addressHelp}
+          >
             <Input
               value={address || ''}
               placeholder="Z or T address"
@@ -171,7 +175,6 @@ class TipJarProposalSettingsModalBase extends React.Component<Props, State> {
     e.preventDefault();
     const {
       proposal: { proposalId },
-      updateProposal,
     } = this.props;
     const { address } = this.state;
 
@@ -181,7 +184,7 @@ class TipJarProposalSettingsModalBase extends React.Component<Props, State> {
     try {
       const res = await updateProposalTipJarSettings(proposalId, { address });
       message.success('Address saved');
-      updateProposal(res.data);
+      this.props.updateProposal(res.data);
     } catch (err) {
       console.error(err);
       message.error(err.message || err.toString(), 5);
@@ -193,7 +196,6 @@ class TipJarProposalSettingsModalBase extends React.Component<Props, State> {
     e.preventDefault();
     const {
       proposal: { proposalId },
-      updateProposal,
     } = this.props;
     const { viewKey } = this.state;
 
@@ -203,7 +205,7 @@ class TipJarProposalSettingsModalBase extends React.Component<Props, State> {
     try {
       const res = await updateProposalTipJarSettings(proposalId, { viewKey });
       message.success('View key saved');
-      updateProposal(res.data);
+      this.props.updateProposal(res.data);
     } catch (err) {
       console.error(err);
       message.error(err.message || err.toString(), 5);
@@ -213,7 +215,7 @@ class TipJarProposalSettingsModalBase extends React.Component<Props, State> {
 }
 
 function mapDispatchToProps(dispatch: Dispatch) {
-  return bindActionCreators({ updateProposal }, dispatch)
+  return bindActionCreators({ updateProposal }, dispatch);
 }
 
 export const TipJarProposalSettingsModal = connect<{}, DispatchProps, OwnProps, AppState>(
