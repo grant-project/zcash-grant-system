@@ -83,29 +83,36 @@ class Milestone(db.Model):
                 )
                 db.session.add(m)
 
+    #  The purpose of this method is to set the `date_estimated` property on all milestones in a proposal. This works
+    #  by figuring out a starting point for each milestone  (the `base_date` below) and adding `days_estimated`.
+    #
+    #  As proposal creators now estimate their milestones in days (instead of picking months), this method allows us to
+    #  keep `date_estimated` in sync throughout the lifecycle of a proposal. For example, if a user misses their
+    #  first milestone deadline by a week, this method would take the actual completion date of that milestone and
+    #  adjust the `date_estimated` of the remaining milestones accordingly.
+    #
     @staticmethod
     def set_v2_date_estimates(proposal):
         if not proposal.date_approved:
             raise MilestoneException(f'Cannot estimate milestone dates because proposal has no date_approved set')
 
-        # the milestone being actively worked on
+        # The milestone being actively worked on
         current_milestone = proposal.current_milestone
 
         if current_milestone.stage == MilestoneStage.PAID:
             raise MilestoneException(f'Cannot estimate milestone dates because they are all completed')
 
-        # we add days_estimated to base_date to calculate date_estimated
+        # The starting point for `date_estimated` calculation for each uncompleted milestone
+        # We add `days_estimated` to `base_date` to calculate `date_estimated`
         base_date = None
 
         for index, milestone in enumerate(proposal.milestones):
             if index == 0:
-                # if it's the first milestone, use the proposal approval
-                # date as a base_date
+                # If it's the first milestone, use the proposal approval date as a `base_date`
                 base_date = proposal.date_approved
 
             if milestone.date_paid:
-                # if milestone has been paid, set base_date for
-                # the next milestone and noop out
+                # If milestone has been paid, set `base_date` for the next milestone and noop out
                 base_date = milestone.date_paid
                 continue
 
@@ -113,15 +120,15 @@ class Milestone(db.Model):
             date_estimated = base_date + datetime.timedelta(days=int(days_estimated))
             milestone.date_estimated = date_estimated
 
-            # set the base_date for the next milestone
+            # Set the `base_date` for the next milestone using the estimate completion date of the current milestone
             base_date = date_estimated
             db.session.add(milestone)
 
-        # skip task creation if current milestone has an immediate payout
+        # Skip task creation if current milestone has an immediate payout
         if current_milestone.immediate_payout:
             return
 
-        # create milestone deadline task for the current milestone
+        # Create MilestoneDeadline task for the current milestone so arbiters will be alerted if the deadline is missed
         task = MilestoneDeadline(proposal, current_milestone)
         task.make_task()
 
