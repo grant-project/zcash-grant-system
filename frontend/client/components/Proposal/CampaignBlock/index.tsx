@@ -10,7 +10,7 @@ import { withRouter } from 'react-router';
 import UnitDisplay from 'components/UnitDisplay';
 import { TipJarBlock } from 'components/TipJar';
 import Loader from 'components/Loader';
-import { CATEGORY_UI, PROPOSAL_STAGE } from 'api/constants';
+import { PROPOSAL_STAGE } from 'api/constants';
 import './style.less';
 
 interface OwnProps {
@@ -88,16 +88,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
               </div>
             </div>
           )}
-          <div className="ProposalCampaignBlock-info">
-            <div className="ProposalCampaignBlock-info-label">Category</div>
-            <div className="ProposalCampaignBlock-info-value">
-              <Icon
-                type={CATEGORY_UI[proposal.category].icon}
-                style={{ color: CATEGORY_UI[proposal.category].color }}
-              />{' '}
-              {CATEGORY_UI[proposal.category].label}
-            </div>
-          </div>
           {!isVersionTwo &&
             !isFundingOver && (
               <div className="ProposalCampaignBlock-info">
