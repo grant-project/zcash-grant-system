@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Timeline } from 'antd';
-import moment from 'moment';
 import { getCreateErrors, KeyOfForm, FIELD_NAME_MAP } from 'modules/create/utils';
 import Markdown from 'components/Markdown';
 import UserAvatar from 'components/UserAvatar';
