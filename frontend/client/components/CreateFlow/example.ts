@@ -16,9 +16,7 @@ const createExampleProposal = (): Partial<ProposalDraft> => {
         title: 'Initial Funding',
         content:
           'This will be used to pay for a professional designer to hand-craft each letter on the shirt.',
-        dateEstimated: moment()
-          .add(1, 'month')
-          .unix(),
+        daysEstimated: '40',
         payoutPercent: '30',
         immediatePayout: true,
       },
@@ -26,9 +24,7 @@ const createExampleProposal = (): Partial<ProposalDraft> => {
         title: 'Test Prints',
         content:
           "We'll get test prints from 5 different factories and choose the highest quality shirts. Once we've decided, we'll order a full batch of prints.",
-        dateEstimated: moment()
-          .add(2, 'month')
-          .unix(),
+        daysEstimated: '30',
         payoutPercent: '20',
         immediatePayout: false,
       },
@@ -36,9 +32,7 @@ const createExampleProposal = (): Partial<ProposalDraft> => {
         title: 'All Shirts Printed',
         content:
           "All of the shirts have been printed, hooray! They'll be given out at conferences and meetups.",
-        dateEstimated: moment()
-          .add(3, 'month')
-          .unix(),
+        daysEstimated: '30',
         payoutPercent: '50',
         immediatePayout: false,
       },

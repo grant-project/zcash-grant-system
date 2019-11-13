@@ -179,9 +179,9 @@ const ReviewMilestones = ({
         <div className="ReviewMilestone">
           <div className="ReviewMilestone-title">{m.title || <em>No title</em>}</div>
           <div className="ReviewMilestone-info">
-            {moment(m.dateEstimated * 1000).format('MMMM YYYY')}
+            {m.immediatePayout || !m.daysEstimated ? '0' : m.daysEstimated} days
             {' – '}
-            {m.payoutPercent}% of funds
+            {m.payoutPercent || '0'}% of funds
           </div>
           <div className="ReviewMilestone-description">
             {m.content || <em>No description</em>}
