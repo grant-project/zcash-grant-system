@@ -1,4 +1,3 @@
-import moment from 'moment';
 import { ProposalDraft } from 'types';
 
 const createExampleProposal = (): Partial<ProposalDraft> => {
