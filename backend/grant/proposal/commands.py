@@ -101,11 +101,10 @@ def retire_v1_proposals(dry):
         return
 
     for p in proposals:
-        new_deadline = (now - p.date_published).total_seconds()
-        p.stage = ProposalStage.FAILED
-        p.deadline_duration = int(new_deadline)
-
         if not dry:
+            new_deadline = (now - p.date_published).total_seconds()
+            p.stage = ProposalStage.FAILED
+            p.deadline_duration = int(new_deadline)
             db.session.add(p)
             modified_count += 1
 
