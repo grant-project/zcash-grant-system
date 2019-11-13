@@ -17,7 +17,8 @@ export interface Milestone {
   index: number;
   content: string;
   dateCreated: number;
-  dateEstimated: number;
+  dateEstimated?: number;
+  daysEstimated?: string;
   dateRequested: number;
   dateAccepted: number;
   dateRejected: number;
@@ -41,7 +42,6 @@ export interface RFP {
   title: string;
   brief: string;
   content: string;
-  category: string;
   status: string;
   proposals: Proposal[];
   matching: boolean;
@@ -52,7 +52,6 @@ export interface RFPArgs {
   title: string;
   brief: string;
   content: string;
-  category: string;
   matching: boolean;
   dateCloses: number | null | undefined;
   bounty: string | null | undefined;
@@ -102,7 +101,6 @@ export interface Proposal {
   title: string;
   content: string;
   stage: PROPOSAL_STAGE;
-  category: string;
   milestones: Milestone[];
   currentMilestone?: Milestone;
   team: User[];

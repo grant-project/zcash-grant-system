@@ -155,6 +155,8 @@ export function getUserSettings(
 interface SettingsArgs {
   emailSubscriptions?: EmailSubscriptions;
   refundAddress?: string;
+  tipJarAddress?: string;
+  tipJarViewKey?: string;
 }
 export function updateUserSettings(
   userId: string | number,
@@ -384,4 +386,19 @@ export function getRFP(rfpId: number | string): Promise<{ data: RFP }> {
 
 export function resendEmailVerification(): Promise<{ data: void }> {
   return axios.put(`/api/v1/users/me/resend-verification`);
+}
+
+export function getHomeLatest(): Promise<{
+  data: {
+    latestProposals: Proposal[];
+    latestRfps: RFP[];
+  };
+}> {
+  return axios.get('/api/v1/home/latest').then(res => {
+    res.data = {
+      latestProposals: res.data.latestProposals.map(formatProposalFromGet),
+      latestRfps: res.data.latestRfps.map(formatRFPFromGet),
+    };
+    return res;
+  });
 }
