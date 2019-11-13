@@ -363,6 +363,10 @@ def approve_proposal(id, is_accepted, with_funding, reject_reason=None):
     proposal = Proposal.query.filter_by(id=id).first()
     if proposal:
         proposal.approve_pending(is_accepted, with_funding, reject_reason)
+
+        if is_accepted and with_funding:
+            Milestone.set_v2_date_estimates(proposal)
+
         db.session.commit()
         return proposal_schema.dump(proposal)
 
@@ -383,6 +387,7 @@ def change_proposal_to_accepted_with_funding(id):
         return {"message": "Only live or approved proposals can be modified by this endpoint"}, 404
 
     proposal.update_proposal_with_funding()
+    Milestone.set_v2_date_estimates(proposal)
     db.session.add(proposal)
     db.session.commit()
 
@@ -415,12 +420,14 @@ def paid_milestone_payout_request(id, mid, tx_id):
         return {"message": "Proposal is not fully funded"}, 400
     for ms in proposal.milestones:
         if ms.id == int(mid):
+            is_final_milestone = False
             ms.mark_paid(tx_id)
             db.session.add(ms)
             db.session.flush()
             # check if this is the final ms, and update proposal.stage
             num_paid = reduce(lambda a, x: a + (1 if x.stage == MilestoneStage.PAID else 0), proposal.milestones, 0)
             if num_paid == len(proposal.milestones):
+                is_final_milestone = True
                 proposal.stage = ProposalStage.COMPLETED  # WIP -> COMPLETED
                 db.session.add(proposal)
                 db.session.flush()
@@ -442,6 +449,11 @@ def paid_milestone_payout_request(id, mid, tx_id):
                 email_args={"milestone": ms},
                 url_suffix="?tab=milestones",
             )
+
+            if not is_final_milestone:
+                Milestone.set_v2_date_estimates(proposal)
+                db.session.commit()
+
             return proposal_schema.dump(proposal), 200
 
     return {"message": "No milestone matching id"}, 404
@@ -475,7 +487,6 @@ def get_rfps():
     "title": fields.Str(required=True),
     "brief": fields.Str(required=True),
     "content": fields.Str(required=True),
-    "category": fields.Str(required=True, validate=validate.OneOf(choices=Category.list())),
     "bounty": fields.Str(required=False, missing=0),
     "matching": fields.Bool(required=False, missing=False),
     "dateCloses": fields.Int(required=False, missing=None)
@@ -507,13 +518,12 @@ def get_rfp(rfp_id):
     "brief": fields.Str(required=True),
     "status": fields.Str(required=True, validate=validate.OneOf(choices=RFPStatus.list())),
     "content": fields.Str(required=True),
-    "category": fields.Str(required=True, validate=validate.OneOf(choices=Category.list())),
     "bounty": fields.Str(required=False, allow_none=True, missing=None),
     "matching": fields.Bool(required=False, default=False, missing=False),
     "dateCloses": fields.Int(required=False, missing=None),
 })
 @admin.admin_auth_required
-def update_rfp(rfp_id, title, brief, content, category, bounty, matching, date_closes, status):
+def update_rfp(rfp_id, title, brief, content, bounty, matching, date_closes, status):
     rfp = RFP.query.filter(RFP.id == rfp_id).first()
     if not rfp:
         return {"message": "No RFP matching that id"}, 404
@@ -522,7 +532,6 @@ def update_rfp(rfp_id, title, brief, content, category, bounty, matching, date_c
     rfp.title = title
     rfp.brief = brief
     rfp.content = content
-    rfp.category = category
     rfp.matching = matching
     rfp.bounty = bounty
     rfp.date_closes = datetime.fromtimestamp(date_closes) if date_closes else None
