@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 from decimal import Decimal, ROUND_DOWN
 from functools import reduce
 
@@ -368,7 +369,7 @@ class Proposal(db.Model):
         if self.deadline_duration > 7776000:
             raise ValidationException("Deadline duration cannot be more than 90 days")
 
-        # Check with node that the address is kosher
+        # Check with node that the payout address is kosher
         try:
             res = blockchain_get('/validate/address', {'address': self.payout_address})
         except:
@@ -376,6 +377,16 @@ class Proposal(db.Model):
                 "Could not validate your payout address due to an internal server error, please try again later")
         if not res['valid']:
             raise ValidationException("Payout address is not a valid Zcash address")
+
+        if self.tip_jar_address:
+            # Check with node that the tip jar address is kosher
+            try:
+                res = blockchain_get('/validate/address', {'address': self.tip_jar_address})
+            except:
+                raise ValidationException(
+                    "Could not validate your tipping address due to an internal server error, please try again later")
+            if not res['valid']:
+                raise ValidationException("Tipping address is not a valid Zcash address")
 
         # Then run through regular validation
         Proposal.simple_validate(vars(self))
@@ -440,6 +451,7 @@ class Proposal(db.Model):
             content: str = '',
             target: str = '0',
             payout_address: str = '',
+            tip_jar_address: Optional[str] = None,
             deadline_duration: int = 5184000  # 60 days
     ):
         self.title = title[:255]
@@ -448,6 +460,7 @@ class Proposal(db.Model):
         self.content = content[:300000]
         self.target = target[:255] if target != '' else '0'
         self.payout_address = payout_address[:255]
+        self.tip_jar_address = tip_jar_address[:255] if tip_jar_address is not None else None
         self.deadline_duration = deadline_duration
         Proposal.simple_validate(vars(self))
 
