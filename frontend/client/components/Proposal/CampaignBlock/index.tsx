@@ -196,9 +196,11 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
               </div>
             )}
 
-          <div className="ProposalCampaignBlock-tipJarWrapper">
-            <TipJarBlock address={proposal.tipJarAddress} type="proposal" hideTitle />
-          </div>
+          {proposal.tipJarAddress && (
+            <div className="ProposalCampaignBlock-tipJarWrapper">
+              <TipJarBlock address={proposal.tipJarAddress} type="proposal" />
+            </div>
+          )}
         </React.Fragment>
       );
     } else {
