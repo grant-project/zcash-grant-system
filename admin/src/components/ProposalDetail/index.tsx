@@ -391,9 +391,19 @@ class ProposalDetailNaked extends React.Component<Props, State> {
                     extra={`${milestone.payoutPercent}% Payout`}
                     key={i}
                   >
+                    {p.isVersionTwo && (
+                      <p>
+                        <b>Estimated Days to Complete:</b>{' '}
+                        {milestone.immediatePayout ? 'N/A' : milestone.daysEstimated}{' '}
+                      </p>
+                    )}
                     <p>
-                      <b>Estimated Date:</b> {formatDateSeconds(milestone.dateEstimated)}{' '}
+                      <b>Estimated Date:</b>{' '}
+                      {milestone.dateEstimated
+                        ? formatDateSeconds(milestone.dateEstimated)
+                        : 'N/A'}{' '}
                     </p>
+
                     <p>{milestone.content}</p>
                   </Card>
                 ))}
@@ -435,7 +445,6 @@ class ProposalDetailNaked extends React.Component<Props, State> {
               {renderDeetItem('isFailed', JSON.stringify(p.isFailed))}
               {renderDeetItem('status', p.status)}
               {renderDeetItem('stage', p.stage)}
-              {renderDeetItem('category', p.category)}
               {renderDeetItem('target', p.target)}
               {renderDeetItem('contributed', p.contributed)}
               {renderDeetItem('funded (inc. matching)', p.funded)}
