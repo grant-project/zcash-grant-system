@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { Icon, Popover } from 'antd';
+import { Icon, Popover, Tooltip } from 'antd';
 import { Proposal, STATUS } from 'types';
 import classnames from 'classnames';
 import { connect } from 'react-redux';
@@ -70,13 +70,7 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
       }
 
       const isAcceptedWithFunding = proposal.acceptedWithFunding === true;
-      const isAcceptedWithoutFunding = proposal.acceptedWithFunding === false;
-      const isAccepted = isAcceptedWithFunding || isAcceptedWithoutFunding;
-      const isCancelled = proposal.stage === PROPOSAL_STAGE.CANCELED;
-      const isJudged = isAccepted || isCancelled;
-
-      const displayBountyFunding =
-        !isVersionTwo || (isVersionTwo && isAcceptedWithFunding);
+      const isCanceled = proposal.stage === PROPOSAL_STAGE.CANCELED;
 
       content = (
         <React.Fragment>
@@ -97,23 +91,56 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
                 </div>
               </div>
             )}
-          <div className="ProposalCampaignBlock-info">
-            <div className="ProposalCampaignBlock-info-label">Funding</div>
-            <div className="ProposalCampaignBlock-info-value">
-              <UnitDisplay value={funded} /> / <UnitDisplay value={target} symbol="ZEC" />
+          {!isVersionTwo && (
+            <div className="ProposalCampaignBlock-info">
+              <div className="ProposalCampaignBlock-info-label">Funding</div>
+              <div className="ProposalCampaignBlock-info-value">
+                <UnitDisplay value={funded} /> /{' '}
+                <UnitDisplay value={target} symbol="ZEC" />
+              </div>
             </div>
-          </div>
+          )}
+
+          {isVersionTwo && (
+            <div className="ProposalCampaignBlock-info">
+              <div className="ProposalCampaignBlock-info-label">
+                {isAcceptedWithFunding ? 'Funding' : 'Requested Funding'}
+              </div>
+              <div className="ProposalCampaignBlock-info-value">
+                <UnitDisplay value={target} symbol="ZEC" />
+              </div>
+            </div>
+          )}
+
+          {proposal.tipJarAddress &&
+            !isCanceled && (
+              <div className="ProposalCampaignBlock-info">
+                <div className="ProposalCampaignBlock-info-label">Tips Recieved</div>
+                <div className="ProposalCampaignBlock-info-value">
+                  ??? &nbsp;
+                  <Tooltip
+                    placement="left"
+                    title="Made possible if a proposal owner supplies a view key with their tip address."
+                  >
+                    <Icon type="info-circle" />
+                  </Tooltip>
+                </div>
+              </div>
+            )}
 
           {bounty &&
-            displayBountyFunding && (
+            !isVersionTwo && (
               <div className="ProposalCampaignBlock-bounty">
                 Awarded with <UnitDisplay value={bounty} symbol="ZEC" /> bounty
               </div>
             )}
 
-          {isAcceptedWithoutFunding && (
-            <div className="ProposalCampaignBlock-bounty">Accepted without funding</div>
-          )}
+          {bounty &&
+            isVersionTwo && (
+              <div className="ProposalCampaignBlock-bounty">
+                Accepted {isAcceptedWithFunding ? 'with' : 'without'} funding
+              </div>
+            )}
 
           {!isVersionTwo &&
             proposal.contributionMatching > 0 && (
@@ -144,7 +171,7 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
                   ['is-success']: isRaiseGoalReached,
                 })}
               >
-                {isCancelled ? (
+                {isCanceled ? (
                   <>
                     <Icon type="close-circle-o" />
                     <span>Proposal was canceled</span>
@@ -175,32 +202,19 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
             ))}
 
           {isVersionTwo &&
-            isJudged && (
-              <div
-                className={classnames({
-                  ['ProposalCampaignBlock-fundingOver']: true,
-                  ['is-success']: isAccepted,
-                })}
-              >
-                {proposal.stage === PROPOSAL_STAGE.CANCELED ? (
-                  <>
-                    <Icon type="close-circle-o" />
-                    <span>Proposal was canceled</span>
-                  </>
-                ) : (
-                  <>
-                    <Icon type="check-circle-o" />
-                    <span>Proposal has been accepted</span>
-                  </>
-                )}
+            isCanceled && (
+              <div className="ProposalCampaignBlock-fundingOver">
+                <Icon type="close-circle-o" />
+                <span>Proposal was canceled</span>
               </div>
             )}
 
-          {proposal.tipJarAddress && (
-            <div className="ProposalCampaignBlock-tipJarWrapper">
-              <TipJarBlock address={proposal.tipJarAddress} type="proposal" />
-            </div>
-          )}
+          {proposal.tipJarAddress &&
+            !isCanceled && (
+              <div className="ProposalCampaignBlock-tipJarWrapper">
+                <TipJarBlock address={proposal.tipJarAddress} type="proposal" />
+              </div>
+            )}
         </React.Fragment>
       );
     } else {
