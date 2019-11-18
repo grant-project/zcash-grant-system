@@ -28,15 +28,15 @@ export default class CCRSubmitWarningModal extends React.Component<Props> {
         <div className="CCRSubmitWarningModal">
           {staked && (
             <p>
-              Are you sure you're ready to submit your proposal for approval? Once you’ve
+              Are you sure you're ready to submit your request for approval? Once you’ve
               done so, you won't be able to edit it.
             </p>
           )}
           {!staked && (
             <p>
-              Are you sure you're ready to submit your proposal? You will be asked to send
-              a staking contribution of <b>{process.env.PROPOSAL_STAKING_AMOUNT} ZEC</b>.
-              Once confirmed, the proposal will be submitted for approval by site
+              Are you sure you're ready to submit your Request? You will be asked to send
+              a staking contribution of <b>{process.env.CCR_STAKING_AMOUNT} ZEC</b>. Once
+              confirmed, the request will be submitted for approval by site
               administrators.
             </p>
           )}

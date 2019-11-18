@@ -47,16 +47,16 @@ const STEP_INFO: { [key in CCR_STEP]: StepInfo } = {
   [CCR_STEP.DETAILS]: {
     short: 'Details',
     title: 'Dive into the details',
-    subtitle: 'Here’s your chance to lay out the full proposal, in all its glory',
+    subtitle: 'Here’s your chance to lay out the full request, in all its glory',
     help:
       'Make sure people know what you’re building, why you’re qualified, and where the money’s going',
     component: Details,
   },
   [CCR_STEP.REVIEW]: {
     short: 'Review',
-    title: 'Review your proposal',
+    title: 'Review your request',
     subtitle: 'Feel free to edit any field that doesn’t look right',
-    help: 'You’ll get a chance to preview your proposal next before you publish it',
+    help: 'You’ll get a chance to preview your request next before you publish it',
     component: Review,
   },
 };
@@ -148,7 +148,7 @@ class CCRFlow extends React.Component<Props, State> {
           </div>
           <div className="CCRFlow-content">
             <StepComponent
-              proposalId={this.props.form && this.props.form.ccrId}
+              ccrId={this.props.form && this.props.form.ccrId}
               initialState={this.props.form}
               updateForm={this.debouncedUpdateForm}
               setStep={this.setStep}
@@ -251,6 +251,7 @@ class CCRFlow extends React.Component<Props, State> {
       return true;
     }
     const errors = getCCRErrors(this.props.form);
+    console.log(errors);
     return !!Object.keys(errors).length;
   };
 

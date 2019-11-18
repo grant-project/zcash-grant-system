@@ -54,7 +54,7 @@ test_ccr = {
     "content": "## My Proposal",
     "title": "Give Me Money",
     "brief": "$$$",
-    "bounty": "123.456",
+    "target": "123.456",
 }
 
 test_comment = {

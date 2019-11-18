@@ -8,6 +8,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import column_property
 
 from grant.comment.models import Comment
+from grant.contribution.models import Contribution
 from grant.email.send import send_email
 from grant.extensions import ma, db
 from grant.settings import PROPOSAL_STAKING_AMOUNT, PROPOSAL_TARGET_MAX
@@ -15,7 +16,6 @@ from grant.task.jobs import ContributionExpired
 from grant.utils.enums import (
     ProposalStatus,
     ProposalStage,
-    Category,
     ContributionStatus,
     ProposalArbiterStatus,
     MilestoneStage
@@ -88,110 +88,6 @@ class ProposalUpdate(db.Model):
         self.date_created = datetime.datetime.now()
 
 
-class ProposalContribution(db.Model):
-    __tablename__ = "proposal_contribution"
-
-    id = db.Column(db.Integer(), primary_key=True)
-    date_created = db.Column(db.DateTime, nullable=False)
-
-    proposal_id = db.Column(db.Integer, db.ForeignKey("proposal.id"), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    status = db.Column(db.String(255), nullable=False)
-    amount = db.Column(db.String(255), nullable=False)
-    tx_id = db.Column(db.String(255), nullable=True)
-    refund_tx_id = db.Column(db.String(255), nullable=True)
-    staking = db.Column(db.Boolean, nullable=False)
-    private = db.Column(db.Boolean, nullable=False, default=False, server_default='true')
-
-    user = db.relationship("User")
-
-    def __init__(
-            self,
-            proposal_id: int,
-            amount: str,
-            user_id: int = None,
-            staking: bool = False,
-            private: bool = True,
-    ):
-        self.proposal_id = proposal_id
-        self.amount = amount
-        self.user_id = user_id
-        self.staking = staking
-        self.private = private
-        self.date_created = datetime.datetime.now()
-        self.status = ContributionStatus.PENDING
-
-    @staticmethod
-    def get_existing_contribution(user_id: int, proposal_id: int, amount: str, private: bool = False):
-        return ProposalContribution.query.filter_by(
-            user_id=user_id,
-            proposal_id=proposal_id,
-            amount=amount,
-            private=private,
-            status=ContributionStatus.PENDING,
-        ).first()
-
-    @staticmethod
-    def get_by_userid(user_id):
-        return ProposalContribution.query \
-            .filter(ProposalContribution.user_id == user_id) \
-            .filter(ProposalContribution.status != ContributionStatus.DELETED) \
-            .filter(ProposalContribution.staking == False) \
-            .order_by(ProposalContribution.date_created.desc()) \
-            .all()
-
-    @staticmethod
-    def validate(contribution):
-        proposal_id = contribution.get('proposal_id')
-        user_id = contribution.get('user_id')
-        status = contribution.get('status')
-        amount = contribution.get('amount')
-        tx_id = contribution.get('tx_id')
-
-        # Proposal ID (must belong to an existing proposal)
-        if proposal_id:
-            proposal = Proposal.query.filter(Proposal.id == proposal_id).first()
-            if not proposal:
-                raise ValidationException('No proposal matching that ID')
-            contribution.proposal_id = proposal_id
-        else:
-            raise ValidationException('Proposal ID is required')
-        # User ID (must belong to an existing user)
-        if user_id:
-            from grant.user.models import User
-
-            user = User.query.filter(User.id == user_id).first()
-            if not user:
-                raise ValidationException('No user matching that ID')
-            contribution.user_id = user_id
-        else:
-            raise ValidationException('User ID is required')
-        # Status (must be in list of statuses)
-        if status:
-            if not ContributionStatus.includes(status):
-                raise ValidationException('Invalid status')
-            contribution.status = status
-        else:
-            raise ValidationException('Status is required')
-        # Amount (must be a Decimal parseable)
-        if amount:
-            try:
-                contribution.amount = str(Decimal(amount))
-            except:
-                raise ValidationException('Amount must be a number')
-        else:
-            raise ValidationException('Amount is required')
-
-    def confirm(self, tx_id: str, amount: str):
-        self.status = ContributionStatus.CONFIRMED
-        self.tx_id = tx_id
-        self.amount = amount
-
-    @hybrid_property
-    def refund_address(self):
-        return self.user.settings.refund_address if self.user else None
-
-
 class ProposalArbiter(db.Model):
     __tablename__ = "proposal_arbiter"
 
@@ -261,7 +157,7 @@ class Proposal(db.Model):
     team = db.relationship("User", secondary=proposal_team)
     comments = db.relationship(Comment, backref="proposal", lazy=True, cascade="all, delete-orphan")
     updates = db.relationship(ProposalUpdate, backref="proposal", lazy=True, cascade="all, delete-orphan")
-    contributions = db.relationship(ProposalContribution, backref="proposal", lazy=True, cascade="all, delete-orphan")
+    contributions = db.relationship(Contribution, backref="proposal", lazy=True, cascade="all, delete-orphan")
     milestones = db.relationship("Milestone", backref="proposal",
                                  order_by="asc(Milestone.index)", lazy=True, cascade="all, delete-orphan")
     invites = db.relationship(ProposalTeamInvite, backref="proposal", lazy=True, cascade="all, delete-orphan")
@@ -271,16 +167,16 @@ class Proposal(db.Model):
     )
     followers_count = column_property(
         select([func.count(proposal_follower.c.proposal_id)])
-        .where(proposal_follower.c.proposal_id == id)
-        .correlate_except(proposal_follower)
+            .where(proposal_follower.c.proposal_id == id)
+            .correlate_except(proposal_follower)
     )
     likes = db.relationship(
         "User", secondary=proposal_liker, back_populates="liked_proposals"
     )
     likes_count = column_property(
         select([func.count(proposal_liker.c.proposal_id)])
-        .where(proposal_liker.c.proposal_id == id)
-        .correlate_except(proposal_liker)
+            .where(proposal_liker.c.proposal_id == id)
+            .correlate_except(proposal_liker)
     )
 
     def __init__(
@@ -379,7 +275,6 @@ class Proposal(db.Model):
         # Then run through regular validation
         Proposal.simple_validate(vars(self))
 
-
     def validate_milestone_days(self):
         for milestone in self.milestones:
             if milestone.immediate_payout:
@@ -426,9 +321,10 @@ class Proposal(db.Model):
     @staticmethod
     def get_by_user_contribution(user):
         return Proposal.query \
-            .join(ProposalContribution) \
-            .filter(ProposalContribution.user_id == user.id) \
-            .order_by(ProposalContribution.date_created.desc()) \
+            .join(Contribution) \
+            .filter(Contribution.user_id == user.id) \
+            .filter(Contribution.proposal_id is not None) \
+            .order_by(Contribution.date_created.desc()) \
             .all()
 
     def update(
@@ -454,13 +350,13 @@ class Proposal(db.Model):
         self.rfp_opt_in = opt_in
 
     def create_contribution(
-        self,
-        amount,
-        user_id: int = None,
-        staking: bool = False,
-        private: bool = True,
+            self,
+            amount,
+            user_id: int = None,
+            staking: bool = False,
+            private: bool = True,
     ):
-        contribution = ProposalContribution(
+        contribution = Contribution(
             proposal_id=self.id,
             amount=amount,
             user_id=user_id,
@@ -481,7 +377,7 @@ class Proposal(db.Model):
         # check funding
         if remaining > 0:
             # find pending contribution for any user of remaining amount
-            contribution = ProposalContribution.query.filter_by(
+            contribution = Contribution.query.filter_by(
                 proposal_id=self.id,
                 status=ProposalStatus.PENDING,
                 staking=True,
@@ -650,7 +546,7 @@ class Proposal(db.Model):
 
     @hybrid_property
     def contributed(self):
-        contributions = ProposalContribution.query \
+        contributions = Contribution.query \
             .filter_by(proposal_id=self.id, status=ContributionStatus.CONFIRMED, staking=False) \
             .all()
         funded = reduce(lambda prev, c: prev + Decimal(c.amount), contributions, 0)
@@ -658,7 +554,7 @@ class Proposal(db.Model):
 
     @hybrid_property
     def amount_staked(self):
-        contributions = ProposalContribution.query \
+        contributions = Contribution.query \
             .filter_by(proposal_id=self.id, status=ContributionStatus.CONFIRMED, staking=True) \
             .all()
         amount = reduce(lambda prev, c: prev + Decimal(c.amount), contributions, 0)
@@ -681,7 +577,7 @@ class Proposal(db.Model):
     @hybrid_property
     def is_staked(self):
         # Don't use self.contributed since that ignores stake contributions
-        contributions = ProposalContribution.query \
+        contributions = Contribution.query \
             .filter_by(proposal_id=self.id, status=ContributionStatus.CONFIRMED) \
             .all()
         funded = reduce(lambda prev, c: prev + Decimal(c.amount), contributions, 0)
@@ -724,8 +620,8 @@ class Proposal(db.Model):
             return False
         res = (
             db.session.query(proposal_follower)
-            .filter_by(user_id=authed.id, proposal_id=self.id)
-            .count()
+                .filter_by(user_id=authed.id, proposal_id=self.id)
+                .count()
         )
         if res:
             return True
@@ -740,8 +636,8 @@ class Proposal(db.Model):
             return False
         res = (
             db.session.query(proposal_liker)
-            .filter_by(user_id=authed.id, proposal_id=self.id)
-            .count()
+                .filter_by(user_id=authed.id, proposal_id=self.id)
+                .count()
         )
         if res:
             return True
@@ -816,6 +712,7 @@ class ProposalSchema(ma.Schema):
 
     def get_is_version_two(self, obj):
         return True if obj.version == '2' else False
+
 
 proposal_schema = ProposalSchema()
 proposals_schema = ProposalSchema(many=True)
@@ -915,7 +812,7 @@ invites_with_proposal_schema = InviteWithProposalSchema(many=True)
 
 class ProposalContributionSchema(ma.Schema):
     class Meta:
-        model = ProposalContribution
+        model = Contribution
         # Fields to expose
         fields = (
             "id",
@@ -967,7 +864,7 @@ proposal_proposal_contributions_schema = ProposalContributionSchema(many=True, e
 
 class AdminProposalContributionSchema(ma.Schema):
     class Meta:
-        model = ProposalContribution
+        model = Contribution
         # Fields to expose
         fields = (
             "id",

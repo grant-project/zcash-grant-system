@@ -16,7 +16,7 @@ export const FIELD_NAME_MAP: { [key in KeyOfForm]: string } = {
   content: 'Details',
 };
 
-const requiredFields = ['title', 'brief', 'category', 'target', 'content'];
+const requiredFields = ['title', 'brief', 'target', 'content'];
 
 export function getCCRErrors(
   form: Partial<CCRDraft>,
@@ -52,12 +52,14 @@ export function getCCRErrors(
   // Amount to raise
   const targetFloat = target ? parseFloat(target) : 0;
   if (target && !Number.isNaN(targetFloat)) {
-    const limit = parseFloat(process.env.PROPOSAL_TARGET_MAX as string);
+    const limit = parseFloat(process.env.CCR_TARGET_MAX as string);
     const targetErr = getAmountError(targetFloat, limit, 0.001);
     if (targetErr) {
       errors.target = targetErr;
     }
   }
+
+  console.log('errors', errors);
 
   return errors;
 }

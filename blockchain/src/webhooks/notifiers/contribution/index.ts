@@ -146,6 +146,6 @@ export default class ContributionNotifier implements Notifier {
 
   private sendContributionConfirmation = (p: ContributionConfirmationPayload) => {
     log.info(`Contribution confirmed for contribution ${p.contributionId}, +${p.amount} ZEC`);
-    this.send(`/proposals/contribution/${p.contributionId}/confirm`, 'POST', p);
+    this.send(`/contribution/${p.contributionId}/confirm`, 'POST', p);
   };
 }

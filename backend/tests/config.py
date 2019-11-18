@@ -195,7 +195,7 @@ class BaseCCRCreatorConfig(BaseUserConfig):
             title=test_ccr["title"],
             content=test_ccr["content"],
             brief=test_ccr["brief"],
-            bounty=test_ccr["bounty"],
+            target=test_ccr["target"],
             user_id=self.user.id
         )
         self._ccr_id = self._ccr.id

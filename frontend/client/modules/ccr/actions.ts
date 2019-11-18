@@ -1,6 +1,7 @@
 import { Dispatch } from 'redux';
 import types from './types';
 import { CCRDraft } from 'types/ccr';
+import { putCCR, putCCRSubmitForApproval } from 'api/api';
 
 export function initializeForm(ccrId: number) {
   return {
@@ -46,22 +47,22 @@ export function deleteCCRDraft(ccrId: number) {
   };
 }
 
-// export function submitProposal(form: ProposalDraft) {
-//   return async (dispatch: Dispatch<any>) => {
-//     dispatch({ type: types.SUBMIT_CCR_PROPOSAL_PENDING });
-//     try {
-//       await putProposal(form);
-//       const res = await putProposalSubmitForApproval(form);
-//       dispatch({
-//         type: types.SUBMIT_CCR_PROPOSAL_FULFILLED,
-//         payload: res.data,
-//       });
-//     } catch (err) {
-//       dispatch({
-//         type: types.SUBMIT_CCR_PROPOSAL_REJECTED,
-//         payload: err.message || err.toString(),
-//         error: true,
-//       });
-//     }
-//   };
-// }
+export function submitCCR(form: CCRDraft) {
+  return async (dispatch: Dispatch<any>) => {
+    dispatch({ type: types.SUBMIT_CCR_PENDING });
+    try {
+      await putCCR(form);
+      const res = await putCCRSubmitForApproval(form);
+      dispatch({
+        type: types.SUBMIT_CCR_FULFILLED,
+        payload: res.data,
+      });
+    } catch (err) {
+      dispatch({
+        type: types.SUBMIT_CCR_REJECTED,
+        payload: err.message || err.toString(),
+        error: true,
+      });
+    }
+  };
+}

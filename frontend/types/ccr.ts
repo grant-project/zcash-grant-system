@@ -21,3 +21,8 @@ export interface CCRDraft {
   content: string;
   isStaked: boolean;
 }
+
+export interface CCR extends CCRDraft {
+  // TODO remove
+  noOp: boolean;
+}

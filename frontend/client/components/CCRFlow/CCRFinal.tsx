@@ -4,9 +4,9 @@ import { Icon } from 'antd';
 import { Link } from 'react-router-dom';
 import Result from 'ant-design-pro/lib/Result';
 import Loader from 'components/Loader';
-import { createActions } from 'modules/create';
+import { ccrActions } from 'modules/ccr';
 import { AppState } from 'store/reducers';
-import { getProposalStakingContribution } from 'api/api';
+import { getCCRStakingContribution } from 'api/api';
 import './CCRFinal.less';
 import PaymentInfo from 'components/ContributionModal/PaymentInfo';
 import { ContributionWithAddresses } from 'types';
@@ -16,13 +16,13 @@ interface OwnProps {
 }
 
 interface StateProps {
-  form: AppState['create']['form'];
-  submittedProposal: AppState['create']['submittedProposal'];
-  submitError: AppState['create']['submitError'];
+  form: AppState['ccr']['form'];
+  submittedCCR: AppState['ccr']['submittedCCR'];
+  submitError: AppState['ccr']['submitError'];
 }
 
 interface DispatchProps {
-  submitProposal: typeof createActions['submitProposal'];
+  submitCCR: typeof ccrActions['submitCCR'];
 }
 
 type Props = OwnProps & StateProps & DispatchProps;
@@ -34,34 +34,34 @@ const STATE = {
 
 type State = typeof STATE;
 
-class CreateFinal extends React.Component<Props, State> {
+class CCRFinal extends React.Component<Props, State> {
   state = STATE;
   componentDidMount() {
     this.submit();
   }
 
   componentDidUpdate(prev: Props) {
-    const { submittedProposal } = this.props;
-    if (!prev.submittedProposal && submittedProposal) {
-      if (!submittedProposal.isStaked) {
+    const { submittedCCR } = this.props;
+    if (!prev.submittedCCR && submittedCCR) {
+      if (!submittedCCR.isStaked) {
         this.getStakingContribution();
       }
     }
   }
 
   render() {
-    const { submittedProposal, submitError, goBack } = this.props;
+    const { submittedCCR, submitError, goBack } = this.props;
     const { contribution, contributionError } = this.state;
 
-    const ready = submittedProposal && (submittedProposal.isStaked || contribution);
-    const staked = submittedProposal && submittedProposal.isStaked;
+    const ready = submittedCCR && (submittedCCR.isStaked || contribution);
+    const staked = submittedCCR && submittedCCR.isStaked;
 
     let content;
     if (submitError) {
       content = (
-        <div className="CreateFinal-message is-error">
+        <div className="CCRFinal-message is-error">
           <Icon type="close-circle" />
-          <div className="CreateFinal-message-text">
+          <div className="CCRFinal-message-text">
             <h3>
               <b>Something went wrong during creation</b>
             </h3>
@@ -73,18 +73,18 @@ class CreateFinal extends React.Component<Props, State> {
     } else if (ready) {
       content = (
         <>
-          <div className="CreateFinal-message is-success">
+          <div className="CCRFinal-message is-success">
             <Icon type="check-circle" />
             {staked && (
-              <div className="CreateFinal-message-text">
-                Your proposal has been staked and submitted! Check your{' '}
-                <Link to={`/profile?tab=pending`}>profile's pending proposals tab</Link>{' '}
-                to check its status.
+              <div className="CCRFinal-message-text">
+                Your request has been staked and submitted! Check your{' '}
+                <Link to={`/profile?tab=pending`}>profile's pending requests tab</Link> to
+                check its status.
               </div>
             )}
             {!staked && (
-              <div className="CreateFinal-message-text">
-                Your proposal has been submitted! Please send the staking contribution of{' '}
+              <div className="CCRFinal-message-text">
+                Your request has been submitted! Please send the staking contribution of{' '}
                 <b>{contribution && contribution.amount} ZEC</b> using the instructions
                 below.
               </div>
@@ -92,7 +92,7 @@ class CreateFinal extends React.Component<Props, State> {
           </div>
           {!staked && (
             <>
-              <div className="CreateFinal-contribute">
+              <div className="CCRFinal-contribute">
                 <PaymentInfo
                   text={
                     <>
@@ -105,7 +105,7 @@ class CreateFinal extends React.Component<Props, State> {
                         Once your payment has been sent and processed with 6
                         confirmations, you will receive an email. Visit your{' '}
                         <Link to={`/profile?tab=pending`}>
-                          profile's pending proposals tab
+                          profile's pending requests tab
                         </Link>{' '}
                         at any time to check its status.
                       </p>
@@ -114,9 +114,9 @@ class CreateFinal extends React.Component<Props, State> {
                   contribution={contribution}
                 />
               </div>
-              <p className="CreateFinal-staked">
+              <p className="CCRFinal-staked">
                 I'm finished, take me to{' '}
-                <Link to="/profile?tab=pending">my pending proposals</Link>!
+                <Link to="/profile?tab=pending">my pending requests</Link>!
               </p>
             </>
           )}
@@ -137,23 +137,23 @@ class CreateFinal extends React.Component<Props, State> {
         />
       );
     } else {
-      content = <Loader size="large" tip="Submitting your proposal..." />;
+      content = <Loader size="large" tip="Submitting your request..." />;
     }
 
-    return <div className="CreateFinal">{content}</div>;
+    return <div className="CCRFinal">{content}</div>;
   }
 
   private submit = () => {
     if (this.props.form) {
-      this.props.submitProposal(this.props.form);
+      this.props.submitCCR(this.props.form);
     }
   };
 
   private getStakingContribution = async () => {
-    const { submittedProposal } = this.props;
-    if (submittedProposal) {
+    const { submittedCCR } = this.props;
+    if (submittedCCR) {
       try {
-        const res = await getProposalStakingContribution(submittedProposal.proposalId);
+        const res = await getCCRStakingContribution(submittedCCR.ccrId);
         this.setState({ contribution: res.data });
       } catch (err) {
         this.setState({ contributionError: err });
@@ -164,11 +164,11 @@ class CreateFinal extends React.Component<Props, State> {
 
 export default connect<StateProps, DispatchProps, OwnProps, AppState>(
   (state: AppState) => ({
-    form: state.create.form,
-    submittedProposal: state.create.submittedProposal,
-    submitError: state.create.submitError,
+    form: state.ccr.form,
+    submittedCCR: state.ccr.submittedCCR,
+    submitError: state.ccr.submitError,
   }),
   {
-    submitProposal: createActions.submitProposal,
+    submitCCR: ccrActions.submitCCR,
   },
-)(CreateFinal);
+)(CCRFinal);

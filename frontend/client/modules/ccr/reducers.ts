@@ -1,5 +1,5 @@
 import types from './types';
-import { CCRDraft, Proposal } from 'types';
+import { CCRDraft, CCR } from 'types';
 
 export interface CCRState {
   drafts: CCRDraft[] | null;
@@ -21,11 +21,11 @@ export interface CCRState {
   isDeletingDraft: boolean;
   deleteDraftError: string | null;
 
-  submittedProposal: Proposal | null;
+  submittedCCR: CCR | null;
   isSubmitting: boolean;
   submitError: string | null;
 
-  publishedProposal: Proposal | null;
+  publishedCCR: CCR | null;
   isPublishing: boolean;
   publishError: string | null;
 }
@@ -50,11 +50,11 @@ export const INITIAL_STATE: CCRState = {
   isDeletingDraft: false,
   deleteDraftError: null,
 
-  submittedProposal: null,
+  submittedCCR: null,
   isSubmitting: false,
   submitError: null,
 
-  publishedProposal: null,
+  publishedCCR: null,
   isPublishing: false,
   publishError: null,
 };
@@ -174,14 +174,14 @@ export default function createReducer(
     case types.SUBMIT_CCR_PENDING:
       return {
         ...state,
-        submittedProposal: null,
+        submittedCCR: null,
         isSubmitting: true,
         submitError: null,
       };
     case types.SUBMIT_CCR_FULFILLED:
       return {
         ...state,
-        submittedProposal: action.payload,
+        submittedCCR: action.payload,
         isSubmitting: false,
       };
     case types.SUBMIT_CCR_REJECTED:

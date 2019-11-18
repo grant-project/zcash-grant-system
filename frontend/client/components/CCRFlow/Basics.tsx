@@ -4,7 +4,7 @@ import { CCRDraft } from 'types';
 import { getCCRErrors } from 'modules/ccr/utils';
 
 interface OwnProps {
-  proposalId: number;
+  ccrId: number;
   initialState?: Partial<State>;
 
   updateForm(form: Partial<CCRDraft>): void;
@@ -64,7 +64,7 @@ class CCRFlowBasics extends React.Component<Props, State> {
         >
           <Input.TextArea
             name="brief"
-            placeholder="An elevator-pitch version of your proposal, max 140 chars"
+            placeholder="An elevator-pitch version of your request, max 140 chars"
             value={brief}
             onChange={this.handleInputChange}
             rows={3}
@@ -75,7 +75,7 @@ class CCRFlowBasics extends React.Component<Props, State> {
         <Form.Item
           label="Target amount"
           validateStatus={errors.target ? 'error' : undefined}
-          help={errors.target || 'This cannot be changed once your proposal starts'}
+          help={errors.target || 'This cannot be changed once your request is approved'}
         >
           <Input
             size="large"

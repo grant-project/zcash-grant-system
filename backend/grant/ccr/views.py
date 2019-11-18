@@ -12,7 +12,7 @@ from grant.utils.auth import (
 from grant.utils.auth import requires_ccr_owner_auth
 from grant.utils.enums import CCRStatus
 from grant.utils.exceptions import ValidationException
-from .models import CCR, ccr_schema, ccrs_schema, db
+from .models import CCR, ccr_schema, ccrs_schema, db, ccr_contribution_schema
 
 blueprint = Blueprint("ccr", __name__, url_prefix="/api/v1/ccrs")
 
@@ -23,7 +23,7 @@ def get_ccr(ccr_id):
     if ccr:
         if ccr.status != CCR.LIVE:
             if CCR.status == CCR.DELETED:
-                return {"message": "Proposal was deleted"}, 404
+                return {"message": "CCR was deleted"}, 404
             authed_user = get_authed_user()
 
             if authed_user.id != ccr.author.id:
@@ -45,7 +45,7 @@ def make_ccr_draft():
 
 @blueprint.route("/drafts", methods=["GET"])
 @requires_auth
-def get_proposal_drafts():
+def get_ccr_drafts():
     ccrs = (
         CCR.query
             .filter(or_(
@@ -60,7 +60,7 @@ def get_proposal_drafts():
 
 @blueprint.route("/<ccr_id>", methods=["DELETE"])
 @requires_ccr_owner_auth
-def delete_proposal(ccr_id):
+def delete_ccr(ccr_id):
     deleteable_statuses = [
         CCRStatus.DRAFT,
         CCRStatus.PENDING,
@@ -100,12 +100,25 @@ def update_ccr(ccr_id, **kwargs):
     db.session.commit()
     return ccr_schema.dump(g.current_ccr), 200
 
-# @blueprint.route("/<ccr_id>/submit_for_approval", methods=["PUT"])
-# def submit_for_approval_proposal(ccr_id):
-# try:
-#     g.current_proposal.submit_for_approval()
-# except ValidationException as e:
-#     return {"message": "{}".format(str(e))}, 400
-# db.session.add(g.current_proposal)
-# db.session.commit()
-# return proposal_schema.dump(g.current_proposal), 200
+
+@blueprint.route("/<ccr_id>/submit_for_approval", methods=["PUT"])
+@requires_ccr_owner_auth
+def submit_for_approval_ccr(ccr_id):
+    try:
+        g.current_ccr.submit_for_approval()
+    except ValidationException as e:
+        return {"message": "{}".format(str(e))}, 400
+    db.session.add(g.current_ccr)
+    db.session.commit()
+    return ccr_schema.dump(g.current_ccr), 200
+
+
+@blueprint.route("/<ccr_id>/stake", methods=["GET"])
+@requires_ccr_owner_auth
+def get_ccr_stake(ccr_id):
+    if g.current_ccr.status != CCRStatus.STAKING:
+        return {"message": "ok"}, 400
+    contribution = g.current_ccr.get_staking_contribution(g.current_user.id)
+    if contribution:
+        return ccr_contribution_schema.dump(contribution)
+    return {"message": "ok"}, 404

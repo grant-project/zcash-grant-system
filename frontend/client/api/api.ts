@@ -14,6 +14,7 @@ import {
   ProposalPageParams,
   PageParams,
   UserSettings,
+  CCR,
 } from 'types';
 import {
   formatUserForPost,
@@ -355,7 +356,7 @@ export function postProposalComment(payload: {
 }
 
 export function deleteProposalContribution(contributionId: string | number) {
-  return axios.delete(`/api/v1/proposals/contribution/${contributionId}`);
+  return axios.delete(`/api/v1/contribution/${contributionId}`);
 }
 
 export function getProposalContribution(
@@ -428,13 +429,15 @@ export function getCCR(ccrId: number | string): Promise<{ data: any }> {
     return res;
   });
 }
-// export async function putProposalSubmitForApproval(
-//   proposal: ProposalDraft,
-// ): Promise<{ data: Proposal }> {
-//   return axios
-//     .put(`/api/v1/proposals/${proposal.proposalId}/submit_for_approval`)
-//     .then(res => {
-//       res.data = formatProposalFromGet(res.data);
-//       return res;
-//     });
-// }
+
+export function getCCRStakingContribution(
+  ccrId: number,
+): Promise<{ data: ContributionWithAddressesAndUser }> {
+  return axios.get(`/api/v1/ccrs/${ccrId}/stake`);
+}
+
+export async function putCCRSubmitForApproval(ccr: CCRDraft): Promise<{ data: CCR }> {
+  return axios.put(`/api/v1/ccrs/${ccr.ccrId}/submit_for_approval`).then(res => {
+    return res;
+  });
+}
