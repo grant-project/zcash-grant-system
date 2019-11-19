@@ -364,8 +364,10 @@ class Proposal(db.Model):
             raise ValidationException("Content cannot be longer than 250,000 characters")
         if Decimal(self.target) > PROPOSAL_TARGET_MAX:
             raise ValidationException("Target cannot be more than {} ZEC".format(PROPOSAL_TARGET_MAX))
-        if Decimal(self.target) < 0.0001:
-            raise ValidationException("Target cannot be less than 0.0001")
+        if Decimal(self.target) < 0:
+            raise ValidationException("Target cannot be less than 0")
+        if not self.target.isdigit():
+            raise ValidationException("Target must be a whole number")
         if self.deadline_duration > 7776000:
             raise ValidationException("Deadline duration cannot be more than 90 days")
 
