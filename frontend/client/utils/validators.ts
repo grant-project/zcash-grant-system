@@ -1,3 +1,5 @@
+import { formatUsd } from './formatters';
+
 export function getAmountError(amount: number, max: number = Infinity, min?: number) {
   if (amount < 0) {
     return 'Amount must be a positive number';
@@ -15,16 +17,30 @@ export function getAmountError(amount: number, max: number = Infinity, min?: num
   return null;
 }
 
+export function getAmountErrorUsd(amount: number, max: number = Infinity, min?: number) {
+  if (amount < 0) {
+    return 'Amount must be a positive number';
+  } else if (!Number.isInteger(amount)) {
+    return 'Amount must be a whole number';
+  } else if (amount > max) {
+    return `Cannot exceed maximum (${formatUsd(max)})`;
+  } else if (min && amount < min) {
+    return `Must be at least ${formatUsd(min)}`;
+  }
+
+  return null;
+}
+
 export function getAmountErrorFromString(amount: string, max?: number, min?: number) {
-  const parsedAmount = parseFloat(amount)
+  const parsedAmount = parseFloat(amount);
   if (Number.isNaN(parsedAmount)) {
-    return 'Not a valid number'
+    return 'Not a valid number';
   }
   // prevents "-0" from being valid...
   if (amount[0] === '-') {
-    return 'Amount must be a positive number'
+    return 'Amount must be a positive number';
   }
-  return getAmountError(parsedAmount, max, min)
+  return getAmountError(parsedAmount, max, min);
 }
 
 export function isValidEmail(email: string): boolean {

@@ -11,6 +11,7 @@ import UnitDisplay from 'components/UnitDisplay';
 import { TipJarBlock } from 'components/TipJar';
 import Loader from 'components/Loader';
 import { PROPOSAL_STAGE } from 'api/constants';
+import { formatUsd } from 'utils/formatters';
 import './style.less';
 
 interface OwnProps {
@@ -107,7 +108,13 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
                 {isAcceptedWithFunding ? 'Funding' : 'Requested Funding'}
               </div>
               <div className="ProposalCampaignBlock-info-value">
-                <UnitDisplay value={target} symbol="ZEC" />
+                {formatUsd(target.toString(10))} &nbsp;
+                <Tooltip
+                  placement="left"
+                  title="Proposal owners will be paid out in ZEC at market price at payout time"
+                >
+                  <Icon type="info-circle" />
+                </Tooltip>
               </div>
             </div>
           )}

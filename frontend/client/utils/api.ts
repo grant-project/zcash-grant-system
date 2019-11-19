@@ -10,7 +10,7 @@ import {
 } from 'types';
 import { UserState } from 'modules/users/reducers';
 import { AppState } from 'store/reducers';
-import { toZat } from './units';
+import { toZat, toUsd } from './units';
 
 export function formatUserForPost(user: User) {
   return {
@@ -84,17 +84,36 @@ export function formatProposalPageFromGet(page: any): ProposalPage {
 export function formatProposalFromGet(p: any): Proposal {
   const proposal = { ...p } as Proposal;
   proposal.proposalUrlId = generateSlugUrl(proposal.proposalId, proposal.title);
-  proposal.target = toZat(p.target);
   proposal.funded = toZat(p.funded);
   proposal.contributionBounty = toZat(p.contributionBounty);
-  proposal.percentFunded = proposal.target.isZero()
-    ? 0
-    : proposal.funded.div(proposal.target.divn(100)).toNumber();
+
+  if (proposal.isVersionTwo) {
+    proposal.percentFunded = 0; // not used in v2
+    proposal.target = toUsd(p.target);
+  } else {
+    proposal.percentFunded = proposal.target.isZero()
+      ? 0
+      : proposal.funded.div(proposal.target.divn(100)).toNumber();
+    proposal.target = toZat(p.target);
+  }
+
   if (proposal.milestones) {
-    const msToFe = (m: any) => ({
-      ...m,
-      amount: proposal.target.mul(new BN(m.payoutPercent)).divn(100),
-    });
+    const msToFe = (m: any) => {
+      let amount;
+
+      if (proposal.isVersionTwo) {
+        const target = parseFloat(proposal.target.toString());
+        const payoutPercent = parseFloat(m.payoutPercent);
+        amount = ((target * payoutPercent) / 100).toFixed(2);
+      } else {
+        amount = proposal.target.mul(new BN(m.payoutPercent)).divn(100);
+      }
+
+      return {
+        ...m,
+        amount,
+      };
+    };
     proposal.milestones = proposal.milestones.map(msToFe);
     proposal.currentMilestone = msToFe(proposal.currentMilestone);
   }
