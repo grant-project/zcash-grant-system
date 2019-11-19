@@ -115,7 +115,7 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
           {proposal.tipJarAddress &&
             !isCanceled && (
               <div className="ProposalCampaignBlock-info">
-                <div className="ProposalCampaignBlock-info-label">Tips Recieved</div>
+                <div className="ProposalCampaignBlock-info-label">Tips Received</div>
                 <div className="ProposalCampaignBlock-info-value">
                   ??? &nbsp;
                   <Tooltip
