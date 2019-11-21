@@ -11,6 +11,7 @@ import UnitDisplay from 'components/UnitDisplay';
 import { TipJarBlock } from 'components/TipJar';
 import Loader from 'components/Loader';
 import { PROPOSAL_STAGE } from 'api/constants';
+import LogoNameLight from 'static/images/logo-name-light.svg';
 import './style.less';
 
 interface OwnProps {
@@ -135,10 +136,18 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
               </div>
             )}
 
-          {bounty &&
-            isVersionTwo && (
-              <div className="ProposalCampaignBlock-bounty">
-                Accepted {isAcceptedWithFunding ? 'with' : 'without'} funding
+          {isVersionTwo &&
+            isAcceptedWithFunding && (
+              <div className="ProposalCampaignBlock-with-funding">
+                Funded by &nbsp;
+                <LogoNameLight style={{ height: '1.5rem', marginBottom: '0.1rem' }} />
+              </div>
+            )}
+
+          {isVersionTwo &&
+            !isAcceptedWithFunding && (
+              <div className="ProposalCampaignBlock-without-funding">
+                Open for Community Donations
               </div>
             )}
 
