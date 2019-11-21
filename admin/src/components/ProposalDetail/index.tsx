@@ -222,12 +222,12 @@ class ProposalDetailNaked extends React.Component<Props, State> {
         <Alert
           showIcon
           type="error"
-          message="Rejected"
+          message="Changes requested"
           description={
             <div>
               <p>
-                This proposal has been rejected. The team will be able to re-submit it for
-                approval should they desire to do so.
+                This proposal has changes requested. The team will be able to re-submit it
+                for approval should they desire to do so.
               </p>
               <b>Reason:</b>
               <br />
@@ -292,16 +292,15 @@ class ProposalDetailNaked extends React.Component<Props, State> {
         const target = parseFloat(p.target.toString());
         const payoutPercent = parseFloat(ms.payoutPercent);
         const amountNum = (target * payoutPercent) / 100;
-        const amount = formatUsd(amountNum, true, 2)
-        paymentMsg = `${amount} in ZEC`
-
+        const amount = formatUsd(amountNum, true, 2);
+        paymentMsg = `${amount} in ZEC`;
       } else {
         const amount = fromZat(
           toZat(p.target)
             .mul(new BN(ms.payoutPercent))
             .divn(100),
         );
-        paymentMsg = `${amount} ZEC`
+        paymentMsg = `${amount} ZEC`;
       }
 
       return (
@@ -461,7 +460,10 @@ class ProposalDetailNaked extends React.Component<Props, State> {
               {renderDeetItem('stage', p.stage)}
               {renderDeetItem('target', p.isVersionTwo ? formatUsd(p.target) : p.target)}
               {renderDeetItem('contributed', p.contributed)}
-              {renderDeetItem('funded (inc. matching)', p.isVersionTwo ? formatUsd(p.funded) : p.funded)}
+              {renderDeetItem(
+                'funded (inc. matching)',
+                p.isVersionTwo ? formatUsd(p.funded) : p.funded,
+              )}
               {renderDeetItem('matching', p.contributionMatching)}
               {renderDeetItem('bounty', p.contributionBounty)}
               {renderDeetItem('rfpOptIn', JSON.stringify(p.rfpOptIn))}
@@ -561,7 +563,7 @@ class ProposalDetailNaked extends React.Component<Props, State> {
 
   private handleReject = async (reason: string) => {
     await store.approveProposal(false, false, reason);
-    message.info('Proposal rejected');
+    message.info('Proposal changes requested');
   };
 
   private handlePaidMilestone = async () => {
