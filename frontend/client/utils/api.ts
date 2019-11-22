@@ -21,8 +21,14 @@ export function formatUserForPost(user: User) {
 
 export function formatUserFromGet(user: UserState) {
   const bnUserProp = (p: any) => {
-    p.funded = toZat(p.funded);
-    p.target = toZat(p.target);
+    if (p.isVersionTwo) {
+      p.funded = toUsd(p.funded);
+      p.target = toUsd(p.target);
+    } else {
+      p.funded = toZat(p.funded);
+      p.target = toZat(p.target);
+    }
+
     return p;
   };
   if (user.pendingProposals) {
@@ -84,17 +90,21 @@ export function formatProposalPageFromGet(page: any): ProposalPage {
 export function formatProposalFromGet(p: any): Proposal {
   const proposal = { ...p } as Proposal;
   proposal.proposalUrlId = generateSlugUrl(proposal.proposalId, proposal.title);
-  proposal.funded = toZat(p.funded);
-  proposal.contributionBounty = toZat(p.contributionBounty);
 
   if (proposal.isVersionTwo) {
-    proposal.percentFunded = 0; // not used in v2
     proposal.target = toUsd(p.target);
+    proposal.funded = toUsd(p.funded);
+
+    // not used in v2 proposals, but populated for completeness
+    proposal.contributionBounty = toUsd(p.contributionBounty);
+    proposal.percentFunded = 0;
   } else {
+    proposal.target = toZat(p.target);
+    proposal.funded = toZat(p.funded);
+    proposal.contributionBounty = toZat(p.contributionBounty);
     proposal.percentFunded = proposal.target.isZero()
       ? 0
       : proposal.funded.div(proposal.target.divn(100)).toNumber();
-    proposal.target = toZat(p.target);
   }
 
   if (proposal.milestones) {
@@ -126,7 +136,7 @@ export function formatProposalFromGet(p: any): Proposal {
 export function formatRFPFromGet(rfp: RFP): RFP {
   rfp.urlId = generateSlugUrl(rfp.id, rfp.title);
   if (rfp.bounty) {
-    rfp.bounty = toZat(rfp.bounty as any);
+    rfp.bounty = rfp.isVersionTwo ? toUsd(rfp.bounty as any) : toZat(rfp.bounty as any);
   }
   if (rfp.acceptedProposals) {
     rfp.acceptedProposals = rfp.acceptedProposals.map(formatProposalFromGet);
@@ -158,42 +168,53 @@ export function extractIdFromSlug(slug: string) {
 export function massageSerializedState(state: AppState) {
   // proposal detail
   if (state.proposal.detail) {
+    const { isVersionTwo } = state.proposal.detail
+    const base = isVersionTwo ? 10 : 16;
+
     state.proposal.detail.target = new BN(
       (state.proposal.detail.target as any) as string,
-      16,
+      base,
     );
     state.proposal.detail.funded = new BN(
       (state.proposal.detail.funded as any) as string,
-      16,
+      base,
     );
     state.proposal.detail.contributionBounty = new BN((state.proposal.detail
       .contributionBounty as any) as string);
     state.proposal.detail.milestones = state.proposal.detail.milestones.map(m => ({
       ...m,
-      amount: new BN((m.amount as any) as string, 16),
+      amount: isVersionTwo
+        ? m.amount
+        : new BN((m.amount as any) as string, 16),
     }));
     if (state.proposal.detail.rfp && state.proposal.detail.rfp.bounty) {
       state.proposal.detail.rfp.bounty = new BN(
         (state.proposal.detail.rfp.bounty as any) as string,
-        16,
+        base,
       );
     }
   }
   // proposals
-  state.proposal.page.items = state.proposal.page.items.map(p => ({
-    ...p,
-    target: new BN((p.target as any) as string, 16),
-    funded: new BN((p.funded as any) as string, 16),
-    contributionBounty: new BN((p.contributionMatching as any) as string, 16),
-    milestones: p.milestones.map(m => ({
-      ...m,
-      amount: new BN((m.amount as any) as string, 16),
-    })),
-  }));
+  state.proposal.page.items = state.proposal.page.items.map(p => {
+    const base = p.isVersionTwo ? 10 : 16;
+    return {
+      ...p,
+      target: new BN((p.target as any) as string, base),
+      funded: new BN((p.funded as any) as string, base),
+      contributionBounty: new BN((p.contributionMatching as any) as string, base),
+      milestones: p.milestones.map(m => ({
+        ...m,
+        amount: p.isVersionTwo
+          ? m.amount
+          : new BN((m.amount as any) as string, 16),
+      })),
+    };
+  });
   // users
   const bnUserProp = (p: UserProposal) => {
-    p.funded = new BN(p.funded, 16);
-    p.target = new BN(p.target, 16);
+    const base = p.isVersionTwo ? 10 : 16;
+    p.funded = new BN(p.funded, base);
+    p.target = new BN(p.target, base);
     return p;
   };
   Object.values(state.users.map).forEach(user => {
@@ -209,8 +230,9 @@ export function massageSerializedState(state: AppState) {
   });
   // RFPs
   state.rfps.rfps = state.rfps.rfps.map(rfp => {
+    const base = rfp.isVersionTwo ? 10 : 16;
     if (rfp.bounty) {
-      rfp.bounty = new BN(rfp.bounty, 16);
+      rfp.bounty = new BN(rfp.bounty, base);
     }
     return rfp;
   });
