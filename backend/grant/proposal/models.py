@@ -865,6 +865,7 @@ user_fields = [
     "date_published",
     "reject_reason",
     "team",
+    "accepted_with_funding",
     "is_version_two",
     "authed_follows",
     "authed_liked"
