@@ -11,7 +11,7 @@ import UnitDisplay from 'components/UnitDisplay';
 import Loader from 'components/Loader';
 import { PROPOSAL_STAGE } from 'api/constants';
 import { formatUsd } from 'utils/formatters';
-import ZFGrantsLogo from 'static/images/logo-name-light.svg'
+import ZFGrantsLogo from 'static/images/logo-name-light.svg';
 import './style.less';
 
 interface OwnProps {
@@ -103,23 +103,22 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
           )}
 
           {isVersionTwo && (
-            <Tooltip
-              placement="topLeft"
-              title={
-                isAcceptedWithFunding
-                  ? 'Proposal owners will be paid out in ZEC at market price at payout time'
-                  : ''
-              }
-            >
-              <div className="ProposalCampaignBlock-info">
-                <div className="ProposalCampaignBlock-info-label">
-                  {isAcceptedWithFunding ? 'Funding' : 'Requested Funding'}
-                </div>
-                <div className="ProposalCampaignBlock-info-value">
-                  {formatUsd(target.toString(10))}
-                </div>
+            <div className="ProposalCampaignBlock-info">
+              <div className="ProposalCampaignBlock-info-label">
+                {isAcceptedWithFunding ? 'Funding' : 'Requested Funding'}
               </div>
-            </Tooltip>
+              <div className="ProposalCampaignBlock-info-value">
+                {formatUsd(target.toString(10))}
+                {isAcceptedWithFunding && (
+                  <Tooltip
+                    placement="left"
+                    title="Proposal owners will be paid out in ZEC at market price at payout time"
+                  >
+                    &nbsp; <Icon type="info-circle" />
+                  </Tooltip>
+                )}
+              </div>
+            </div>
           )}
 
           {bounty &&
