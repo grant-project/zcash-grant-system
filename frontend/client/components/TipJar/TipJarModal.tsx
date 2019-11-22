@@ -22,6 +22,7 @@ interface State {
 
 export class TipJarModal extends React.Component<Props, State> {
   static getDerivedStateFromProps = (nextProps: Props) => {
+    // while modal is closed, set amount state via props
     return !nextProps.isOpen ? { amount: nextProps.amount } : {};
   };
 
@@ -119,5 +120,5 @@ export class TipJarModal extends React.Component<Props, State> {
       amount: e.currentTarget.value,
     });
 
-private handleAfterClose = () => this.setState({ amount: '' });
+  private handleAfterClose = () => this.setState({ amount: '' });
 }
