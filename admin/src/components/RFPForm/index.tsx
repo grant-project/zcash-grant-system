@@ -47,6 +47,8 @@ class RFPForm extends React.Component<Props, State> {
       dateCloses: undefined,
     };
     const rfpId = this.getRFPId();
+    let isVersionTwo = true;
+
     if (rfpId) {
       if (!store.rfpsFetched) {
         return <Spin />;
@@ -63,6 +65,7 @@ class RFPForm extends React.Component<Props, State> {
           bounty: rfp.bounty,
           dateCloses: rfp.dateCloses || undefined,
         };
+        isVersionTwo = rfp.isVersionTwo;
       } else {
         return <Exception type="404" desc="This RFP does not exist" />;
       }
@@ -166,8 +169,9 @@ class RFPForm extends React.Component<Props, State> {
                 <Input
                   autoComplete="off"
                   name="bounty"
-                  placeholder="100"
-                  addonAfter="ZEC"
+                  placeholder="1000"
+                  addonBefore={isVersionTwo ? '$' : undefined}
+                  addonAfter={isVersionTwo ? undefined : 'ZEC'}
                   size="large"
                 />,
               )}
