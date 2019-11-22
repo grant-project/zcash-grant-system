@@ -8,10 +8,10 @@ import { compose } from 'recompose';
 import { AppState } from 'store/reducers';
 import { withRouter } from 'react-router';
 import UnitDisplay from 'components/UnitDisplay';
-import { TipJarBlock } from 'components/TipJar';
 import Loader from 'components/Loader';
 import { PROPOSAL_STAGE } from 'api/constants';
 import { formatUsd } from 'utils/formatters';
+import ZFGrantsLogo from 'static/images/logo-name-light.svg'
 import './style.less';
 
 interface OwnProps {
@@ -122,22 +122,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
             </Tooltip>
           )}
 
-          {proposal.tipJarAddress &&
-            !isCanceled && (
-              <div className="ProposalCampaignBlock-info">
-                <div className="ProposalCampaignBlock-info-label">Tips Received</div>
-                <div className="ProposalCampaignBlock-info-value">
-                  ??? &nbsp;
-                  <Tooltip
-                    placement="left"
-                    title="Made possible if a proposal owner supplies a view key with their tip address."
-                  >
-                    <Icon type="info-circle" />
-                  </Tooltip>
-                </div>
-              </div>
-            )}
-
           {bounty &&
             !isVersionTwo && (
               <div className="ProposalCampaignBlock-bounty">
@@ -145,10 +129,18 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
               </div>
             )}
 
-          {bounty &&
-            isVersionTwo && (
-              <div className="ProposalCampaignBlock-bounty">
-                Accepted {isAcceptedWithFunding ? 'with' : 'without'} funding
+          {isVersionTwo &&
+            isAcceptedWithFunding && (
+              <div className="ProposalCampaignBlock-with-funding">
+                Funded through &nbsp;
+                <ZFGrantsLogo style={{ height: '1.5rem' }} />
+              </div>
+            )}
+
+          {isVersionTwo &&
+            !isAcceptedWithFunding && (
+              <div className="ProposalCampaignBlock-without-funding">
+                Open for Community Donations
               </div>
             )}
 
@@ -216,13 +208,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
               <div className="ProposalCampaignBlock-fundingOver">
                 <Icon type="close-circle-o" />
                 <span>Proposal was canceled</span>
-              </div>
-            )}
-
-          {proposal.tipJarAddress &&
-            !isCanceled && (
-              <div className="ProposalCampaignBlock-tipJarWrapper">
-                <TipJarBlock address={proposal.tipJarAddress} type="proposal" />
               </div>
             )}
         </React.Fragment>
