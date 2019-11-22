@@ -8,10 +8,9 @@ import { compose } from 'recompose';
 import { AppState } from 'store/reducers';
 import { withRouter } from 'react-router';
 import UnitDisplay from 'components/UnitDisplay';
-import { TipJarBlock } from 'components/TipJar';
 import Loader from 'components/Loader';
 import { PROPOSAL_STAGE } from 'api/constants';
-import LogoNameLight from 'static/images/logo-name-light.svg';
+import ZFLogoLight from 'static/images/zcf-light.svg'
 import './style.less';
 
 interface OwnProps {
@@ -124,7 +123,7 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
             isAcceptedWithFunding && (
               <div className="ProposalCampaignBlock-with-funding">
                 Funded by &nbsp;
-                <LogoNameLight style={{ height: '1.5rem', marginBottom: '0.1rem' }} />
+                <ZFLogoLight style={{ height: '4rem', marginLeft: '0.3rem' }} />
               </div>
             )}
 
