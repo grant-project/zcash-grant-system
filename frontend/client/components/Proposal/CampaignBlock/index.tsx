@@ -10,7 +10,7 @@ import { withRouter } from 'react-router';
 import UnitDisplay from 'components/UnitDisplay';
 import Loader from 'components/Loader';
 import { PROPOSAL_STAGE } from 'api/constants';
-import ZFLogoLight from 'static/images/zcf-light.svg'
+import ZFGrantsLogo from 'static/images/logo-name-light.svg'
 import './style.less';
 
 interface OwnProps {
@@ -122,8 +122,8 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
           {isVersionTwo &&
             isAcceptedWithFunding && (
               <div className="ProposalCampaignBlock-with-funding">
-                Funded by &nbsp;
-                <ZFLogoLight style={{ height: '4rem', marginLeft: '0.3rem' }} />
+                Funded through &nbsp;
+                <ZFGrantsLogo style={{ height: '1.5rem' }} />
               </div>
             )}
 
