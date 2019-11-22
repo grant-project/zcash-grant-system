@@ -26,3 +26,14 @@ export interface CCR extends CCRDraft {
   // TODO remove
   noOp: boolean;
 }
+
+export interface UserCCR {
+  ccrId: number;
+  status: CCRSTATUS;
+  title: string;
+  brief: string;
+  dateCreated: number;
+  dateApproved: number;
+  datePublished: number;
+  rejectReason: string;
+}

@@ -90,6 +90,7 @@ export function getUser(address: string): Promise<{ data: User }> {
   return axios
     .get(`/api/v1/users/${address}`, {
       params: {
+        withRequests: true,
         withProposals: true,
         withComments: true,
         withFunded: true,
@@ -201,16 +202,6 @@ export function getSocialAuthUrl(service: SOCIAL_SERVICE): Promise<any> {
 
 export function verifySocial(service: SOCIAL_SERVICE, code: string): Promise<any> {
   return axios.post(`/api/v1/users/social/${service}/verify`, { code });
-}
-
-export async function fetchCrowdFundFactoryJSON(): Promise<any> {
-  const res = await axios.get(process.env.CROWD_FUND_FACTORY_URL as string);
-  return res.data;
-}
-
-export async function fetchCrowdFundJSON(): Promise<any> {
-  const res = await axios.get(process.env.CROWD_FUND_URL as string);
-  return res.data;
 }
 
 export function postProposalUpdate(

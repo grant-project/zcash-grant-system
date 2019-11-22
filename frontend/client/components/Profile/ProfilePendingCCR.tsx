@@ -1,14 +1,14 @@
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Popconfirm, message, Tag } from 'antd';
-import { UserProposal, STATUS } from 'types';
-import { deletePendingProposal } from 'modules/users/actions';
+import { CCRSTATUS, STATUS, UserCCR } from 'types';
+import { deletePendingRequest } from 'modules/users/actions';
 import { connect } from 'react-redux';
 import { AppState } from 'store/reducers';
 import './ProfilePending.less';
 
 interface OwnProps {
-  proposal: UserProposal;
+  ccr: UserCCR;
 }
 
 interface StateProps {
@@ -16,7 +16,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-  deletePendingProposal: typeof deletePendingProposal;
+  deletePendingRequest: typeof deletePendingRequest;
 }
 
 type Props = OwnProps & StateProps & DispatchProps;
@@ -26,52 +26,36 @@ interface State {
   isPublishing: boolean;
 }
 
-class ProfilePending extends React.Component<Props, State> {
+class ProfilePendingCCR extends React.Component<Props, State> {
   state: State = {
     isDeleting: false,
     isPublishing: false,
   };
 
   render() {
-    const { status, title, proposalId, rejectReason } = this.props.proposal;
+    const { status, title, ccrId, rejectReason } = this.props.ccr;
     const { isDeleting, isPublishing } = this.state;
 
     const isDisableActions = isDeleting || isPublishing;
 
     const st = {
-      [STATUS.APPROVED]: {
-        color: 'green',
-        tag: 'Approved',
-        blurb: <div>You may publish this proposal when you are ready.</div>,
-      },
       [STATUS.REJECTED]: {
         color: 'red',
         tag: 'Rejected',
         blurb: (
           <>
-            <div>This proposal was rejected for the following reason:</div>
+            <div>This request was rejected for the following reason:</div>
             <q>{rejectReason}</q>
-            <div>You may edit this proposal and re-submit it for approval.</div>
+            <div>You may edit this request and re-submit it for approval.</div>
           </>
         ),
       },
-      [STATUS.STAKING]: {
-        color: 'purple',
-        tag: 'Staking',
-        blurb: (
-          <div>
-            Awaiting staking contribution, you will receive an email when staking has been
-            confirmed. If you staked this proposal you may check its status under the
-            "funded" tab.
-          </div>
-        ),
-      },
       [STATUS.PENDING]: {
-        color: 'orange',
+        color: 'purple',
         tag: 'Pending',
         blurb: (
           <div>
-            You will receive an email when this proposal has completed the review process.
+            You will receive an email when this request has completed the review process.
           </div>
         ),
       },
@@ -80,16 +64,16 @@ class ProfilePending extends React.Component<Props, State> {
     return (
       <div className="ProfilePending">
         <div className="ProfilePending-block">
-          <Link to={`/proposals/${proposalId}`} className="ProfilePending-title">
-            {title} <Tag color={st[status].color}>{st[status].tag} Proposal</Tag>
+          <Link to={`/ccrs/${ccrId}`} className="ProfilePending-title">
+            {title} <Tag color={st[status].color}>{st[status].tag} Request</Tag>
           </Link>
           <div className={`ProfilePending-status is-${status.toLowerCase()}`}>
             {st[status].blurb}
           </div>
         </div>
         <div className="ProfilePending-block is-actions">
-          {STATUS.REJECTED === status && (
-            <Link to={`/proposals/${proposalId}/edit`}>
+          {CCRSTATUS.REJECTED === status && (
+            <Link to={`/ccrs/${ccrId}/edit`}>
               <Button disabled={isDisableActions} type="primary">
                 Edit
               </Button>
@@ -113,13 +97,13 @@ class ProfilePending extends React.Component<Props, State> {
   private handleDelete = async () => {
     const {
       user,
-      proposal: { proposalId },
+      ccr: { ccrId },
     } = this.props;
     if (!user) return;
     this.setState({ isDeleting: true });
     try {
-      await this.props.deletePendingProposal(user.userid, proposalId);
-      message.success('Proposal deleted.');
+      await this.props.deletePendingRequest(user.userid, ccrId);
+      message.success('Request deleted.');
     } catch (e) {
       message.error(e.message || e.toString());
       this.setState({ isDeleting: false });
@@ -132,6 +116,6 @@ export default connect<StateProps, DispatchProps, OwnProps, AppState>(
     user: state.auth.user,
   }),
   {
-    deletePendingProposal,
+    deletePendingRequest,
   },
-)(ProfilePending);
+)(ProfilePendingCCR);

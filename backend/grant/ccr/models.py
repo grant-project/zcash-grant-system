@@ -3,6 +3,7 @@ from decimal import Decimal
 from functools import reduce
 
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import or_, and_
 
 from grant.email.send import send_email
 from grant.extensions import ma, db
@@ -34,6 +35,14 @@ class CCR(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     author = db.relationship("User", back_populates="ccrs")
+
+    @staticmethod
+    def get_by_user(user, statuses=[CCRStatus.LIVE]):
+        status_filter = or_(CCR.status == v for v in statuses)
+        return CCR.query \
+            .filter(CCR.user_id == user.id) \
+            .filter(status_filter) \
+            .all()
 
     @hybrid_property
     def is_staked(self):
@@ -95,7 +104,7 @@ class CCR(db.Model):
         self.title = title[:255]
         self.brief = brief[:255]
         self.content = content[:300000]
-        self._target = target[:255] if target != '' else '0'
+        self._target = target[:255] if target != '' and target else '0'
 
     # state: status (DRAFT || REJECTED) -> (PENDING || STAKING)
     def submit_for_approval(self):
@@ -181,7 +190,8 @@ class CCR(db.Model):
             raise ValidationException(f"CCR status must be staking in order to be set to pending")
         if not self.is_staked:
             raise ValidationException(f"CCR is not fully staked, cannot set to pending")
-        self.send_admin_email('admin_approval_ccr')
+        # TODO send email
+        # self.send_admin_email('admin_approval_ccr')
         self.status = CCRStatus.PENDING
         db.session.add(self)
         db.session.flush()

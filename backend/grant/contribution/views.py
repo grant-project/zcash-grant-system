@@ -6,9 +6,10 @@ from grant.contribution.models import Contribution
 from grant.email.send import send_email
 from grant.extensions import db
 from grant.parser import body
-from grant.settings import PROPOSAL_STAKING_AMOUNT
+from grant.settings import PROPOSAL_STAKING_AMOUNT, CCR_STAKING_AMOUNT
+from grant.ccr.models import CCR
 from grant.utils.auth import internal_webhook, requires_auth
-from grant.utils.enums import ContributionStatus, ProposalStatus
+from grant.utils.enums import ContributionStatus, ProposalStatus, CCRStatus
 from grant.utils.misc import from_zat, make_explore_url, make_url
 
 blueprint = Blueprint("contribution", __name__, url_prefix="/api/v1/contribution")
@@ -79,11 +80,36 @@ def post_contribution_confirmation(contribution_id, to, amount, txid):
         return {"message": "ok"}, 200
 
     if contribution.ccr_id:
-        # TODO handle ccr flow
-        print("CCR got staked")
+        ccr = CCR.query.get(contribution.ccr_id)
+        if ccr.status == CCRStatus.STAKING:
+            ccr.set_pending_when_ready()
+
+            # email progress of staking, partial or complete
+            # TODO SEND EMAIL
+            # send_email(contribution.user.email_address, 'staking_contribution_confirmed', {
+            #     'contribution': contribution,
+            #     'proposal': contribution.proposal,
+            #     'tx_explorer_url': make_explore_url(txid),
+            #     'fully_staked': contribution.proposal.is_staked,
+            #     'stake_target': str(PROPOSAL_STAKING_AMOUNT.normalize()),
+            # })
+
+        else:
+            # Send to the user
+            if contribution.user:
+                pass
+                # TODO
+                # send_email(contribution.user.email_address, 'contribution_confirmed', {
+                #     'contribution': contribution,
+                #     'proposal': contribution.proposal,
+                #     'tx_explorer_url': make_explore_url(txid),
+                # })
+
+        db.session.commit()
         return {"message": "ok"}, 200
 
     # TODO log error, respond 400 if get here
+
 
 @blueprint.route("/<contribution_id>", methods=["DELETE"])
 @requires_auth

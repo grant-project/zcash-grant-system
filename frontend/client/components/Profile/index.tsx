@@ -91,6 +91,8 @@ class Profile extends React.Component<Props, State> {
     const {
       proposals,
       pendingProposals,
+      pendingRequests,
+      requests,
       contributions,
       comments,
       invites,
@@ -98,8 +100,10 @@ class Profile extends React.Component<Props, State> {
     } = user;
 
     const isLoading = user.isFetching;
-    const nonePending = pendingProposals.length === 0;
-    const noneCreated = proposals.length === 0;
+    const noProposalsPending = pendingProposals.length === 0;
+    const noProposalsCreated = proposals.length === 0;
+    const noRequestsPending = pendingRequests.length === 0;
+    const noRequestsCreated = requests.length === 0;
     const noneFunded = contributions.length === 0;
     const noneCommented = comments.length === 0;
     const noneArbitrated = arbitrated.length === 0;
@@ -128,30 +132,41 @@ class Profile extends React.Component<Props, State> {
           <LinkableTabs defaultActiveKey={(isAuthedUser && 'pending') || 'created'}>
             {isAuthedUser && (
               <Tabs.TabPane
-                tab={TabTitle('Pending', pendingProposals.length)}
+                tab={TabTitle(
+                  'Pending',
+                  pendingProposals.length + pendingRequests.length,
+                )}
                 key="pending"
               >
                 <div>
-                  {nonePending && (
-                    <Placeholder
-                      loading={isLoading}
-                      title="No pending proposals"
-                      subtitle="You do not have any proposals awaiting approval."
-                    />
-                  )}
-                  <ProfilePendingList proposals={pendingProposals} />
+                  {noProposalsPending &&
+                    noRequestsPending && (
+                      <Placeholder
+                        loading={isLoading}
+                        title="No pending items"
+                        subtitle="You do not have any proposals or requests awaiting approval."
+                      />
+                    )}
+                  <ProfilePendingList
+                    proposals={pendingProposals}
+                    requests={pendingRequests}
+                  />
                 </div>
               </Tabs.TabPane>
             )}
-            <Tabs.TabPane tab={TabTitle('Created', proposals.length)} key="created">
+            <Tabs.TabPane
+              tab={TabTitle('Created', proposals.length + requests.length)}
+              key="created"
+            >
               <div>
-                {noneCreated && (
-                  <Placeholder
-                    loading={isLoading}
-                    title="No created proposals"
-                    subtitle="There have not been any created proposals."
-                  />
-                )}
+                {noProposalsCreated &&
+                  noRequestsCreated && (
+                    <Placeholder
+                      loading={isLoading}
+                      title="No created items"
+                      subtitle="There have not been any created proposals or requests."
+                    />
+                  )}
                 {proposals.map(p => (
                   <ProfileProposal key={p.proposalId} proposal={p} />
                 ))}
