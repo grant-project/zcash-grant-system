@@ -378,7 +378,7 @@ const Milestone: React.SFC<MilestoneProps> = p => {
       type: 'success',
       message: (
         <span>
-          The team was awarded <strong>{reward}</strong>{' '}
+          The team was awarded <strong>{reward}</strong> {p.isVersionTwo && `in ZEC`}
           {p.immediatePayout && ` as an initial payout `} on {fmtDate(p.datePaid)}.
         </span>
       ),

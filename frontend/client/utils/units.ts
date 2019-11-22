@@ -66,7 +66,8 @@ export const toUsd = (value: string | number): Usd => {
   value = value.toString();
   const hasDecimal = value.indexOf('.') !== -1;
 
-  // remove decimal, if exists
+  // decimals aren't allowed for proposal targets,
+  // but remove decimal if it exists
   value = hasDecimal ? value.split('.')[0] : value;
   return new BN(value, 10);
 };

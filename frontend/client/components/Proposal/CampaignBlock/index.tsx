@@ -103,20 +103,23 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
           )}
 
           {isVersionTwo && (
-            <div className="ProposalCampaignBlock-info">
-              <div className="ProposalCampaignBlock-info-label">
-                {isAcceptedWithFunding ? 'Funding' : 'Requested Funding'}
+            <Tooltip
+              placement="topLeft"
+              title={
+                isAcceptedWithFunding
+                  ? 'Proposal owners will be paid out in ZEC at market price at payout time'
+                  : ''
+              }
+            >
+              <div className="ProposalCampaignBlock-info">
+                <div className="ProposalCampaignBlock-info-label">
+                  {isAcceptedWithFunding ? 'Funding' : 'Requested Funding'}
+                </div>
+                <div className="ProposalCampaignBlock-info-value">
+                  {formatUsd(target.toString(10))}
+                </div>
               </div>
-              <div className="ProposalCampaignBlock-info-value">
-                {formatUsd(target.toString(10))} &nbsp;
-                <Tooltip
-                  placement="left"
-                  title="Proposal owners will be paid out in ZEC at market price at payout time"
-                >
-                  <Icon type="info-circle" />
-                </Tooltip>
-              </div>
-            </div>
+            </Tooltip>
           )}
 
           {proposal.tipJarAddress &&
