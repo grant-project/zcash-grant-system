@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { Icon, Popover, Tooltip } from 'antd';
+import { Icon, Popover } from 'antd';
 import { Proposal, STATUS } from 'types';
 import classnames from 'classnames';
 import { connect } from 'react-redux';
@@ -113,22 +113,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
             </div>
           )}
 
-          {proposal.tipJarAddress &&
-            !isCanceled && (
-              <div className="ProposalCampaignBlock-info">
-                <div className="ProposalCampaignBlock-info-label">Tips Received</div>
-                <div className="ProposalCampaignBlock-info-value">
-                  ??? &nbsp;
-                  <Tooltip
-                    placement="left"
-                    title="Made possible if a proposal owner supplies a view key with their tip address."
-                  >
-                    <Icon type="info-circle" />
-                  </Tooltip>
-                </div>
-              </div>
-            )}
-
           {bounty &&
             !isVersionTwo && (
               <div className="ProposalCampaignBlock-bounty">
@@ -215,13 +199,6 @@ export class ProposalCampaignBlock extends React.Component<Props, State> {
               <div className="ProposalCampaignBlock-fundingOver">
                 <Icon type="close-circle-o" />
                 <span>Proposal was canceled</span>
-              </div>
-            )}
-
-          {proposal.tipJarAddress &&
-            !isCanceled && (
-              <div className="ProposalCampaignBlock-tipJarWrapper">
-                <TipJarBlock address={proposal.tipJarAddress} type="proposal" />
               </div>
             )}
         </React.Fragment>
