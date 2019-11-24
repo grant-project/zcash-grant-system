@@ -108,8 +108,8 @@ class ContributionExpired:
 
     @staticmethod
     def process_task(task):
-        from grant.contribution.models import Contribution
-        contribution = Contribution.query.filter_by(id=task.blob["contribution_id"]).first()
+        from grant.proposal.models import ProposalContribution
+        contribution = ProposalContribution.query.filter_by(id=task.blob["contribution_id"]).first()
 
         # If it's missing or not pending, noop out
         if not contribution or contribution.status != ContributionStatus.PENDING:

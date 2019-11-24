@@ -16,13 +16,13 @@ from grant.parser import body, query, paginated_fields
 from grant.proposal.models import (
     Proposal,
     ProposalArbiter,
+    ProposalContribution,
     proposals_schema,
     proposal_schema,
     user_proposal_contributions_schema,
     admin_proposal_contribution_schema,
     admin_proposal_contributions_schema,
 )
-from grant.proposal.models import ProposalContribution
 from grant.rfp.models import RFP, admin_rfp_schema, admin_rfps_schema
 from grant.user.models import User, UserSettings, admin_users_schema, admin_user_schema
 from grant.utils import pagination
@@ -156,14 +156,13 @@ def stats():
     contribution_refundable_count = db.session.query(func.count(ProposalContribution.id)) \
         .filter(ProposalContribution.refund_tx_id == None) \
         .filter(ProposalContribution.staking == False) \
-        .filter(ProposalContribution.proposal_id is not None) \
         .filter(ProposalContribution.status == ContributionStatus.CONFIRMED) \
         .join(Proposal) \
         .filter(or_(
             Proposal.stage == ProposalStage.FAILED,
             Proposal.stage == ProposalStage.CANCELED,
         )) \
-        .join(Contribution.user) \
+        .join(ProposalContribution.user) \
         .join(UserSettings) \
         .filter(UserSettings.refund_address != None) \
         .scalar()
@@ -591,7 +590,7 @@ def get_contributions(page, filters, search, sort):
 @admin.admin_auth_required
 def create_contribution(proposal_id, user_id, status, amount, tx_id):
     # Some fields set manually since we're admin, and normally don't do this
-    contribution = Contribution(
+    contribution = ProposalContribution(
         proposal_id=proposal_id,
         user_id=user_id,
         amount=amount,
@@ -612,7 +611,7 @@ def create_contribution(proposal_id, user_id, status, amount, tx_id):
 @blueprint.route('/contributions/<contribution_id>', methods=['GET'])
 @admin.admin_auth_required
 def get_contribution(contribution_id):
-    contribution = Contribution.query.filter(Contribution.id == contribution_id).first()
+    contribution = ProposalContribution.query.filter(ProposalContribution.id == contribution_id).first()
     if not contribution:
         return {"message": "No contribution matching that id"}, 404
 
@@ -630,7 +629,7 @@ def get_contribution(contribution_id):
 })
 @admin.admin_auth_required
 def edit_contribution(contribution_id, proposal_id, user_id, status, amount, tx_id, refund_tx_id):
-    contribution = Contribution.query.filter(Contribution.id == contribution_id).first()
+    contribution = ProposalContribution.query.filter(ProposalContribution.id == contribution_id).first()
     if not contribution:
         return {"message": "No contribution matching that id"}, 404
     had_refund = contribution.refund_tx_id

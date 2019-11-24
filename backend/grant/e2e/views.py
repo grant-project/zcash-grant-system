@@ -10,8 +10,8 @@ from grant.milestone.models import Milestone
 from grant.proposal.models import (
     Proposal,
     ProposalArbiter,
+    ProposalContribution,
 )
-from grant.proposal.models import ProposalContribution
 from grant.user.models import User, admin_user_schema
 
 from grant.utils.enums import (
