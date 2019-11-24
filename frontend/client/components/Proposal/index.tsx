@@ -27,6 +27,7 @@ import { withRouter } from 'react-router';
 import SocialShare from 'components/SocialShare';
 import Follow from 'components/Follow';
 import Like from 'components/Like';
+import { TipJarProposalSettingsModal } from 'components/TipJar';
 import './index.less';
 
 interface OwnProps {
@@ -52,6 +53,7 @@ interface State {
   isBodyOverflowing: boolean;
   isUpdateOpen: boolean;
   isCancelOpen: boolean;
+  isTipJarOpen: boolean;
 }
 
 export class ProposalDetail extends React.Component<Props, State> {
@@ -60,6 +62,7 @@ export class ProposalDetail extends React.Component<Props, State> {
     isBodyOverflowing: false,
     isUpdateOpen: false,
     isCancelOpen: false,
+    isTipJarOpen: false,
   };
 
   bodyEl: HTMLElement | null = null;
@@ -90,7 +93,13 @@ export class ProposalDetail extends React.Component<Props, State> {
 
   render() {
     const { user, detail: proposal, isPreview, detailError } = this.props;
-    const { isBodyExpanded, isBodyOverflowing, isCancelOpen, isUpdateOpen } = this.state;
+    const {
+      isBodyExpanded,
+      isBodyOverflowing,
+      isCancelOpen,
+      isUpdateOpen,
+      isTipJarOpen,
+    } = this.state;
     const showExpand = !isBodyExpanded && isBodyOverflowing;
     const wrongProposal = proposal && proposal.proposalId !== this.props.proposalId;
 
@@ -110,6 +119,9 @@ export class ProposalDetail extends React.Component<Props, State> {
 
     const adminMenu = (
       <Menu>
+        <Menu.Item disabled={!isLive} onClick={this.openTipJarModal}>
+          Manage Tipping
+        </Menu.Item>
         <Menu.Item disabled={!isLive} onClick={this.openUpdateModal}>
           Post an Update
         </Menu.Item>
@@ -143,8 +155,8 @@ export class ProposalDetail extends React.Component<Props, State> {
       [STATUS.REJECTED]: {
         blurb: (
           <>
-            Your proposal was rejected and is only visible to the team. Visit your{' '}
-            <Link to="/profile?tab=pending">profile's pending tab</Link> for more
+            Your proposal has changes requested and is only visible to the team. Visit
+            your <Link to="/profile?tab=pending">profile's pending tab</Link> for more
             information.
           </>
         ),
@@ -206,8 +218,14 @@ export class ProposalDetail extends React.Component<Props, State> {
                       </Button>
                     </Dropdown>
                   )}
-                  <Like proposal={proposal} style={{ marginLeft: '0.5rem' }} />
-                  <Follow proposal={proposal} style={{ marginLeft: '0.5rem' }} />
+                  <Like
+                    proposal={proposal}
+                    className="Proposal-top-main-title-menu-item"
+                  />
+                  <Follow
+                    proposal={proposal}
+                    className="Proposal-top-main-title-menu-item"
+                  />
                 </div>
               )}
             </div>
@@ -270,6 +288,11 @@ export class ProposalDetail extends React.Component<Props, State> {
               isVisible={isCancelOpen}
               handleClose={this.closeCancelModal}
             />
+            <TipJarProposalSettingsModal
+              proposal={proposal}
+              isVisible={isTipJarOpen}
+              handleClose={this.closeTipJarModal}
+            />
           </>
         )}
       </div>
@@ -295,6 +318,9 @@ export class ProposalDetail extends React.Component<Props, State> {
       this.setState({ isBodyOverflowing: true });
     }
   };
+
+  private openTipJarModal = () => this.setState({ isTipJarOpen: true });
+  private closeTipJarModal = () => this.setState({ isTipJarOpen: false });
 
   private openUpdateModal = () => this.setState({ isUpdateOpen: true });
   private closeUpdateModal = () => this.setState({ isUpdateOpen: false });

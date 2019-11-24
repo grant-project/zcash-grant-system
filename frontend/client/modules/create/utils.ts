@@ -21,6 +21,7 @@ interface CreateFormErrors {
   team?: string[];
   content?: string;
   payoutAddress?: string;
+  tipJarAddress?: string;
   milestones?: string[];
 }
 
@@ -33,6 +34,7 @@ export const FIELD_NAME_MAP: { [key in KeyOfForm]: string } = {
   team: 'Team',
   content: 'Details',
   payoutAddress: 'Payout address',
+  tipJarAddress: 'Tip address',
   milestones: 'Milestones',
 };
 
@@ -50,6 +52,7 @@ export function getCreateErrors(
     milestones,
     target,
     payoutAddress,
+    tipJarAddress,
     rfp,
     rfpOptIn,
     brief,
@@ -109,6 +112,17 @@ export function getCreateErrors(
       errors.payoutAddress = 'Must be a Sapling Z address, not a T address';
     } else {
       errors.payoutAddress = 'That doesn’t look like a valid Sapling address';
+    }
+  }
+
+  // Tip Jar Address
+  if (tipJarAddress && !isValidSaplingAddress(tipJarAddress)) {
+    if (isValidSproutAddress(tipJarAddress)) {
+      errors.tipJarAddress = 'Must be a Sapling address, not a Sprout address';
+    } else if (isValidTAddress(tipJarAddress)) {
+      errors.tipJarAddress = 'Must be a Sapling Z address, not a T address';
+    } else {
+      errors.tipJarAddress = 'That doesn’t look like a valid Sapling address';
     }
   }
 
@@ -226,6 +240,8 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
     arbiter: {
       status: PROPOSAL_ARBITER_STATUS.ACCEPTED,
     },
+    tipJarAddress: null,
+    tipJarViewKey: null,
     acceptedWithFunding: false,
     authedFollows: false,
     followersCount: 0,

@@ -204,6 +204,20 @@ export function verifySocial(service: SOCIAL_SERVICE, code: string): Promise<any
   return axios.post(`/api/v1/users/social/${service}/verify`, { code });
 }
 
+interface ProposalTipJarArgs {
+  address?: string;
+  viewKey?: string;
+}
+export function updateProposalTipJarSettings(
+  proposalId: string | number,
+  args?: ProposalTipJarArgs,
+): Promise<{ data: Proposal }> {
+  return axios.put(`/api/v1/proposals/${proposalId}/tips`, args).then(res => {
+    res.data = formatProposalFromGet(res.data);
+    return res;
+  });
+}
+
 export function postProposalUpdate(
   proposalId: number,
   title: string,
@@ -347,7 +361,7 @@ export function postProposalComment(payload: {
 }
 
 export function deleteProposalContribution(contributionId: string | number) {
-  return axios.delete(`/api/v1/contribution/${contributionId}`);
+  return axios.delete(`/api/v1/proposals/contribution/${contributionId}`);
 }
 
 export function getProposalContribution(
