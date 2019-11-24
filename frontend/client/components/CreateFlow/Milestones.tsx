@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Card, Icon, Alert, Checkbox, Button } from 'antd';
+import { Form, Input, Card, Icon, Alert, Checkbox, Button, Tooltip } from 'antd';
 import { ProposalDraft, CreateMilestone } from 'types';
 import { getCreateErrors } from 'modules/create/utils';
 
@@ -186,6 +186,9 @@ const MilestoneFields = ({
           >
             <span style={{ opacity: 0.7 }}>Payout Immediately</span>
           </Checkbox>
+          <Tooltip title="Allows the milestone to be paid out immediatly if the proposal is accepted with funding.">
+            <Icon type="info-circle" style={{ fontSize: '16px' }} />
+          </Tooltip>
         </div>
       )}
     </div>

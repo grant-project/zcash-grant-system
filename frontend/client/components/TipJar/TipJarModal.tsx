@@ -17,24 +17,22 @@ interface Props {
 }
 
 interface State {
-  amount: string | null;
+  amount: string;
 }
 
 export class TipJarModal extends React.Component<Props, State> {
-  static getDerivedStateFromProps = (nextProps: Props, prevState: State) => {
-    return prevState.amount === null ? { amount: nextProps.amount } : {};
+  static getDerivedStateFromProps = (nextProps: Props) => {
+    // while modal is closed, set amount state via props
+    return !nextProps.isOpen ? { amount: nextProps.amount } : {};
   };
 
   state: State = {
-    amount: null,
+    amount: '',
   };
 
   render() {
     const { isOpen, onClose, type, address } = this.props;
     const { amount } = this.state;
-
-    // should not be possible due to derived state, but makes TS happy
-    if (amount === null) return;
 
     const amountError = getAmountErrorFromString(amount);
     const amountIsValid = !amountError;
@@ -122,5 +120,5 @@ export class TipJarModal extends React.Component<Props, State> {
       amount: e.currentTarget.value,
     });
 
-  private handleAfterClose = () => this.setState({ amount: null });
+  private handleAfterClose = () => this.setState({ amount: '' });
 }
