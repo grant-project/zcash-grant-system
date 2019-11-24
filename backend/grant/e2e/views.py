@@ -11,7 +11,7 @@ from grant.proposal.models import (
     Proposal,
     ProposalArbiter,
 )
-from grant.contribution.models import Contribution
+from grant.proposal.models import ProposalContribution
 from grant.user.models import User, admin_user_schema
 
 from grant.utils.enums import (
@@ -140,8 +140,8 @@ def get_email():
 
 @blueprint.route("/contribution/confirm", methods=["GET"])
 def confirm_contributions():
-    contributions = Contribution.query \
-        .filter(Contribution.status == ContributionStatus.PENDING).all()
+    contributions = ProposalContribution.query \
+        .filter(ProposalContribution.status == ContributionStatus.PENDING).all()
     for c in contributions:
         c.confirm('fakefundedtxid1', '23.456')
         db.session.add(c)

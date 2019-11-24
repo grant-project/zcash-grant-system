@@ -63,7 +63,6 @@ BLOCKCHAIN_API_SECRET = env.str("BLOCKCHAIN_API_SECRET")
 EXPLORER_URL = env.str("EXPLORER_URL", default="https://chain.so/tx/ZECTEST/<txid>")
 
 PROPOSAL_STAKING_AMOUNT = Decimal(env.str("PROPOSAL_STAKING_AMOUNT"))
-CCR_STAKING_AMOUNT = Decimal(env.str("CCR_STAKING_AMOUNT", default="0.025"))
 PROPOSAL_TARGET_MAX = Decimal(env.str("PROPOSAL_TARGET_MAX"))
 
 UI = {

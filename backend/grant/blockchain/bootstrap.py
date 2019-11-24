@@ -1,18 +1,18 @@
 from datetime import datetime, timedelta
 
-from grant.contribution.models import Contribution
+from grant.proposal.models import ProposalContribution
 from grant.utils.requests import blockchain_post
 from grant.utils.enums import ContributionStatus
 
 
 def make_bootstrap_data():
-    pending_contributions = Contribution.query \
+    pending_contributions = ProposalContribution.query \
         .filter_by(status=ContributionStatus.PENDING) \
-        .filter(Contribution.date_created + timedelta(hours=24) > datetime.now()) \
+        .filter(ProposalContribution.date_created + timedelta(hours=24) > datetime.now()) \
         .all()
-    latest_contribution = Contribution.query \
+    latest_contribution = ProposalContribution.query \
         .filter_by(status=ContributionStatus.CONFIRMED) \
-        .order_by(Contribution.date_created.desc()) \
+        .order_by(ProposalContribution.date_created.desc()) \
         .first()
     serialized_pending_contributions = list(map(lambda c: {"id": c.id}, pending_contributions))
     return {

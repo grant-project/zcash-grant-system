@@ -13,7 +13,6 @@ class CustomEnum():
 
 class CCRStatusEnum(CustomEnum):
     DRAFT = 'DRAFT'
-    STAKING = 'STAKING'
     PENDING = 'PENDING'
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'

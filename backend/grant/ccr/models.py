@@ -1,23 +1,14 @@
 from datetime import datetime
 from decimal import Decimal
-from functools import reduce
 
+from sqlalchemy import or_
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import or_, and_
 
 from grant.email.send import send_email
 from grant.extensions import ma, db
-from grant.settings import CCR_STAKING_AMOUNT
 from grant.utils.enums import CCRStatus
-from grant.utils.enums import (
-    ContributionStatus
-)
-from grant.task.jobs import ContributionExpired
-
 from grant.utils.exceptions import ValidationException
-from grant.utils.misc import dt_to_unix, make_admin_url, gen_random_id
-from grant.utils.requests import blockchain_get
-from grant.contribution.models import Contribution
+from grant.utils.misc import make_admin_url, gen_random_id
 
 
 class CCR(db.Model):
@@ -43,15 +34,6 @@ class CCR(db.Model):
             .filter(CCR.user_id == user.id) \
             .filter(status_filter) \
             .all()
-
-    @hybrid_property
-    def is_staked(self):
-        contributions = Contribution.query \
-            .filter_by(ccr_id=self.id,
-                       status=ContributionStatus.CONFIRMED) \
-            .all()
-        funded = reduce(lambda prev, c: prev + Decimal(c.amount), contributions, 0)
-        return Decimal(funded) >= CCR_STAKING_AMOUNT
 
     @staticmethod
     def create(**kwargs):
@@ -114,65 +96,7 @@ class CCR(db.Model):
         # specific validation
         if self.status not in allowed_statuses:
             raise ValidationException(f"CCR status must be draft or rejected to submit for approval")
-        # set to PENDING if staked, else STAKING
-        if self.is_staked:
-            self.status = CCRStatus.PENDING
-        else:
-            self.status = CCRStatus.STAKING
-
-    def set_pending_when_ready(self):
-        if self.status == CCRStatus.STAKING and self.is_staked:
-            self.set_pending()
-
-    def create_contribution(
-        self,
-        amount,
-        user_id: int = None,
-        staking: bool = False,
-    ):
-        contribution = Contribution(
-            ccr_id=self.id,
-            amount=amount,
-            user_id=user_id,
-            staking=staking,
-        )
-        db.session.add(contribution)
-        db.session.flush()
-        if user_id:
-            task = ContributionExpired(contribution)
-            task.make_task()
-        db.session.commit()
-        return contribution
-
-    def get_staking_contribution(self, user_id: int):
-        contribution = None
-        remaining = CCR_STAKING_AMOUNT - Decimal(self.amount_staked)
-        # check funding
-        if remaining > 0:
-            # find pending contribution for any user of remaining amount
-            contribution = Contribution.query.filter_by(
-                ccr_id=self.id,
-                status=CCRStatus.PENDING,
-                staking=True,
-            ).first()
-            if not contribution:
-                contribution = self.create_contribution(
-                    user_id=user_id,
-                    amount=str(remaining.normalize()),
-                    staking=True,
-                )
-
-        return contribution
-
-    @hybrid_property
-    def amount_staked(self):
-        contributions = Contribution.query.filter_by(
-            ccr_id=self.id,
-            status=ContributionStatus.CONFIRMED,
-            staking=True
-        ).all()
-        amount = reduce(lambda prev, c: prev + Decimal(c.amount), contributions, 0)
-        return str(amount)
+        self.set_pending()
 
     def send_admin_email(self, type: str):
         from grant.user.models import User
@@ -184,12 +108,8 @@ class CCR(db.Model):
                 'ccr_url': make_admin_url(f'/ccrs/{self.id}'),
             })
 
-    # state: status STAKING -> PENDING
+    # state: status DRAFT -> PENDING
     def set_pending(self):
-        if self.status != CCRStatus.STAKING:
-            raise ValidationException(f"CCR status must be staking in order to be set to pending")
-        if not self.is_staked:
-            raise ValidationException(f"CCR is not fully staked, cannot set to pending")
         # TODO send email
         # self.send_admin_email('admin_approval_ccr')
         self.status = CCRStatus.PENDING
@@ -242,7 +162,6 @@ class CCRSchema(ma.Schema):
             "status",
             "target",
             "date_created",
-            "is_staked",
             "reject_reason"
         )
 
@@ -255,40 +174,3 @@ class CCRSchema(ma.Schema):
 
 ccr_schema = CCRSchema()
 ccrs_schema = CCRSchema(many=True)
-
-
-class CCRContributionSchema(ma.Schema):
-    class Meta:
-        model = Contribution
-        # Fields to expose
-        fields = (
-            "id",
-            "ccr",
-            "user",
-            "status",
-            "tx_id",
-            "amount",
-            "date_created",
-            "addresses",
-            "private"
-        )
-
-    ccr = ma.Nested("CCRSchema")
-    user = ma.Nested("UserSchema")
-    date_created = ma.Method("get_date_created")
-    addresses = ma.Method("get_addresses")
-
-    def get_date_created(self, obj):
-        return dt_to_unix(obj.date_created)
-
-    def get_addresses(self, obj):
-        # Omit 'memo' and 'sprout' for now
-        # NOTE: Add back in 'sapling' when ready
-        addresses = blockchain_get('/contribution/addresses', {'contributionId': obj.id})
-        return {
-            'transparent': addresses['transparent'],
-        }
-
-
-ccr_contribution_schema = CCRContributionSchema()
-ccr_contributions_schema = CCRContributionSchema(many=True)

@@ -59,7 +59,5 @@ export function getCCRErrors(
     }
   }
 
-  console.log('errors', errors);
-
   return errors;
 }

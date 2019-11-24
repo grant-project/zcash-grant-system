@@ -22,7 +22,7 @@ from grant.proposal.models import (
     admin_proposal_contribution_schema,
     admin_proposal_contributions_schema,
 )
-from grant.contribution.models import Contribution
+from grant.proposal.models import ProposalContribution
 from grant.rfp.models import RFP, admin_rfp_schema, admin_rfps_schema
 from grant.user.models import User, UserSettings, admin_users_schema, admin_user_schema
 from grant.utils import pagination
@@ -153,11 +153,11 @@ def stats():
         .filter(Milestone.stage == MilestoneStage.ACCEPTED) \
         .scalar()
     # Count contributions on proposals that didn't get funded for users who have specified a refund address
-    contribution_refundable_count = db.session.query(func.count(Contribution.id)) \
-        .filter(Contribution.refund_tx_id == None) \
-        .filter(Contribution.staking == False) \
-        .filter(Contribution.proposal_id is not None) \
-        .filter(Contribution.status == ContributionStatus.CONFIRMED) \
+    contribution_refundable_count = db.session.query(func.count(ProposalContribution.id)) \
+        .filter(ProposalContribution.refund_tx_id == None) \
+        .filter(ProposalContribution.staking == False) \
+        .filter(ProposalContribution.proposal_id is not None) \
+        .filter(ProposalContribution.status == ContributionStatus.CONFIRMED) \
         .join(Proposal) \
         .filter(or_(
             Proposal.stage == ProposalStage.FAILED,
@@ -218,7 +218,7 @@ def get_user(id):
         user['proposals'] = proposals_schema.dump(user_proposals)
         user_comments = Comment.get_by_user(user_db)
         user['comments'] = user_comments_schema.dump(user_comments)
-        contributions = Contribution.get_proposal_contributions_by_userid(user_db.id)
+        contributions = ProposalContribution.get_by_userid(user_db.id)
         contributions_dump = user_proposal_contributions_schema.dump(contributions)
         user["contributions"] = contributions_dump
         return user

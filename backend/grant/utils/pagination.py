@@ -2,8 +2,7 @@ import abc
 from sqlalchemy import or_, and_
 
 from grant.comment.models import Comment, comments_schema
-from grant.proposal.models import db, ma, Proposal, ProposalArbiter, proposal_contributions_schema
-from grant.contribution.models import Contribution
+from grant.proposal.models import db, ma, Proposal, ProposalContribution, ProposalArbiter, proposal_contributions_schema
 from grant.comment.models import Comment, comments_schema
 from grant.user.models import User, UserSettings, users_schema
 from grant.milestone.models import Milestone
@@ -131,10 +130,10 @@ class ContributionPagination(Pagination):
         self.FILTERS.extend(['REFUNDABLE', 'DONATION'])
         self.PAGE_SIZE = 9
         self.SORT_MAP = {
-            'CREATED:DESC': Contribution.date_created.desc(),
-            'CREATED:ASC': Contribution.date_created,
-            'AMOUNT:DESC': Contribution.amount.desc(),
-            'AMOUNT:ASC': Contribution.amount,
+            'CREATED:DESC': ProposalContribution.date_created.desc(),
+            'CREATED:ASC': ProposalContribution.date_created,
+            'AMOUNT:DESC': ProposalContribution.amount.desc(),
+            'AMOUNT:ASC': ProposalContribution.amount,
         }
 
     def paginate(
@@ -146,7 +145,7 @@ class ContributionPagination(Pagination):
         search: str=None,
         sort: str='PUBLISHED:DESC',
     ):
-        query = query or Contribution.query
+        query = query or ProposalContribution.query
         sort = sort or 'CREATED:DESC'
 
         # FILTER
@@ -155,30 +154,30 @@ class ContributionPagination(Pagination):
             status_filters = extract_filters('STATUS_', filters)
 
             if status_filters:
-                query = query.filter(Contribution.status.in_(status_filters))
+                query = query.filter(ProposalContribution.status.in_(status_filters))
 
             if 'REFUNDABLE' in filters:
-                query = query.filter(Contribution.refund_tx_id == None) \
-                    .filter(Contribution.staking == False) \
-                    .filter(Contribution.status == ContributionStatus.CONFIRMED) \
+                query = query.filter(ProposalContribution.refund_tx_id == None) \
+                    .filter(ProposalContribution.staking == False) \
+                    .filter(ProposalContribution.status == ContributionStatus.CONFIRMED) \
                     .join(Proposal) \
                     .filter(or_(
                         Proposal.stage == ProposalStage.FAILED,
                         Proposal.stage == ProposalStage.CANCELED,
                     )) \
-                    .join(Contribution.user) \
+                    .join(ProposalContribution.user) \
                     .join(UserSettings) \
                     .filter(UserSettings.refund_address != None)
 
             if 'DONATION' in filters:
-                query = query.filter(Contribution.refund_tx_id == None) \
-                    .filter(Contribution.status == ContributionStatus.CONFIRMED) \
+                query = query.filter(ProposalContribution.refund_tx_id == None) \
+                    .filter(ProposalContribution.status == ContributionStatus.CONFIRMED) \
                     .join(Proposal) \
                     .filter(or_(
                         Proposal.stage == ProposalStage.FAILED,
                         Proposal.stage == ProposalStage.CANCELED,
                     )) \
-                    .join(Contribution.user, isouter=True) \
+                    .join(ProposalContribution.user, isouter=True) \
                     .join(UserSettings, isouter=True) \
                     .filter(UserSettings.refund_address == None)
 
@@ -190,8 +189,8 @@ class ContributionPagination(Pagination):
         # SEARCH can match txids or amounts
         if search:
             query = query.filter(or_(
-                Contribution.amount.ilike(f'%{search}%'),
-                Contribution.tx_id.ilike(f'%{search}%'),
+                ProposalContribution.amount.ilike(f'%{search}%'),
+                ProposalContribution.tx_id.ilike(f'%{search}%'),
             ))
 
         res = query.paginate(page, self.PAGE_SIZE, False)

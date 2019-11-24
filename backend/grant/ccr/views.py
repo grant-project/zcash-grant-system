@@ -12,7 +12,7 @@ from grant.utils.auth import (
 from grant.utils.auth import requires_ccr_owner_auth
 from grant.utils.enums import CCRStatus
 from grant.utils.exceptions import ValidationException
-from .models import CCR, ccr_schema, ccrs_schema, db, ccr_contribution_schema
+from .models import CCR, ccr_schema, ccrs_schema, db
 
 blueprint = Blueprint("ccr", __name__, url_prefix="/api/v1/ccrs")
 
@@ -66,7 +66,6 @@ def delete_ccr(ccr_id):
         CCRStatus.PENDING,
         CCRStatus.APPROVED,
         CCRStatus.REJECTED,
-        CCRStatus.STAKING,
     ]
     status = g.current_ccr.status
     if status not in deleteable_statuses:
@@ -111,14 +110,3 @@ def submit_for_approval_ccr(ccr_id):
     db.session.add(g.current_ccr)
     db.session.commit()
     return ccr_schema.dump(g.current_ccr), 200
-
-
-@blueprint.route("/<ccr_id>/stake", methods=["GET"])
-@requires_ccr_owner_auth
-def get_ccr_stake(ccr_id):
-    if g.current_ccr.status != CCRStatus.STAKING:
-        return {"message": "ok"}, 400
-    contribution = g.current_ccr.get_staking_contribution(g.current_user.id)
-    if contribution:
-        return ccr_contribution_schema.dump(contribution)
-    return {"message": "ok"}, 404

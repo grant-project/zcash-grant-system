@@ -24,8 +24,7 @@ from grant import (
     task,
     rfp,
     e2e,
-    home,
-    contribution
+    home
 )
 from grant.extensions import bcrypt, migrate, db, ma, security, limiter
 from grant.settings import SENTRY_RELEASE, ENV, E2E_TESTING, DEBUG, CORS_DOMAINS
@@ -156,7 +155,6 @@ def register_blueprints(app):
     app.register_blueprint(task.views.blueprint)
     app.register_blueprint(rfp.views.blueprint)
     app.register_blueprint(home.views.blueprint)
-    app.register_blueprint(contribution.views.blueprint)
     if E2E_TESTING and DEBUG:
         print('Warning: e2e end-points are open, this should only be the case for development or testing')
         app.register_blueprint(e2e.views.blueprint)

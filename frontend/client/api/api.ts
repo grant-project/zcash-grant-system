@@ -357,12 +357,6 @@ export function getProposalContribution(
   return axios.get(`/api/v1/proposals/${proposalId}/contributions/${contributionId}`);
 }
 
-export function getProposalStakingContribution(
-  proposalId: number,
-): Promise<{ data: ContributionWithAddressesAndUser }> {
-  return axios.get(`/api/v1/proposals/${proposalId}/stake`);
-}
-
 export function getRFPs(): Promise<{ data: RFP[] }> {
   return axios.get('/api/v1/rfps/').then(res => {
     res.data = res.data.map(formatRFPFromGet);
@@ -419,12 +413,6 @@ export function getCCR(ccrId: number | string): Promise<{ data: any }> {
   return axios.get(`/api/v1/ccr/${ccrId}`).then(res => {
     return res;
   });
-}
-
-export function getCCRStakingContribution(
-  ccrId: number,
-): Promise<{ data: ContributionWithAddressesAndUser }> {
-  return axios.get(`/api/v1/ccrs/${ccrId}/stake`);
 }
 
 export async function putCCRSubmitForApproval(ccr: CCRDraft): Promise<{ data: CCR }> {

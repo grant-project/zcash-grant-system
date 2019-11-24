@@ -1,9 +1,10 @@
 from decimal import Decimal
 from datetime import datetime
 
-from flask import Blueprint, g, request
-from marshmallow import fields
+from flask import Blueprint, g, request, current_app
+from marshmallow import fields, validate
 from sqlalchemy import or_
+from sentry_sdk import capture_message
 from webargs import validate
 
 from grant.extensions import limiter
@@ -12,6 +13,7 @@ from grant.email.send import send_email
 from grant.milestone.models import Milestone
 from grant.parser import body, query, paginated_fields
 from grant.rfp.models import RFP
+from grant.settings import PROPOSAL_STAKING_AMOUNT
 from grant.task.jobs import ProposalDeadline, PruneDraft
 from grant.user.models import User
 from grant.utils import pagination
@@ -20,17 +22,20 @@ from grant.utils.auth import (
     requires_team_member_auth,
     requires_arbiter_auth,
     requires_email_verified_auth,
-    get_authed_user
+    get_authed_user,
+    internal_webhook
 )
+from grant.utils.enums import Category
 from grant.utils.enums import ProposalStatus, ProposalStage, ContributionStatus, RFPStatus
 from grant.utils.exceptions import ValidationException
-from grant.utils.misc import is_email, make_url
+from grant.utils.misc import is_email, make_url, from_zat, make_explore_url
 from .models import (
     Proposal,
     proposals_schema,
     proposal_schema,
     ProposalUpdate,
     proposal_update_schema,
+    ProposalContribution,
     proposal_contribution_schema,
     proposal_team,
     ProposalTeamInvite,
@@ -38,7 +43,6 @@ from .models import (
     proposal_proposal_contributions_schema,
     db,
 )
-from grant.contribution.models import Contribution
 
 blueprint = Blueprint("proposal", __name__, url_prefix="/api/v1/proposals")
 
@@ -294,17 +298,6 @@ def submit_for_approval_proposal(proposal_id):
     return proposal_schema.dump(g.current_proposal), 200
 
 
-@blueprint.route("/<proposal_id>/stake", methods=["GET"])
-@requires_team_member_auth
-def get_proposal_stake(proposal_id):
-    if g.current_proposal.status != ProposalStatus.STAKING:
-        return {"message": "ok"}, 400
-    contribution = g.current_proposal.get_staking_contribution(g.current_user.id)
-    if contribution:
-        return proposal_contribution_schema.dump(contribution)
-    return {"message": "ok"}, 404
-
-
 @blueprint.route("/<proposal_id>/publish", methods=["PUT"])
 @requires_team_member_auth
 def publish_proposal(proposal_id):
@@ -442,21 +435,21 @@ def get_proposal_contributions(proposal_id):
     if not proposal:
         return {"message": "No proposal matching id"}, 404
 
-    top_contributions = Contribution.query.filter_by(
+    top_contributions = ProposalContribution.query.filter_by(
         proposal_id=proposal_id,
         status=ContributionStatus.CONFIRMED,
         staking=False,
     ).order_by(
-        Contribution.amount.desc()
+        ProposalContribution.amount.desc()
     ).limit(
         5
     ).all()
-    latest_contributions = Contribution.query.filter_by(
+    latest_contributions = ProposalContribution.query.filter_by(
         proposal_id=proposal_id,
         status=ContributionStatus.CONFIRMED,
         staking=False,
     ).order_by(
-        Contribution.date_created.desc()
+        ProposalContribution.date_created.desc()
     ).limit(
         5
     ).all()
@@ -473,7 +466,7 @@ def get_proposal_contribution(proposal_id, contribution_id):
     if not proposal:
         return {"message": "No proposal matching id"}, 404
 
-    contribution = Contribution.query.filter_by(id=contribution_id).first()
+    contribution = ProposalContribution.query.filter_by(id=contribution_id).first()
     if not contribution:
         return {"message": "No contribution matching id"}, 404
 
@@ -496,8 +489,8 @@ def post_proposal_contribution(proposal_id, amount, private):
     contribution = None
 
     if user:
-        contribution = Contribution \
-            .get_existing_proposal_contribution(user.id, proposal_id, amount, private)
+        contribution = ProposalContribution \
+            .get_existing_contribution(user.id, proposal_id, amount, private)
 
     if not contribution:
         code = 201
@@ -511,7 +504,89 @@ def post_proposal_contribution(proposal_id, amount, private):
     return dumped_contribution, code
 
 
+# Can't use <proposal_id> since webhook doesn't know proposal id
+@blueprint.route("/contribution/<contribution_id>/confirm", methods=["POST"])
+@internal_webhook
+@body({
+    "to": fields.Str(required=True),
+    "amount": fields.Str(required=True),
+    "txid": fields.Str(required=True),
+})
+def post_contribution_confirmation(contribution_id, to, amount, txid):
+    contribution = ProposalContribution.query.filter_by(
+        id=contribution_id).first()
 
+    if not contribution:
+        msg = f'Unknown contribution {contribution_id} confirmed with txid {txid}, amount {amount}'
+        capture_message(msg)
+        current_app.logger.warn(msg)
+        return {"message": "No contribution matching id"}, 404
+
+    if contribution.status == ContributionStatus.CONFIRMED:
+        # Duplicates can happen, just return ok
+        return {"message": "ok"}, 200
+
+    # Convert to whole zcash coins from zats
+    zec_amount = str(from_zat(int(amount)))
+
+    contribution.confirm(tx_id=txid, amount=zec_amount)
+    db.session.add(contribution)
+    db.session.flush()
+
+    if contribution.proposal.status == ProposalStatus.STAKING:
+        contribution.proposal.set_pending_when_ready()
+
+        # email progress of staking, partial or complete
+        send_email(contribution.user.email_address, 'staking_contribution_confirmed', {
+            'contribution': contribution,
+            'proposal': contribution.proposal,
+            'tx_explorer_url': make_explore_url(txid),
+            'fully_staked': contribution.proposal.is_staked,
+            'stake_target': str(PROPOSAL_STAKING_AMOUNT.normalize()),
+        })
+
+    else:
+        # Send to the user
+        if contribution.user:
+            send_email(contribution.user.email_address, 'contribution_confirmed', {
+                'contribution': contribution,
+                'proposal': contribution.proposal,
+                'tx_explorer_url': make_explore_url(txid),
+            })
+
+        # Send to the full proposal gang
+        for member in contribution.proposal.team:
+            send_email(member.email_address, 'proposal_contribution', {
+                'proposal': contribution.proposal,
+                'contribution': contribution,
+                'contributor': contribution.user,
+                'funded': contribution.proposal.funded,
+                'proposal_url': make_url(f'/proposals/{contribution.proposal.id}'),
+                'contributor_url': make_url(f'/profile/{contribution.user.id}') if contribution.user else '',
+            })
+
+    db.session.commit()
+    return {"message": "ok"}, 200
+
+
+@blueprint.route("/contribution/<contribution_id>", methods=["DELETE"])
+@requires_auth
+def delete_proposal_contribution(contribution_id):
+    contribution = ProposalContribution.query.filter_by(
+        id=contribution_id).first()
+    if not contribution:
+        return {"message": "No contribution matching id"}, 404
+
+    if contribution.status == ContributionStatus.CONFIRMED:
+        return {"message": "Cannot delete confirmed contributions"}, 400
+
+    if contribution.user_id != g.current_user.id:
+        return {"message": "Must be the user of the contribution to delete it"}, 403
+
+    contribution.status = ContributionStatus.DELETED
+    db.session.add(contribution)
+    db.session.commit()
+    return {"message": "ok"}, 202
 
 
 # request MS payout

@@ -251,7 +251,6 @@ class CCRFlow extends React.Component<Props, State> {
       return true;
     }
     const errors = getCCRErrors(this.props.form);
-    console.log(errors);
     return !!Object.keys(errors).length;
   };
 

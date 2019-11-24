@@ -19,7 +19,7 @@ from grant.proposal.models import (
     user_proposals_schema,
     user_proposal_arbiters_schema
 )
-from grant.contribution.models import Contribution
+from grant.proposal.models import ProposalContribution
 from grant.utils.enums import ProposalStatus, ContributionStatus
 from grant.utils.exceptions import ValidationException
 from grant.utils.requests import validate_blockchain_get
@@ -70,7 +70,7 @@ def get_user(user_id, with_proposals, with_comments, with_funded, with_pending, 
             proposals_dump = user_proposals_schema.dump(proposals)
             result["proposals"] = proposals_dump
         if with_funded:
-            contributions = Contribution.get_proposal_contributions_by_userid(user_id)
+            contributions = ProposalContribution.get_by_userid(user_id)
             if not authed_user or user.id != authed_user.id:
                 contributions = [c for c in contributions if c.status == ContributionStatus.CONFIRMED]
                 contributions = [c for c in contributions if not c.private]
