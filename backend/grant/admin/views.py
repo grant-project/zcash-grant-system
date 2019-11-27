@@ -506,6 +506,7 @@ def get_ccr(id):
         return ccr_schema.dump(ccr)
     return {"message": f"Could not find ccr with id {id}"}, 404
 
+
 @blueprint.route('/ccrs/<ccr_id>/accept', methods=['PUT'])
 @body({
     "isAccepted": fields.Bool(required=True),
@@ -515,12 +516,14 @@ def get_ccr(id):
 def approve_ccr(ccr_id, is_accepted, reject_reason=None):
     ccr = CCR.query.filter_by(id=ccr_id).first()
     if ccr:
-        ccr.approve_pending(is_accepted, reject_reason)
-
-        db.session.commit()
-        return ccr_schema.dump(ccr)
+        rfp_id = ccr.approve_pending(is_accepted, reject_reason)
+        if is_accepted:
+            return {"rfpId": rfp_id}, 201
+        else:
+            return ccr_schema.dump(ccr)
 
     return {"message": "No CCR found."}, 404
+
 
 # Requests for Proposal
 

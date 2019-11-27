@@ -339,6 +339,7 @@ const app = store({
   ccrDetailUpdating: false,
   ccrDetailUpdated: false,
   ccrDetailChangingToAcceptedWithFunding: false,
+  ccrCreatedRFPId: null,
 
   comments: {
     page: createDefaultPageData<Comment>('CREATED:DESC'),
@@ -583,11 +584,16 @@ const app = store({
       console.error(m);
       return;
     }
+    app.ccrCreatedRFPId = null;
     app.ccrDetailApproving = true;
     try {
       const { ccrId } = app.ccrDetail;
-      await approveCCR(ccrId, isAccepted, rejectReason);
+      const res = await approveCCR(ccrId, isAccepted, rejectReason);
       await app.fetchCCRs();
+      await app.fetchRFPs();
+      if (isAccepted) {
+        app.ccrCreatedRFPId = res.rfpId;
+      }
     } catch (e) {
       handleApiError(e);
     }

@@ -33,6 +33,8 @@ class RFP(db.Model):
     date_opened = db.Column(db.DateTime, nullable=True)
     date_closed = db.Column(db.DateTime, nullable=True)
 
+    ccr_id = db.Column(db.Integer, db.ForeignKey("ccr.id"), nullable=True)
+
     # Relationships
     proposals = db.relationship(
         "Proposal",
@@ -100,6 +102,7 @@ class RFP(db.Model):
         date_closes: datetime,
         matching: bool = False,
         status: str = RFPStatus.DRAFT,
+        ccr_id: int = None
     ):
         assert RFPStatus.includes(status)
         self.id = gen_random_id(RFP)
@@ -111,6 +114,7 @@ class RFP(db.Model):
         self.date_closes = date_closes
         self.matching = matching
         self.status = status
+        self.ccr_id = ccr_id
 
 
 class RFPSchema(ma.Schema):

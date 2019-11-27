@@ -75,7 +75,7 @@ class CCRDetailNaked extends React.Component<Props, State> {
                                 type="danger"
                                 onClick={() => {
                                     FeedbackModal.open({
-                                        title: 'Request changes for this request?',
+                                        title: 'Request changes for this Request?',
                                         label: 'Please provide a reason:',
                                         okText: 'Request changes',
                                         onOk: this.handleReject,
@@ -183,9 +183,12 @@ class CCRDetailNaked extends React.Component<Props, State> {
         store.fetchCCRDetail(this.getIdFromQuery());
     };
 
-
-    private handleApprove = () => {
-        store.approveCCR(true);
+    private handleApprove = async () => {
+        await store.approveCCR(true);
+        if (store.ccrCreatedRFPId) {
+            message.success('Successfully created RFP from CCR!', 1);
+            setTimeout(() => this.props.history.replace(`/rfps/${store.ccrCreatedRFPId}/edit`), 1500);
+        }
     };
 
     private handleReject = async (reason: string) => {

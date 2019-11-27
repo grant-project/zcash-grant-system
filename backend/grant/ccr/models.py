@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import or_
@@ -118,14 +118,27 @@ class CCR(db.Model):
 
     # state: status PENDING -> (LIVE || REJECTED)
     def approve_pending(self, is_approve, reject_reason=None):
-        self.validate_publishable()
+        from grant.rfp.models import RFP
+        # TODO add validation
+        # self.validate_publishable()
         # specific validation
         if not self.status == CCRStatus.PENDING:
             raise ValidationException(f"CCR must be pending to approve or reject")
 
         if is_approve:
             self.status = CCRStatus.LIVE
-            # TODO make into rfp and set to live
+            rfp = RFP(
+                title=self.title,
+                brief=self.brief,
+                content=self.content,
+                bounty=self._target,
+                date_closes=datetime.now() + timedelta(days=90),
+                ccr_id=self.id
+            )
+            db.session.add(self)
+            db.session.add(rfp)
+            # for emails
+            db.session.commit()
 
             # TODO email notify that CCR was accepted
             # send_email(t.email_address, 'ccr_approved', {
@@ -134,18 +147,23 @@ class CCR(db.Model):
             #     'ccr_url': make_url(f'/ccrs/{self.id}'),
             #     'admin_note': f'Congratulations! Your Request has been accepted. .'
             # })
+            return rfp.id
         else:
             if not reject_reason:
                 raise ValidationException("Please provide a reason for rejecting the ccr")
             self.status = CCRStatus.REJECTED
             self.reject_reason = reject_reason
-            # email that CCR was rejected
+            # for emails
+            db.session.add(self)
+            db.session.commit()
+            # TODO email that CCR was rejected
             # send_email(t.email_address, 'ccr_rejected', {
             #     'user': t,
             #     'ccr': self,
             #     'ccr_url': make_url(f'/ccrs/{self.id}'),
             #     'admin_note': reject_reason
             # })
+            return None
 
 
 class CCRSchema(ma.Schema):
@@ -164,11 +182,14 @@ class CCRSchema(ma.Schema):
             "date_created",
             "reject_reason"
         )
+
     date_created = ma.Method("get_date_created")
     author = ma.Nested("UserSchema")
     ccr_id = ma.Method("get_ccr_id")
+
     def get_date_created(self, obj):
         return dt_to_unix(obj.date_created)
+
     def get_ccr_id(self, obj):
         return obj.id
 
