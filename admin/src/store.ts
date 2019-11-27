@@ -4,6 +4,7 @@ import axios, { AxiosError } from 'axios';
 import {
   User,
   Proposal,
+  CCR,
   Contribution,
   ContributionArgs,
   RFP,
@@ -176,6 +177,32 @@ async function getEmailExample(type: string) {
   return data;
 }
 
+async function fetchCCRDetail(id: number) {
+  const { data } = await api.get(`/admin/ccrs/${id}`);
+  return data;
+}
+
+async function approveCCR(
+  id: number,
+  isAccepted: boolean,
+  rejectReason?: string,
+) {
+  const { data } = await api.put(`/admin/ccrs/${id}/accept`, {
+    isAccepted,
+    rejectReason,
+  });
+  return data;
+}
+
+async function getCCRs() {
+  const { data } = await api.get(`/admin/ccrs`);
+  return data;
+}
+
+async function deleteCCR(id: number) {
+  await api.delete(`/admin/ccrs/${id}`);
+}
+
 async function getRFPs() {
   const { data } = await api.get(`/admin/rfps`);
   return data;
@@ -229,6 +256,7 @@ const app = store({
   stats: {
     userCount: 0,
     proposalCount: 0,
+    ccrPendingCount: 0,
     proposalPendingCount: 0,
     proposalNoArbiterCount: 0,
     proposalMilestonePayoutsCount: 0,
@@ -294,6 +322,23 @@ const app = store({
   proposalDetailUpdating: false,
   proposalDetailUpdated: false,
   proposalDetailChangingToAcceptedWithFunding: false,
+
+  ccrs: [] as CCR[],
+  ccrsFetching: false,
+  ccrsFetched: false,
+  ccrSaving: false,
+  ccrSaved: false,
+  ccrDeleting: false,
+  ccrDeleted: false,
+
+  ccrDetail: null as null | CCR,
+  ccrDetailFetching: false,
+  ccrDetailApproving: false,
+  ccrDetailMarkingMilestonePaid: false,
+  ccrDetailCanceling: false,
+  ccrDetailUpdating: false,
+  ccrDetailUpdated: false,
+  ccrDetailChangingToAcceptedWithFunding: false,
 
   comments: {
     page: createDefaultPageData<Comment>('CREATED:DESC'),
@@ -492,6 +537,61 @@ const app = store({
       handleApiError(e);
     }
     app.arbiterSaving = false;
+  },
+
+  // CCRS
+
+  async fetchCCRs() {
+    app.ccrsFetching = true;
+    try {
+      app.ccrs = await getCCRs();
+      app.ccrsFetched = true;
+    } catch (e) {
+      handleApiError(e);
+    }
+    app.ccrsFetching = false;
+  },
+
+  async deleteCCR(id: number) {
+    app.ccrDeleting = true;
+    app.ccrDeleted = false;
+    try {
+      await deleteCCR(id);
+      app.ccrs = app.ccrs.filter(ccr => ccr.ccrId !== id);
+      app.ccrDeleted = true;
+    } catch (e) {
+      handleApiError(e);
+    }
+    app.ccrDeleting = false;
+  },
+
+  async fetchCCRDetail(id: number) {
+    app.ccrDetailFetching = true;
+    try {
+      app.ccrDetail = await fetchCCRDetail(id);
+    } catch (e) {
+      handleApiError(e);
+    }
+    app.ccrDetailFetching = false;
+  },
+
+
+  async approveCCR(isAccepted: boolean, rejectReason?: string) {
+    if (!app.ccrDetail) {
+      const m = 'store.approveCCR(): Expected ccrDetail to be populated!';
+      app.generalError.push(m);
+      console.error(m);
+      return;
+    }
+    app.ccrDetailApproving = true;
+    try {
+      const { ccrId } = app.ccrDetail;
+      await approveCCR(ccrId, isAccepted, rejectReason);
+      await app.fetchCCRs();
+    } catch (e) {
+      handleApiError(e);
+    }
+    app.ccrDetailApproving = false;
   },
 
   // Proposals

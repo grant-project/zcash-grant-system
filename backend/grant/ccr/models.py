@@ -8,7 +8,7 @@ from grant.email.send import send_email
 from grant.extensions import ma, db
 from grant.utils.enums import CCRStatus
 from grant.utils.exceptions import ValidationException
-from grant.utils.misc import make_admin_url, gen_random_id
+from grant.utils.misc import make_admin_url, gen_random_id, dt_to_unix
 
 
 class CCR(db.Model):
@@ -164,10 +164,11 @@ class CCRSchema(ma.Schema):
             "date_created",
             "reject_reason"
         )
-
+    date_created = ma.Method("get_date_created")
     author = ma.Nested("UserSchema")
     ccr_id = ma.Method("get_ccr_id")
-
+    def get_date_created(self, obj):
+        return dt_to_unix(obj.date_created)
     def get_ccr_id(self, obj):
         return obj.id
 

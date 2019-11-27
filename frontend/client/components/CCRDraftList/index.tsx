@@ -72,7 +72,7 @@ class CCRDraftList extends React.Component<Props, State> {
         <div className="CreateRequestDraftList">
           <Placeholder
             title="Your email is not verified"
-            subtitle="Please confirm your email before making a ccr."
+            subtitle="Please confirm your email before creating a request."
           />
         </div>
       );

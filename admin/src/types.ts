@@ -199,6 +199,28 @@ export enum PROPOSAL_CATEGORY {
   ACCESSIBILITY = 'ACCESSIBILITY',
 }
 
+export enum CCR_STATUS {
+  DRAFT = 'DRAFT',
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  LIVE = 'LIVE',
+  DELETED = 'DELETED',
+}
+
+export interface CCR {
+  ccrId: number;
+  brief: string;
+  status: CCR_STATUS;
+  dateCreated: number;
+  dateApproved: number;
+  datePublished: number;
+  title: string;
+  content: string;
+  target: string;
+  rejectReason: string;
+}
+
 export interface PageQuery {
   page: number;
   filters: string[];
