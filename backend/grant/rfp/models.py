@@ -33,7 +33,7 @@ class RFP(db.Model):
     date_opened = db.Column(db.DateTime, nullable=True)
     date_closed = db.Column(db.DateTime, nullable=True)
 
-    ccr_id = db.Column(db.Integer, db.ForeignKey("ccr.id"), nullable=True)
+    ccr = db.relationship("CCR", uselist=False, back_populates="rfp")
 
     # Relationships
     proposals = db.relationship(
@@ -57,7 +57,6 @@ class RFP(db.Model):
         .where(rfp_liker.c.rfp_id == id)
         .correlate_except(rfp_liker)
     )
-
 
     @hybrid_property
     def bounty(self):
@@ -102,7 +101,6 @@ class RFP(db.Model):
         date_closes: datetime,
         matching: bool = False,
         status: str = RFPStatus.DRAFT,
-        ccr_id: int = None
     ):
         assert RFPStatus.includes(status)
         self.id = gen_random_id(RFP)
@@ -114,7 +112,6 @@ class RFP(db.Model):
         self.date_closes = date_closes
         self.matching = matching
         self.status = status
-        self.ccr_id = ccr_id
 
 
 class RFPSchema(ma.Schema):

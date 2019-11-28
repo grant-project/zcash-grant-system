@@ -112,8 +112,8 @@ class Profile extends React.Component<Props, State> {
     return (
       <div className="Profile">
         <HeaderDetails
-          title={`${user.displayName} is funding projects on ZF Grants`}
-          description={`Join ${user.displayName} in funding the future!`}
+          title={`${user.displayName} on ZF Grants`}
+          description={`Join ${user.displayName} in improving the Zcash ecosystem!`}
           image={user.avatar ? user.avatar.imageUrl : undefined}
         />
         <Switch>

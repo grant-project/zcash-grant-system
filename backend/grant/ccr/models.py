@@ -27,6 +27,9 @@ class CCR(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     author = db.relationship("User", back_populates="ccrs")
 
+    rfp_id = db.Column(db.Integer, db.ForeignKey("rfp.id"), nullable=True)
+    rfp = db.relationship("RFP", back_populates="ccr")
+
     @staticmethod
     def get_by_user(user, statuses=[CCRStatus.LIVE]):
         status_filter = or_(CCR.status == v for v in statuses)
@@ -133,10 +136,14 @@ class CCR(db.Model):
                 content=self.content,
                 bounty=self._target,
                 date_closes=datetime.now() + timedelta(days=90),
-                ccr_id=self.id
             )
             db.session.add(self)
             db.session.add(rfp)
+            db.session.flush()
+            self.rfp_id = rfp.id
+            db.session.add(rfp)
+            db.session.flush()
+
             # for emails
             db.session.commit()
 
