@@ -132,9 +132,11 @@ class RFPSchema(ma.Schema):
             "date_closed",
             "accepted_proposals",
             "authed_liked",
-            "likes_count"
+            "likes_count",
+            "ccr"
         )
 
+    ccr = ma.Nested("CCRSchema", exclude=["rfp"])
     status = ma.Method("get_status")
     date_closes = ma.Method("get_date_closes")
     date_opened = ma.Method("get_date_opened")
@@ -178,8 +180,10 @@ class AdminRFPSchema(ma.Schema):
             "date_opened",
             "date_closed",
             "proposals",
+            "ccr"
         )
 
+    ccr = ma.Nested("CCRSchema", exclude=["rfp"])
     status = ma.Method("get_status")
     date_created = ma.Method("get_date_created")
     date_closes = ma.Method("get_date_closes")

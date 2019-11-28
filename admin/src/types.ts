@@ -47,6 +47,7 @@ export interface RFP {
   matching: boolean;
   bounty: string | null;
   dateCloses: number | null;
+  ccr?: CCR;
 }
 export interface RFPArgs {
   title: string;
@@ -219,6 +220,9 @@ export interface CCR {
   content: string;
   target: string;
   rejectReason: string;
+  rfp?: RFP;
+  author: User
+
 }
 
 export interface PageQuery {

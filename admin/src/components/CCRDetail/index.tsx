@@ -10,6 +10,8 @@ import Back from 'components/Back';
 import Markdown from 'components/Markdown';
 import FeedbackModal from '../FeedbackModal';
 import './index.less';
+import { Link } from 'react-router-dom';
+
 
 type Props = RouteComponentProps<any>;
 
@@ -66,7 +68,7 @@ class CCRDetailNaked extends React.Component<Props, State> {
                                 type="primary"
                                 onClick={() => this.handleApprove()}
                             >
-                                Generate RFP from Community Request
+                                Generate RFP from CCR
                             </Button>
                             <Button
                                 className="CCRDetail-review"
@@ -98,7 +100,7 @@ class CCRDetailNaked extends React.Component<Props, State> {
                     description={
                         <div>
                             <p>
-                                This ccr has changes requested. The team will be able to re-submit it
+                                This CCR has changes requested. The team will be able to re-submit it
                                 for approval should they desire to do so.
                             </p>
                             <b>Reason:</b>
@@ -128,13 +130,17 @@ class CCRDetailNaked extends React.Component<Props, State> {
                         {renderReview()}
                         {renderRejected()}
 
-                        <Collapse defaultActiveKey={['brief', 'content', 'milestones']}>
+                        <Collapse defaultActiveKey={['brief', 'content', 'target']}>
                             <Collapse.Panel key="brief" header="brief">
                                 {c.brief}
                             </Collapse.Panel>
 
                             <Collapse.Panel key="content" header="content">
                                 <Markdown source={c.content}/>
+                            </Collapse.Panel>
+
+                             <Collapse.Panel key="target" header="target">
+                                <Markdown source={c.target}/>
                             </Collapse.Panel>
 
 
@@ -147,6 +153,15 @@ class CCRDetailNaked extends React.Component<Props, State> {
                     {/* RIGHT SIDE */}
                     <Col span={6}>
 
+                        {c.rfp &&
+                            <Alert
+                                message="Linked to RFP"
+                                description={<React.Fragment>This CCR has been accepted and is instantiated as an RFP <Link to={`/rfps/${c.rfp.id}`}>here</Link>.</React.Fragment>}
+                                type="info"
+                                showIcon
+                            />
+                        }
+
 
                         {/* DETAILS */}
                         <Card title="Details" size="small">
@@ -158,8 +173,14 @@ class CCRDetailNaked extends React.Component<Props, State> {
                             )}
 
 
-                            {renderDeetItem('status', c.status)}
+                            {renderDeetItem('status', (c.status === CCR_STATUS.LIVE ? 'Accepted/Generated RFP': c.status))}
                             {renderDeetItem('target', c.target)}
+                        </Card>
+
+                        <Card title="Author" size="small">
+                            <div key={c.author.userid}>
+                              <Link to={`/users/${c.author.userid}`}>{c.author.displayName}</Link>
+                            </div>
                         </Card>
 
                         {/* TEAM */}

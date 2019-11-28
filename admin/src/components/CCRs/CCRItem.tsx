@@ -21,7 +21,7 @@ class CCRItemNaked extends React.Component<CCR> {
           <h2>
             {props.title || '(no title)'}
             <Tooltip title={status.hint}>
-              <Tag color={status.tagColor}>{status.tagDisplay}</Tag>
+              <Tag color={status.tagColor}>{status.tagDisplay === 'Live' ? 'Accepted/Generated RFP' : status.tagDisplay }</Tag>
             </Tooltip>
           </h2>
           <p>Created: {formatDateSeconds(props.dateCreated)}</p>

@@ -113,7 +113,6 @@ class CCR(db.Model):
 
     # state: status DRAFT -> PENDING
     def set_pending(self):
-        # TODO send email
         self.send_admin_email('admin_approval_ccr')
         self.status = CCRStatus.PENDING
         db.session.add(self)
@@ -187,9 +186,11 @@ class CCRSchema(ma.Schema):
             "status",
             "target",
             "date_created",
-            "reject_reason"
+            "reject_reason",
+            "rfp"
         )
 
+    rfp = ma.Nested("RFPSchema")
     date_created = ma.Method("get_date_created")
     author = ma.Nested("UserSchema")
     ccr_id = ma.Method("get_ccr_id")
