@@ -479,11 +479,21 @@ def get_email_example(type):
 
 # CCRs
 
-@blueprint.route('/ccrs', methods=['GET'])
+
+@blueprint.route("/ccrs", methods=["GET"])
+@query(paginated_fields)
 @admin.admin_auth_required
-def get_ccrs():
-    ccrs = CCR.query.all()
-    return ccrs_schema.dump(ccrs)
+def get_ccrs(page, filters, search, sort):
+    filters_workaround = request.args.getlist('filters[]')
+    page = pagination.ccr(
+        schema=ccrs_schema,
+        query=CCR.query,
+        page=page,
+        filters=filters_workaround,
+        search=search,
+        sort=sort,
+    )
+    return page
 
 
 @blueprint.route('/ccrs/<ccr_id>', methods=['DELETE'])

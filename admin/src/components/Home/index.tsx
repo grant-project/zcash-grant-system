@@ -26,7 +26,7 @@ class Home extends React.Component {
         <div>
           <Icon type="exclamation-circle" /> There are <b>{ccrPendingCount}</b>{' '}
           community created requests <b>waiting for review</b>.{' '}
-          <Link to="/ccrs">Click here</Link> to view them.
+          <Link to="/ccrs?filters[]=STATUS_PENDING">Click here</Link> to view them.
         </div>
       ),
       !!proposalPendingCount && (

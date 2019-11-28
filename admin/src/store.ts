@@ -194,8 +194,8 @@ async function approveCCR(
   return data;
 }
 
-async function getCCRs() {
-  const { data } = await api.get(`/admin/ccrs`);
+async function fetchCCRs(params: Partial<PageQuery>) {
+  const { data } = await api.get(`/admin/ccrs`, {params});
   return data;
 }
 
@@ -323,9 +323,10 @@ const app = store({
   proposalDetailUpdated: false,
   proposalDetailChangingToAcceptedWithFunding: false,
 
-  ccrs: [] as CCR[],
-  ccrsFetching: false,
-  ccrsFetched: false,
+
+  ccrs: {
+    page: createDefaultPageData<CCR>('CREATED:DESC'),
+  },
   ccrSaving: false,
   ccrSaved: false,
   ccrDeleting: false,
@@ -543,27 +544,26 @@ const app = store({
   // CCRS
 
   async fetchCCRs() {
-    app.ccrsFetching = true;
-    try {
-      app.ccrs = await getCCRs();
-      app.ccrsFetched = true;
-    } catch (e) {
-      handleApiError(e);
-    }
-    app.ccrsFetching = false;
+    return await pageFetch(app.ccrs, fetchCCRs);
+  },
+
+  setCCRPageQuery(params: Partial<PageQuery>) {
+    setPageParams(app.ccrs, params);
+  },
+
+  resetCCRPageQuery() {
+    resetPageParams(app.ccrs);
   },
 
   async deleteCCR(id: number) {
-    app.ccrDeleting = true;
-    app.ccrDeleted = false;
     try {
       await deleteCCR(id);
-      app.ccrs = app.ccrs.filter(ccr => ccr.ccrId !== id);
-      app.ccrDeleted = true;
+      app.ccrs.page.items = app.ccrs.page.items.filter(
+        c => c.ccrId === id,
+      );
     } catch (e) {
       handleApiError(e);
     }
-    app.ccrDeleting = false;
   },
 
   async fetchCCRDetail(id: number) {
