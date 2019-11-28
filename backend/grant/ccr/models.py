@@ -111,7 +111,7 @@ class CCR(db.Model):
     # state: status DRAFT -> PENDING
     def set_pending(self):
         # TODO send email
-        # self.send_admin_email('admin_approval_ccr')
+        self.send_admin_email('admin_approval_ccr')
         self.status = CCRStatus.PENDING
         db.session.add(self)
         db.session.flush()

@@ -556,16 +556,21 @@ class Proposal(db.Model):
             self.date_published = datetime.datetime.now()
             self.stage = ProposalStage.WIP
 
-            with_or_out = 'without'
             if with_funding:
                 self.fully_fund_contibution_bounty()
-                with_or_out = 'with'
             for t in self.team:
+                admin_note = ''
+                if with_funding:
+                    admin_note = 'Congratulations! Your proposal has been accepted with funding from the Zcash Foundation.'
+                else:
+                    admin_note = '''
+                    We've chosen to list your proposal on ZF Grants, but we won't be funding your proposal at this time.
+                    '''
                 send_email(t.email_address, 'proposal_approved', {
                     'user': t,
                     'proposal': self,
                     'proposal_url': make_url(f'/proposals/{self.id}'),
-                    'admin_note': f'Congratulations! Your proposal has been accepted {with_or_out} funding.'
+                    'admin_note': admin_note
                 })
         else:
             if not reject_reason:

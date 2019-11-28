@@ -71,7 +71,7 @@ def proposal_approved(email_args):
     return {
         'subject': 'Your proposal has been approved!',
         'title': 'Your proposal has been approved',
-        'preview': 'Start raising funds for {} now'.format(email_args['proposal'].title),
+        'preview': '{} is now live on ZF Grants!'.format(email_args['proposal'].title),
         'subscription': EmailSubscription.MY_PROPOSAL_APPROVAL
     }
 
