@@ -18,6 +18,7 @@ import { fetchCCRDrafts } from 'modules/ccr/actions';
 import { fetchDrafts } from 'modules/create/actions';
 
 interface StateProps {
+  hasCheckedUser: AppState['auth']['hasCheckedUser'];
   ccrDrafts: AppState['ccr']['drafts'];
   proposalDrafts: AppState['create']['drafts'];
 }
@@ -48,7 +49,7 @@ class Header extends React.Component<Props, State> {
   };
 
   render() {
-    const { isTransparent, ccrDrafts, proposalDrafts } = this.props;
+    const { isTransparent, ccrDrafts, proposalDrafts, hasCheckedUser } = this.props;
     const { isDrawerOpen } = this.state;
 
     return (
@@ -78,11 +79,11 @@ class Header extends React.Component<Props, State> {
             <Logo className="Header-title-logo" />
           </Link>
 
-          {ccrDrafts === null || proposalDrafts === null ? null : (
+          {!hasCheckedUser && (ccrDrafts === null || proposalDrafts === null) ? null : (
             <div className="Header-links is-right">
               <div className="Header-links-button is-desktop">
                 <Link to="/create">
-                  {proposalDrafts.length > 0 ? (
+                  {Array.isArray(proposalDrafts) && proposalDrafts.length > 0 ? (
                     <Button type={'dashed'}>My Proposals</Button>
                   ) : (
                     <Button>Start a Proposal</Button>
@@ -91,7 +92,7 @@ class Header extends React.Component<Props, State> {
               </div>
               <div className="Header-links-button is-desktop">
                 <Link to="/create-request">
-                  {ccrDrafts.length > 0 ? (
+                  {Array.isArray(ccrDrafts) && ccrDrafts.length > 0 ? (
                     <Button type={'dashed'}>My Requests</Button>
                   ) : (
                     <Button type={'primary'}>Create a Request</Button>
@@ -121,6 +122,7 @@ class Header extends React.Component<Props, State> {
 
 const withConnect = connect<StateProps, {}, {}, AppState>(
   (state: AppState) => ({
+    hasCheckedUser: state.auth.hasCheckedUser,
     ccrDrafts: state.ccr.drafts,
     proposalDrafts: state.create.drafts,
   }),
