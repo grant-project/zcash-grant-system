@@ -424,7 +424,7 @@ export function putCCR(ccr: CCRDraft): Promise<{ data: CCRDraft }> {
 }
 
 export function getCCR(ccrId: number | string): Promise<{ data: any }> {
-  return axios.get(`/api/v1/ccr/${ccrId}`).then(res => {
+  return axios.get(`/api/v1/ccrs/${ccrId}`).then(res => {
     return res;
   });
 }

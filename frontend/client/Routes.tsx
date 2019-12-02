@@ -25,6 +25,7 @@ const RequestEdit = loadable(() => import('pages/request-edit'), opts);
 const ProposalEdit = loadable(() => import('pages/proposal-edit'), opts);
 const Proposals = loadable(() => import('pages/proposals'), opts);
 const Proposal = loadable(() => import('pages/proposal'), opts);
+const Ccr = loadable(() => import('pages/ccr'), opts);
 const Auth = loadable(() => import('pages/auth'));
 const SignOut = loadable(() => import('pages/sign-out'), opts);
 const Profile = loadable(() => import('pages/profile'), opts);
@@ -77,13 +78,26 @@ const routeConfigs: RouteConfig[] = [
     onlyLoggedIn: true,
   },
   {
-    // Proposal edit page
+    // Request edit page
     route: {
       path: '/ccrs/:id/edit',
       component: RequestEdit,
     },
     template: {
       title: 'Edit Request',
+      isFullScreen: true,
+      hideFooter: true,
+    },
+    onlyLoggedIn: true,
+  },
+  {
+    // Request view page
+    route: {
+      path: '/ccrs/:id',
+      component: Ccr,
+    },
+    template: {
+      title: 'View Request',
       isFullScreen: true,
       hideFooter: true,
     },

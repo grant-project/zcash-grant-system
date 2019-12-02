@@ -1,5 +1,12 @@
-import { ProposalDraft, STATUS, MILESTONE_STAGE, PROPOSAL_ARBITER_STATUS } from 'types';
-import { User } from 'types';
+import {
+  ProposalDraft,
+  STATUS,
+  MILESTONE_STAGE,
+  PROPOSAL_ARBITER_STATUS,
+  CCRDraft,
+  RFP,
+} from 'types';
+import { User, CCR } from 'types';
 import {
   getAmountErrorUsd,
   getAmountErrorUsdFromString,
@@ -7,8 +14,8 @@ import {
   isValidTAddress,
   isValidSproutAddress,
 } from 'utils/validators';
-import { Zat, toZat } from 'utils/units';
-import { PROPOSAL_STAGE } from 'api/constants';
+import { Zat, toZat, toUsd } from 'utils/units';
+import { PROPOSAL_STAGE, RFP_STATUS } from 'api/constants';
 import {
   ProposalDetail,
   PROPOSAL_DETAIL_INITIAL_STATE,
@@ -262,5 +269,28 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
       stage: MILESTONE_STAGE.IDLE,
     })),
     ...PROPOSAL_DETAIL_INITIAL_STATE,
+  };
+}
+
+export function makeRfpPreviewFromCcrDraft(draft: CCRDraft): RFP {
+  const ccr: CCR = {
+    ...draft,
+    noOp: true,
+  };
+  const now = new Date().getTime();
+
+  return {
+    ...draft,
+    id: 0,
+    urlId: '',
+    status: RFP_STATUS.LIVE,
+    acceptedProposals: [],
+    bounty: draft.target ? toUsd(draft.target) : null,
+    matching: false,
+    dateOpened: now / 1000,
+    authedLiked: false,
+    likesCount: 0,
+    isVersionTwo: true,
+    ccr,
   };
 }
