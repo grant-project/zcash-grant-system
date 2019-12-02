@@ -5,6 +5,7 @@ import Markdown from 'components/Markdown';
 import { AppState } from 'store/reducers';
 import { CCR_STEP } from './index';
 import { CCRDraft } from 'types';
+import { formatUsd } from 'utils/formatters'
 import './CCRReview.less';
 
 interface OwnProps {
@@ -51,7 +52,7 @@ class CCRReview extends React.Component<Props> {
           },
           {
             key: 'target',
-            content: <div style={{ fontSize: '1.2rem' }}>{form.target} ZEC</div>,
+            content: <div style={{ fontSize: '1.2rem' }}>{formatUsd(form.target)}</div>,
             error: errors.target,
           },
         ],
