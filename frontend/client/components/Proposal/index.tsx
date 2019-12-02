@@ -252,8 +252,8 @@ export class ProposalDetail extends React.Component<Props, State> {
             </div>
           </div>
           <div className="Proposal-top-side">
-            <CampaignBlock proposal={proposal} isPreview={!isLive} />
             <TippingBlock proposal={proposal} />
+            <CampaignBlock proposal={proposal} isPreview={!isLive} />
             <TeamBlock proposal={proposal} />
             {proposal.rfp && <RFPBlock rfp={proposal.rfp} />}
           </div>

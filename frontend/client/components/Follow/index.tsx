@@ -43,7 +43,7 @@ class Follow extends React.Component<Props, State> {
             theme={authedFollows ? 'filled' : 'outlined'}
             type={loading ? 'loading' : 'star'}
           />
-          <span className="Follow-label">{authedFollows ? ' Unfollow' : ' Follow'}</span>
+          <span className="Follow-label">{authedFollows ? ' Un-follow' : ' Follow'}</span>
         </AuthButton>
         <Button className="Follow-count" disabled>
           <span>{followersCount}</span>
@@ -58,7 +58,6 @@ class Follow extends React.Component<Props, State> {
     try {
       await followProposal(proposalId, !authedFollows);
       await this.props.fetchProposal(proposalId);
-      message.success(<>Proposal {authedFollows ? 'unfollowed' : 'followed'}</>);
     } catch (error) {
       // tslint:disable:no-console
       console.error('Follow.handleFollow - unable to change follow state', error);

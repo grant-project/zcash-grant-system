@@ -67,7 +67,7 @@ class Like extends React.Component<Props, State> {
             type={loading ? 'loading' : 'like'}
           />
           {shouldShowLikeText && (
-            <span className="Like-label">{authedLiked ? ' Unlike' : ' Like'}</span>
+            <span className="Like-label">{authedLiked ? ' Un-like' : ' Like'}</span>
           )}
         </IconButton>
         <Button className="Like-count" disabled>
@@ -127,7 +127,6 @@ class Like extends React.Component<Props, State> {
     try {
       await likeProposal(proposalId, !authedLiked);
       await fetchProposal(proposalId);
-      message.success(<>Proposal {authedLiked ? 'unliked' : 'liked'}</>);
     } catch (error) {
       // tslint:disable:no-console
       console.error('Like.handleProposalLike - unable to change like state', error);
