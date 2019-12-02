@@ -228,6 +228,28 @@ class ProposalArbiter(db.Model):
         raise ValidationException('User is not arbiter')
 
 
+def default_proposal_content():
+    return """# Overview
+
+Help us understand the goal(s) of the proposal at a high level. 
+
+
+# Approach
+
+The plan for accomplishing the goal(s) laid out in the overview.
+
+
+# Team
+
+Who you are, and why you're credible to execute on the goals of the proposal.
+
+
+# Deliverable
+    
+The end result of your efforts as related to this proposal.
+"""
+
+
 class Proposal(db.Model):
     __tablename__ = "proposal"
 
@@ -241,7 +263,7 @@ class Proposal(db.Model):
     title = db.Column(db.String(255), nullable=False)
     brief = db.Column(db.String(255), nullable=False)
     stage = db.Column(db.String(255), nullable=False)
-    content = db.Column(db.Text, nullable=False)
+    content = db.Column(db.Text, nullable=False, default=default_proposal_content())
     category = db.Column(db.String(255), nullable=True)
     date_approved = db.Column(db.DateTime)
     date_published = db.Column(db.DateTime)
@@ -290,7 +312,7 @@ class Proposal(db.Model):
             status: str = ProposalStatus.DRAFT,
             title: str = '',
             brief: str = '',
-            content: str = '',
+            content: str = default_proposal_content(),
             stage: str = ProposalStage.PREVIEW,
             target: str = '0',
             payout_address: str = '',
