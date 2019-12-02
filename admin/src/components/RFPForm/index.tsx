@@ -76,6 +76,10 @@ class RFPForm extends React.Component<Props, State> {
       : defaults.dateCloses && moment(defaults.dateCloses * 1000);
     const forceClosed = dateCloses && dateCloses.isBefore(moment.now());
 
+    const bountyMatchRule = isVersionTwo
+      ? { pattern: /^[^.]*$/, message: 'Cannot contain a decimal' }
+      : {};
+
     return (
       <Form className="RFPForm" layout="vertical" onSubmit={this.handleSubmit}>
         <Back to="/rfps" text="RFPs" />
@@ -165,6 +169,10 @@ class RFPForm extends React.Component<Props, State> {
             <Form.Item className="RFPForm-bounty" label="Bounty">
               {getFieldDecorator('bounty', {
                 initialValue: defaults.bounty,
+                rules: [
+                  { required: true, message: 'Bounty is required' },
+                  bountyMatchRule,
+                ],
               })(
                 <Input
                   autoComplete="off"
