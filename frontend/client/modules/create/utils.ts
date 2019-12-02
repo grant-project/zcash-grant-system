@@ -278,9 +278,9 @@ export function makeRfpPreviewFromCcrDraft(draft: CCRDraft): RFP {
     noOp: true,
   };
   const now = new Date().getTime();
+  const { brief, content, title } = draft
 
   return {
-    ...draft,
     id: 0,
     urlId: '',
     status: RFP_STATUS.LIVE,
@@ -292,5 +292,8 @@ export function makeRfpPreviewFromCcrDraft(draft: CCRDraft): RFP {
     likesCount: 0,
     isVersionTwo: true,
     ccr,
+    brief,
+    content,
+    title
   };
 }
