@@ -67,7 +67,7 @@ class Like extends React.Component<Props, State> {
             type={loading ? 'loading' : 'like'}
           />
           {shouldShowLikeText && (
-            <span className="Like-label">{authedLiked ? ' Un-like' : ' Like'}</span>
+            <span className="Like-label">{authedLiked ? ' Unlike' : ' Like'}</span>
           )}
         </IconButton>
         <Button className="Like-count" disabled>

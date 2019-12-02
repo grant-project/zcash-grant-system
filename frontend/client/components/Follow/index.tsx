@@ -43,7 +43,7 @@ class Follow extends React.Component<Props, State> {
             theme={authedFollows ? 'filled' : 'outlined'}
             type={loading ? 'loading' : 'star'}
           />
-          <span className="Follow-label">{authedFollows ? ' Un-follow' : ' Follow'}</span>
+          <span className="Follow-label">{authedFollows ? ' Unfollow' : ' Follow'}</span>
         </AuthButton>
         <Button className="Follow-count" disabled>
           <span>{followersCount}</span>
