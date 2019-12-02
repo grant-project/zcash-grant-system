@@ -31,6 +31,14 @@ export function getAmountErrorUsd(amount: number, max: number = Infinity, min?: 
   return null;
 }
 
+
+// Covers the edge case where whole decimals (eg. 100.00) is valid in getAmountErrorUsd
+export function getAmountErrorUsdFromString(amount: string) {
+  return amount.indexOf('.') !== -1
+    ? 'Amount must be a whole number'
+    : null
+}
+
 export function getAmountErrorFromString(amount: string, max?: number, min?: number) {
   const parsedAmount = parseFloat(amount);
   if (Number.isNaN(parsedAmount)) {
