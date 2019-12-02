@@ -8,7 +8,7 @@ from grant.email.send import send_email
 from grant.extensions import ma, db
 from grant.utils.enums import CCRStatus
 from grant.utils.exceptions import ValidationException
-from grant.utils.misc import make_admin_url, gen_random_id, dt_to_unix
+from grant.utils.misc import make_admin_url, gen_random_id, dt_to_unix, make_url
 
 
 class CCR(db.Model):
@@ -158,8 +158,8 @@ class CCR(db.Model):
             db.session.commit()
 
             # TODO email notify that CCR was accepted
-            send_email(t.email_address, 'ccr_approved', {
-                'user': t,
+            send_email(self.author.email_address, 'ccr_approved', {
+                'user': self.author,
                 'ccr': self,
                 'ccr_url': make_url(f'/ccrs/{self.id}'),
                 'admin_note': f'Congratulations! Your Request has been accepted. .'
