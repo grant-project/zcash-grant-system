@@ -28,6 +28,7 @@ export interface CCR extends CCRDraft {
 }
 
 export interface UserCCR {
+  author: User;
   ccrId: number;
   status: CCRSTATUS;
   title: string;

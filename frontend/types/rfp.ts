@@ -1,6 +1,7 @@
 import { Proposal } from './proposal';
 import { RFP_STATUS } from 'api/constants';
 import { Zat } from 'utils/units';
+import { CCR } from 'types/ccr';
 
 export interface RFP {
   id: number;
@@ -17,4 +18,5 @@ export interface RFP {
   dateCloses?: number;
   authedLiked: boolean;
   likesCount: number;
+  ccr?: CCR;
 }

@@ -19,6 +19,7 @@ import ProfileProposal from './ProfileProposal';
 import ProfileContribution from './ProfileContribution';
 import ProfileComment from './ProfileComment';
 import ProfileInvite from './ProfileInvite';
+import ProfileCCR from './ProfileCCR';
 import Placeholder from 'components/Placeholder';
 import Loader from 'components/Loader';
 import ExceptionPage from 'components/ExceptionPage';
@@ -169,6 +170,9 @@ class Profile extends React.Component<Props, State> {
                   )}
                 {proposals.map(p => (
                   <ProfileProposal key={p.proposalId} proposal={p} />
+                ))}
+                {requests.map(c => (
+                  <ProfileCCR key={c.ccrId} ccr={c} />
                 ))}
               </div>
             </Tabs.TabPane>

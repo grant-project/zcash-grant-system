@@ -43,10 +43,8 @@ class CCR(db.Model):
         ccr = CCR(
             **kwargs
         )
-
         db.session.add(ccr)
         db.session.flush()
-
         return ccr
 
     @hybrid_property
@@ -93,8 +91,7 @@ class CCR(db.Model):
 
     # state: status (DRAFT || REJECTED) -> (PENDING || STAKING)
     def submit_for_approval(self):
-        # TODO validate user generated content
-        # self.validate_publishable()
+        self.validate_publishable()
         allowed_statuses = [CCRStatus.DRAFT, CCRStatus.REJECTED]
         # specific validation
         if self.status not in allowed_statuses:
@@ -118,11 +115,25 @@ class CCR(db.Model):
         db.session.add(self)
         db.session.flush()
 
+    def validate_publishable(self):
+        # Require certain fields
+        required_fields = ['title', 'content', 'brief', 'target']
+        for field in required_fields:
+            if not hasattr(self, field):
+                raise ValidationException("Proposal must have a {}".format(field))
+
+        # Stricter limits on certain fields
+        if len(self.title) > 60:
+            raise ValidationException("Proposal title cannot be longer than 60 characters")
+        if len(self.brief) > 140:
+            raise ValidationException("Brief cannot be longer than 140 characters")
+        if len(self.content) > 250000:
+            raise ValidationException("Content cannot be longer than 250,000 characters")
+
     # state: status PENDING -> (LIVE || REJECTED)
     def approve_pending(self, is_approve, reject_reason=None):
         from grant.rfp.models import RFP
-        # TODO add validation
-        # self.validate_publishable()
+        self.validate_publishable()
         # specific validation
         if not self.status == CCRStatus.PENDING:
             raise ValidationException(f"CCR must be pending to approve or reject")
@@ -147,12 +158,12 @@ class CCR(db.Model):
             db.session.commit()
 
             # TODO email notify that CCR was accepted
-            # send_email(t.email_address, 'ccr_approved', {
-            #     'user': t,
-            #     'ccr': self,
-            #     'ccr_url': make_url(f'/ccrs/{self.id}'),
-            #     'admin_note': f'Congratulations! Your Request has been accepted. .'
-            # })
+            send_email(t.email_address, 'ccr_approved', {
+                'user': t,
+                'ccr': self,
+                'ccr_url': make_url(f'/ccrs/{self.id}'),
+                'admin_note': f'Congratulations! Your Request has been accepted. .'
+            })
             return rfp.id
         else:
             if not reject_reason:
