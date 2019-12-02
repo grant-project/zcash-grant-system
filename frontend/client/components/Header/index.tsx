@@ -84,7 +84,7 @@ class Header extends React.Component<Props, State> {
               <div className="Header-links-button is-desktop">
                 <Link to="/create">
                   {Array.isArray(proposalDrafts) && proposalDrafts.length > 0 ? (
-                    <Button type={'dashed'}>My Proposals</Button>
+                    <Button>My Proposals</Button>
                   ) : (
                     <Button>Start a Proposal</Button>
                   )}
@@ -93,7 +93,7 @@ class Header extends React.Component<Props, State> {
               <div className="Header-links-button is-desktop">
                 <Link to="/create-request">
                   {Array.isArray(ccrDrafts) && ccrDrafts.length > 0 ? (
-                    <Button type={'dashed'}>My Requests</Button>
+                    <Button type={'primary'}>My Requests</Button>
                   ) : (
                     <Button type={'primary'}>Create a Request</Button>
                   )}
