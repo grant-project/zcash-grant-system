@@ -272,9 +272,11 @@ export class ProposalDetail extends React.Component<Props, State> {
             <Tabs.TabPane tab="Updates" key="updates" disabled={!isLive}>
               <UpdatesTab proposalId={proposal.proposalId} />
             </Tabs.TabPane>
-            <Tabs.TabPane tab="Contributors" key="contributors" disabled={!isLive}>
-              <ContributorsTab proposalId={proposal.proposalId} />
-            </Tabs.TabPane>
+            {!proposal.isVersionTwo && (
+              <Tabs.TabPane tab="Contributors" key="contributors" disabled={!isLive}>
+                <ContributorsTab proposalId={proposal.proposalId} />
+              </Tabs.TabPane>
+            )}
           </LinkableTabs>
         </div>
 
