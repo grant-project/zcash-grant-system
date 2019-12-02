@@ -5,6 +5,7 @@ import {
   PROPOSAL_ARBITER_STATUSES,
   MILESTONE_STAGES,
   PROPOSAL_STAGES,
+  CCR_STATUSES,
 } from './statuses';
 
 export interface Filter {
@@ -80,6 +81,20 @@ export const rfpFilters: Filters = {
   getById: getFilterById(RFP_FILTERS),
 };
 
+// CCR
+
+const CCR_FILTERS = CCR_STATUSES.map(c => ({
+  id: `STATUS_${c.id}`,
+  display: `Status: ${c.tagDisplay}`,
+  color: c.tagColor,
+  group: 'Status',
+}));
+
+export const ccrFilters: Filters = {
+  list: CCR_FILTERS,
+  getById: getFilterById(CCR_FILTERS),
+};
+
 // Contribution
 
 const CONTRIBUTION_FILTERS = CONTRIBUTION_STATUSES.map(s => ({
@@ -87,17 +102,20 @@ const CONTRIBUTION_FILTERS = CONTRIBUTION_STATUSES.map(s => ({
   display: `Status: ${s.tagDisplay}`,
   color: s.tagColor,
   group: 'Status',
-})).concat([{
-  id: 'REFUNDABLE',
-  display: 'Refundable',
-  color: '#afd500',
-  group: 'Refundable',
-}, {
-  id: 'DONATION',
-  display: 'Donations',
-  color: '#afd500',
-  group: 'Donations',
-}]);
+})).concat([
+  {
+    id: 'REFUNDABLE',
+    display: 'Refundable',
+    color: '#afd500',
+    group: 'Refundable',
+  },
+  {
+    id: 'DONATION',
+    display: 'Donations',
+    color: '#afd500',
+    group: 'Donations',
+  },
+]);
 
 export const contributionFilters: Filters = {
   list: CONTRIBUTION_FILTERS,

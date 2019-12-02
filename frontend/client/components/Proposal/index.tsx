@@ -14,7 +14,7 @@ import { AlertProps } from 'antd/lib/alert';
 import ExceptionPage from 'components/ExceptionPage';
 import HeaderDetails from 'components/HeaderDetails';
 import CampaignBlock from './CampaignBlock';
-import TippingBlock from './TippingBlock'
+import TippingBlock from './TippingBlock';
 import TeamBlock from './TeamBlock';
 import RFPBlock from './RFPBlock';
 import Milestones from './Milestones';
@@ -28,7 +28,7 @@ import { withRouter } from 'react-router';
 import SocialShare from 'components/SocialShare';
 import Follow from 'components/Follow';
 import Like from 'components/Like';
-import { TipJarProposalSettingsModal } from 'components/TipJar'
+import { TipJarProposalSettingsModal } from 'components/TipJar';
 import './index.less';
 
 interface OwnProps {
@@ -63,7 +63,7 @@ export class ProposalDetail extends React.Component<Props, State> {
     isBodyOverflowing: false,
     isUpdateOpen: false,
     isCancelOpen: false,
-    isTipJarOpen: false
+    isTipJarOpen: false,
   };
 
   bodyEl: HTMLElement | null = null;
@@ -94,7 +94,13 @@ export class ProposalDetail extends React.Component<Props, State> {
 
   render() {
     const { user, detail: proposal, isPreview, detailError } = this.props;
-    const { isBodyExpanded, isBodyOverflowing, isCancelOpen, isUpdateOpen, isTipJarOpen } = this.state;
+    const {
+      isBodyExpanded,
+      isBodyOverflowing,
+      isCancelOpen,
+      isUpdateOpen,
+      isTipJarOpen,
+    } = this.state;
     const showExpand = !isBodyExpanded && isBodyOverflowing;
     const wrongProposal = proposal && proposal.proposalId !== this.props.proposalId;
 
@@ -108,8 +114,8 @@ export class ProposalDetail extends React.Component<Props, State> {
     const isTrustee = !!proposal.team.find(tm => tm.userid === (user && user.userid));
     const isLive = proposal.status === STATUS.LIVE;
     const milestonesDisabled = proposal.isVersionTwo
-        ? !proposal.acceptedWithFunding
-        : false;
+      ? !proposal.acceptedWithFunding
+      : false;
     const defaultTab = milestonesDisabled ? 'discussions' : 'milestones';
 
     const adminMenu = (
@@ -284,7 +290,7 @@ export class ProposalDetail extends React.Component<Props, State> {
               isVisible={isCancelOpen}
               handleClose={this.closeCancelModal}
             />
-            <TipJarProposalSettingsModal 
+            <TipJarProposalSettingsModal
               proposal={proposal}
               isVisible={isTipJarOpen}
               handleClose={this.closeTipJarModal}
@@ -314,7 +320,6 @@ export class ProposalDetail extends React.Component<Props, State> {
       this.setState({ isBodyOverflowing: true });
     }
   };
-
 
   private openTipJarModal = () => this.setState({ isTipJarOpen: true });
   private closeTipJarModal = () => this.setState({ isTipJarOpen: false });

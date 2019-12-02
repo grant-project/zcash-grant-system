@@ -20,6 +20,8 @@ import 'styles/style.less';
 const opts = { fallback: <Loader size="large" /> };
 const Home = loadable(() => import('pages/index'), opts);
 const Create = loadable(() => import('pages/create'), opts);
+const CreateRequest = loadable(() => import('pages/create-request'), opts);
+const RequestEdit = loadable(() => import('pages/request-edit'), opts);
 const ProposalEdit = loadable(() => import('pages/proposal-edit'), opts);
 const Proposals = loadable(() => import('pages/proposals'), opts);
 const Proposal = loadable(() => import('pages/proposal'), opts);
@@ -62,6 +64,30 @@ const routeConfigs: RouteConfig[] = [
       isHeaderTransparent: true,
       isFullScreen: true,
     },
+  },
+  {
+    // Create request
+    route: {
+      path: '/create-request',
+      component: CreateRequest,
+    },
+    template: {
+      title: 'Create a Request',
+    },
+    onlyLoggedIn: true,
+  },
+  {
+    // Proposal edit page
+    route: {
+      path: '/ccrs/:id/edit',
+      component: RequestEdit,
+    },
+    template: {
+      title: 'Edit Request',
+      isFullScreen: true,
+      hideFooter: true,
+    },
+    onlyLoggedIn: true,
   },
   {
     // Create proposal

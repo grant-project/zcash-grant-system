@@ -1,14 +1,15 @@
-from .subscription_settings import EmailSubscription, is_subscribed
-from sendgrid.helpers.mail import Email, Mail, Content
-from python_http_client import HTTPError
-from grant.utils.misc import make_url
-from sentry_sdk import capture_exception
-from grant.settings import SENDGRID_API_KEY, SENDGRID_DEFAULT_FROM, SENDGRID_DEFAULT_FROMNAME, UI
-from grant.settings import SENDGRID_API_KEY, SENDGRID_DEFAULT_FROM, UI, E2E_TESTING
-import sendgrid
 from threading import Thread
-from flask import render_template, Markup, current_app, g
 
+import sendgrid
+from flask import render_template, Markup, current_app, g
+from python_http_client import HTTPError
+from sendgrid.helpers.mail import Email, Mail, Content
+from sentry_sdk import capture_exception
+
+from grant.settings import SENDGRID_API_KEY, SENDGRID_DEFAULT_FROM, UI, E2E_TESTING
+from grant.settings import SENDGRID_DEFAULT_FROMNAME
+from grant.utils.misc import make_url
+from .subscription_settings import EmailSubscription, is_subscribed
 
 default_template_args = {
     'home_url': make_url('/'),
@@ -70,7 +71,7 @@ def proposal_approved(email_args):
     return {
         'subject': 'Your proposal has been approved!',
         'title': 'Your proposal has been approved',
-        'preview': 'Start raising funds for {} now'.format(email_args['proposal'].title),
+        'preview': '{} is now live on ZF Grants!'.format(email_args['proposal'].title),
         'subscription': EmailSubscription.MY_PROPOSAL_APPROVAL
     }
 
@@ -300,6 +301,15 @@ def admin_approval(email_args):
     }
 
 
+def admin_approval_ccr(email_args):
+    return {
+        'subject': f'Review needed for {email_args["ccr"].title}',
+        'title': f'CCR Review',
+        'preview': f'{email_args["ccr"].title} needs review, as an admin you can help.',
+        'subscription': EmailSubscription.ADMIN_APPROVAL_CCR,
+    }
+
+
 def admin_arbiter(email_args):
     return {
         'subject': f'Arbiter needed for {email_args["proposal"].title}',
@@ -367,6 +377,7 @@ get_info_lookup = {
     'milestone_accept': milestone_accept,
     'milestone_paid': milestone_paid,
     'admin_approval': admin_approval,
+    'admin_approval_ccr': admin_approval_ccr,
     'admin_arbiter': admin_arbiter,
     'admin_payout': admin_payout,
     'followed_proposal_milestone': followed_proposal_milestone,

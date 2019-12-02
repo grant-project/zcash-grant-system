@@ -521,7 +521,7 @@ class Proposal(db.Model):
                 'proposal_url': make_admin_url(f'/proposals/{self.id}'),
             })
 
-    # state: status (DRAFT || REJECTED) -> (PENDING || STAKING)
+    # state: status (DRAFT || REJECTED) -> (PENDING)
     def submit_for_approval(self):
         self.validate_publishable()
         self.validate_milestone_days()
@@ -529,11 +529,7 @@ class Proposal(db.Model):
         # specific validation
         if self.status not in allowed_statuses:
             raise ValidationException(f"Proposal status must be draft or rejected to submit for approval")
-        # set to PENDING if staked, else STAKING
-        if self.is_staked:
-            self.status = ProposalStatus.PENDING
-        else:
-            self.status = ProposalStatus.STAKING
+        self.set_pending()
 
     def set_pending_when_ready(self):
         if self.status == ProposalStatus.STAKING and self.is_staked:
@@ -541,10 +537,6 @@ class Proposal(db.Model):
 
     # state: status STAKING -> PENDING
     def set_pending(self):
-        if self.status != ProposalStatus.STAKING:
-            raise ValidationException(f"Proposal status must be staking in order to be set to pending")
-        if not self.is_staked:
-            raise ValidationException(f"Proposal is not fully staked, cannot set to pending")
         self.send_admin_email('admin_approval')
         self.status = ProposalStatus.PENDING
         db.session.add(self)
@@ -566,16 +558,21 @@ class Proposal(db.Model):
             self.date_published = datetime.datetime.now()
             self.stage = ProposalStage.WIP
 
-            with_or_out = 'without'
             if with_funding:
                 self.fully_fund_contibution_bounty()
-                with_or_out = 'with'
             for t in self.team:
+                admin_note = ''
+                if with_funding:
+                    admin_note = 'Congratulations! Your proposal has been accepted with funding from the Zcash Foundation.'
+                else:
+                    admin_note = '''
+                    We've chosen to list your proposal on ZF Grants, but we won't be funding your proposal at this time.
+                    '''
                 send_email(t.email_address, 'proposal_approved', {
                     'user': t,
                     'proposal': self,
                     'proposal_url': make_url(f'/proposals/{self.id}'),
-                    'admin_note': f'Congratulations! Your proposal has been accepted {with_or_out} funding.'
+                    'admin_note': admin_note
                 })
         else:
             if not reject_reason:
