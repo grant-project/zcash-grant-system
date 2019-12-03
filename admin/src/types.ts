@@ -47,7 +47,6 @@ export interface RFP {
   matching: boolean;
   bounty: string | null;
   dateCloses: number | null;
-  isVersionTwo: boolean;
 }
 export interface RFPArgs {
   title: string;

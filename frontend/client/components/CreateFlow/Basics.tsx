@@ -169,10 +169,7 @@ class CreateFlowBasics extends React.Component<Props, State> {
         <Form.Item
           label="Target amount"
           validateStatus={errors.target ? 'error' : undefined}
-          help={
-            errors.target ||
-            'You will be paid out in ZEC at market price at payout time. This cannot be changed once your proposal starts'
-          }
+          help={errors.target || 'This cannot be changed once your proposal starts'}
         >
           <Input
             size="large"
@@ -181,7 +178,7 @@ class CreateFlowBasics extends React.Component<Props, State> {
             type="number"
             value={target}
             onChange={this.handleInputChange}
-            addonBefore="$"
+            addonAfter="ZEC"
             maxLength={16}
           />
         </Form.Item>

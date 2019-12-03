@@ -1,4 +1,4 @@
-import { Zat, Usd } from 'utils/units';
+import { Zat } from 'utils/units';
 import { PROPOSAL_STAGE } from 'api/constants';
 import { CreateMilestone, Update, User, Comment, ContributionWithUser } from 'types';
 import { ProposalMilestone } from './milestone';
@@ -52,8 +52,8 @@ export interface ProposalDraft {
 export interface Proposal extends Omit<ProposalDraft, 'target' | 'invites'> {
   proposalAddress: string;
   proposalUrlId: string;
-  target: Zat | Usd;
-  funded: Zat | Usd;
+  target: Zat;
+  funded: Zat;
   percentFunded: number;
   contributionMatching: number;
   contributionBounty: Zat;
@@ -99,15 +99,13 @@ export interface UserProposal {
   status: STATUS;
   title: string;
   brief: string;
-  funded: Zat | Usd;
-  target: Zat | Usd;
+  funded: Zat;
+  target: Zat;
   dateCreated: number;
   dateApproved: number;
   datePublished: number;
   team: User[];
   rejectReason: string;
-  acceptedWithFunding: boolean | null;
-  isVersionTwo: boolean;
 }
 
 // NOTE: sync with backend/grant/proposal/models.py STATUSES

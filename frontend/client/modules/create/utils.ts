@@ -1,8 +1,7 @@
 import { ProposalDraft, STATUS, MILESTONE_STAGE, PROPOSAL_ARBITER_STATUS } from 'types';
 import { User } from 'types';
 import {
-  getAmountErrorUsd,
-  getAmountErrorUsdFromString,
+  getAmountError,
   isValidSaplingAddress,
   isValidTAddress,
   isValidSproutAddress,
@@ -99,8 +98,7 @@ export function getCreateErrors(
   const targetFloat = target ? parseFloat(target) : 0;
   if (target && !Number.isNaN(targetFloat)) {
     const limit = parseFloat(process.env.PROPOSAL_TARGET_MAX as string);
-    const targetErr =
-      getAmountErrorUsd(targetFloat, limit) || getAmountErrorUsdFromString(target);
+    const targetErr = getAmountError(targetFloat, limit, 0.001);
     if (targetErr) {
       errors.target = targetErr;
     }

@@ -9,7 +9,6 @@ import Markdown from 'components/Markdown';
 import { formatDateSeconds } from 'util/time';
 import store from 'src/store';
 import { PROPOSAL_STATUS } from 'src/types';
-import { formatUsd } from 'src/util/formatters';
 import './index.less';
 
 type Props = RouteComponentProps<{ id?: string }>;
@@ -94,10 +93,7 @@ class RFPDetail extends React.Component<Props> {
               {renderDeetItem('created', formatDateSeconds(rfp.dateCreated))}
               {renderDeetItem('status', rfp.status)}
               {renderDeetItem('matching', String(rfp.matching))}
-              {renderDeetItem(
-                'bounty',
-                rfp.isVersionTwo ? formatUsd(rfp.bounty) : `${rfp.bounty} ZEC`,
-              )}
+              {renderDeetItem('bounty', `${rfp.bounty} ZEC`)}
               {renderDeetItem(
                 'dateCloses',
                 rfp.dateCloses && formatDateSeconds(rfp.dateCloses),

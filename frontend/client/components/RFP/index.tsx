@@ -15,7 +15,6 @@ import UnitDisplay from 'components/UnitDisplay';
 import HeaderDetails from 'components/HeaderDetails';
 import Like from 'components/Like';
 import { RFP_STATUS } from 'api/constants';
-import { formatUsd } from 'utils/formatters';
 import './index.less';
 
 interface OwnProps {
@@ -63,19 +62,11 @@ class RFPDetail extends React.Component<Props> {
     }
 
     if (rfp.bounty) {
-      if (rfp.isVersionTwo) {
-        tags.push(
-          <Tag key="bounty" color="#CF8A00">
-            {formatUsd(rfp.bounty.toString(10))} bounty
-          </Tag>,
-        );
-      } else {
-        tags.push(
-          <Tag key="bounty" color="#CF8A00">
-            <UnitDisplay value={rfp.bounty} symbol="ZEC" /> bounty
-          </Tag>,
-        );
-      }
+      tags.push(
+        <Tag key="bounty" color="#CF8A00">
+          <UnitDisplay value={rfp.bounty} symbol="ZEC" /> bounty
+        </Tag>,
+      );
     }
 
     if (!isLive) {
@@ -107,22 +98,14 @@ class RFPDetail extends React.Component<Props> {
         <Markdown className="RFPDetail-content" source={rfp.content} />
         <div className="RFPDetail-rules">
           <ul>
-            {rfp.bounty &&
-              rfp.isVersionTwo && (
-                <li>
-                  Accepted proposals will be funded up to{' '}
-                  <strong>{formatUsd(rfp.bounty.toString(10))}</strong> in ZEC
-                </li>
-              )}
-            {rfp.bounty &&
-              !rfp.isVersionTwo && (
-                <li>
-                  Accepted proposals will be funded up to{' '}
-                  <strong>
-                    <UnitDisplay value={rfp.bounty} symbol="ZEC" />
-                  </strong>
-                </li>
-              )}
+            {rfp.bounty && (
+              <li>
+                Accepted proposals will be funded up to{' '}
+                <strong>
+                  <UnitDisplay value={rfp.bounty} symbol="ZEC" />
+                </strong>
+              </li>
+            )}
             {rfp.matching && (
               <li>
                 Contributions will have their <strong>funding matched</strong> by the
