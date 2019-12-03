@@ -93,14 +93,13 @@ def retire_v1_proposals(dry):
     proposals_funding_required = Proposal.query.filter_by(stage="FUNDING_REQUIRED").all()
     proposals_draft = Proposal.query.filter_by(status=ProposalStatus.DRAFT).all()
     proposals_pending = Proposal.query.filter_by(status=ProposalStatus.PENDING).all()
+    proposals_staking = Proposal.query.filter_by(status=ProposalStatus.STAKING).all()
     modified_funding_required_count = 0
     modified_draft_count = 0
     modified_pending_count = 0
+    modified_staking_count = 0
 
-    # TODO: what about APPROVED (before use publishes the proposal live) or STAKING stages?
-    # TODO: what happens to PENDING proposals that have already staked?
-
-    if not proposals_funding_required and not proposals_draft:
+    if not proposals_funding_required and not proposals_draft and not proposals_pending and not proposals_staking:
         print("No proposals found. Exiting...")
         return
 
@@ -157,6 +156,11 @@ def retire_v1_proposals(dry):
         modified_pending_count += 1
         print(f"Modified 'PENDING' proposal {p.id} - {p.title}")
 
+    for p in proposals_staking:
+        convert_proposal_to_v2_draft(p)
+        modified_staking_count += 1
+        print(f"Modified 'STAKING' proposal {p.id} - {p.title}")
+
     if not dry:
         print(f"Committing changes to database")
         db.session.commit()
@@ -164,5 +168,7 @@ def retire_v1_proposals(dry):
     print("")
     print(f"Modified {modified_funding_required_count} 'FUNDING_REQUIRED' proposals")
     print(f"Modified {modified_draft_count} 'DRAFT' proposals")
+    print(f"Modified {modified_pending_count} 'PENDING' proposals")
+    print(f"Modified {modified_staking_count} 'STAKING' proposals")
 
 
