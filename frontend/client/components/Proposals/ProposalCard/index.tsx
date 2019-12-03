@@ -4,6 +4,7 @@ import { Proposal } from 'types';
 import Card from 'components/Card';
 import UserAvatar from 'components/UserAvatar';
 import UnitDisplay from 'components/UnitDisplay';
+import { formatUsd } from 'utils/formatters'
 import './style.less';
 
 export class ProposalCard extends React.Component<Proposal> {
@@ -21,6 +22,7 @@ export class ProposalCard extends React.Component<Proposal> {
       team,
       target,
       contributionMatching,
+      isVersionTwo
     } = this.props;
 
     return (
@@ -35,7 +37,12 @@ export class ProposalCard extends React.Component<Proposal> {
         )}
         <div className="ProposalCard-funding">
           <div className="ProposalCard-funding-raised">
-            <UnitDisplay value={target} symbol="ZEC" />
+            {isVersionTwo && (
+              formatUsd(target.toString(10))
+            )}
+            {!isVersionTwo && (
+              <UnitDisplay value={target} symbol="ZEC" />
+            )}
           </div>
         </div>
 

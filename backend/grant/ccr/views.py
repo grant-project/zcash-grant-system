@@ -21,8 +21,8 @@ blueprint = Blueprint("ccr", __name__, url_prefix="/api/v1/ccrs")
 def get_ccr(ccr_id):
     ccr = CCR.query.filter_by(id=ccr_id).first()
     if ccr:
-        if ccr.status != CCR.LIVE:
-            if CCR.status == CCR.DELETED:
+        if ccr.status != CCRStatus.LIVE:
+            if CCR.status == CCRStatus.DELETED:
                 return {"message": "CCR was deleted"}, 404
             authed_user = get_authed_user()
 

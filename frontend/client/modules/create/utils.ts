@@ -1,13 +1,21 @@
-import { ProposalDraft, STATUS, MILESTONE_STAGE, PROPOSAL_ARBITER_STATUS } from 'types';
-import { User } from 'types';
 import {
-  getAmountError,
+  ProposalDraft,
+  STATUS,
+  MILESTONE_STAGE,
+  PROPOSAL_ARBITER_STATUS,
+  CCRDraft,
+  RFP,
+} from 'types';
+import { User, CCR } from 'types';
+import {
+  getAmountErrorUsd,
+  getAmountErrorUsdFromString,
   isValidSaplingAddress,
   isValidTAddress,
   isValidSproutAddress,
 } from 'utils/validators';
-import { Zat, toZat } from 'utils/units';
-import { PROPOSAL_STAGE } from 'api/constants';
+import { Zat, toZat, toUsd } from 'utils/units';
+import { PROPOSAL_STAGE, RFP_STATUS } from 'api/constants';
 import {
   ProposalDetail,
   PROPOSAL_DETAIL_INITIAL_STATE,
@@ -98,7 +106,8 @@ export function getCreateErrors(
   const targetFloat = target ? parseFloat(target) : 0;
   if (target && !Number.isNaN(targetFloat)) {
     const limit = parseFloat(process.env.PROPOSAL_TARGET_MAX as string);
-    const targetErr = getAmountError(targetFloat, limit, 0.001);
+    const targetErr =
+      getAmountErrorUsd(targetFloat, limit) || getAmountErrorUsdFromString(target);
     if (targetErr) {
       errors.target = targetErr;
     }
@@ -260,5 +269,31 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
       stage: MILESTONE_STAGE.IDLE,
     })),
     ...PROPOSAL_DETAIL_INITIAL_STATE,
+  };
+}
+
+export function makeRfpPreviewFromCcrDraft(draft: CCRDraft): RFP {
+  const ccr: CCR = {
+    ...draft,
+    noOp: true,
+  };
+  const now = new Date().getTime();
+  const { brief, content, title } = draft
+
+  return {
+    id: 0,
+    urlId: '',
+    status: RFP_STATUS.LIVE,
+    acceptedProposals: [],
+    bounty: draft.target ? toUsd(draft.target) : null,
+    matching: false,
+    dateOpened: now / 1000,
+    authedLiked: false,
+    likesCount: 0,
+    isVersionTwo: true,
+    ccr,
+    brief,
+    content,
+    title
   };
 }
