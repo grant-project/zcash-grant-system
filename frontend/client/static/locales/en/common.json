@@ -33,7 +33,7 @@
     "guide": {
       "title": "How it works",
       "submit": "Individuals and teams submit proposals against requests from the community or the Zcash Foundation, or submit one of their own ideas",
-      "review": "Their proposal is reviewed by the Zcash Foundation, and potentially rewarded a bounty or flagged for community donations. Acceptance does not neccesarily imply funding, as the Zcash Foundation reserves the right to make proposals public to the community without awarding funding.",
+      "review": "The proposal is reviewed by the Zcash Foundation, after which the proposal may be accepted with or without funding. In cases where the proposal is accepted without funding, the community may donate directly when the team has set a tip address.",
       "community": "The proposal is then opened up to the community to discuss, provide feedback, and optionally donate to the team",
       "complete": "The proposal creator(s) post updates with their progress, and if having received a bounty, are paid out as they reach project milestones"
     },
