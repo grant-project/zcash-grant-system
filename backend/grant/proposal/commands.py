@@ -106,6 +106,7 @@ def retire_v1_proposals(dry):
     print(f"Found {len(proposals_funding_required)} 'FUNDING_REQUIRED' proposals to modify")
     print(f"Found {len(proposals_draft)} 'DRAFT' proposals to modify")
     print(f"Found {len(proposals_pending)} 'PENDING' proposals to modify")
+    print(f"Found {len(proposals_staking)} 'STAKING' proposals to modify")
 
     if dry:
         print(f"This is a dry run. Changes will not be committed to the database")
