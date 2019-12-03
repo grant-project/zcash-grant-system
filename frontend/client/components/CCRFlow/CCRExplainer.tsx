@@ -16,25 +16,28 @@ type Props = WithNamespaces & CreateProps;
 const CCRExplainer: React.SFC<Props> = ({ t, startSteps }) => {
   const items = [
     {
-      text: t('home.guide.submit'),
+      text: (
+        <p>
+          Anyone can create a request for improvements to the Zcash ecosystem. Approved
+          requests are posted publicly to garner interest for proposals.
+        </p>
+      ),
       icon: <SubmitIcon />,
     },
     {
-      text: t('home.guide.review'),
+      text:
+        "The request is reviewed by the Zcash Foundation. \nYou'll be notified should the Zcash Foundation choose to make your request public.",
       icon: <ReviewIcon />,
-    },
-    {
-      text: t('home.guide.community'),
-      icon: <CommunityIcon />,
     },
   ];
 
   return (
     <div className="CCRExplainer">
       <div className="CCRExplainer-header">
-        <h2 className="CCRExplainer-header-title">{t('home.guide.title')}</h2>
+        <h2 className="CCRExplainer-header-title">Creating a Request</h2>
         <div className="CCRExplainer-header-subtitle">
-          You're almost ready to create a proposal.
+          We can't wait to get your request! Before starting, here's what you should
+          know...
         </div>
       </div>
       <div className="CCRExplainer-items">
@@ -46,7 +49,7 @@ const CCRExplainer: React.SFC<Props> = ({ t, startSteps }) => {
         ))}
       </div>
       <div className="CCRExplainer-actions">
-        <Checkbox onChange={ev => ls.set<boolean>('noExplain', ev.target.checked)}>
+        <Checkbox onChange={ev => ls.set<boolean>('noExplainCCR', ev.target.checked)}>
           Don't show this again
         </Checkbox>
         <Button

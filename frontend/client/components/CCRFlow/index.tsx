@@ -19,6 +19,8 @@ import { getCCRErrors } from 'modules/ccr/utils';
 import { AppState } from 'store/reducers';
 
 import './index.less';
+import ls from 'local-storage';
+import Explainer from './CCRExplainer';
 
 export enum CCR_STEP {
   BASICS = 'BASICS',
@@ -35,6 +37,11 @@ interface StepInfo {
   help: React.ReactNode;
   component: any;
 }
+
+interface LSExplainer {
+  noExplainCCR: boolean;
+}
+
 const STEP_INFO: { [key in CCR_STEP]: StepInfo } = {
   [CCR_STEP.BASICS]: {
     short: 'Basics',
@@ -80,6 +87,7 @@ interface State {
   isShowingSubmitWarning: boolean;
   isSubmitting: boolean;
   isExample: boolean;
+  isExplaining: boolean;
 }
 
 class CCRFlow extends React.Component<Props, State> {
@@ -94,12 +102,15 @@ class CCRFlow extends React.Component<Props, State> {
       queryStep && CCR_STEP[queryStep]
         ? (CCR_STEP[queryStep] as CCR_STEP)
         : CCR_STEP.BASICS;
+    const noExplain = !!ls<LSExplainer>('noExplainCCR');
+
     this.state = {
       step,
       isPreviewing: false,
       isSubmitting: false,
       isExample: false,
       isShowingSubmitWarning: false,
+      isExplaining: !noExplain,
     };
     this.debouncedUpdateForm = debounce(this.updateForm, 800);
     this.historyUnlisten = this.props.history.listen(this.handlePop);
@@ -113,7 +124,13 @@ class CCRFlow extends React.Component<Props, State> {
 
   render() {
     const { isSavingDraft, saveDraftError } = this.props;
-    const { step, isPreviewing, isSubmitting, isShowingSubmitWarning } = this.state;
+    const {
+      step,
+      isPreviewing,
+      isSubmitting,
+      isShowingSubmitWarning,
+      isExplaining,
+    } = this.state;
 
     const info = STEP_INFO[step];
     const currentIndex = STEP_ORDER.indexOf(step);
@@ -127,6 +144,9 @@ class CCRFlow extends React.Component<Props, State> {
       showFooter = false;
     } else if (isPreviewing) {
       content = <Preview />;
+    } else if (isExplaining) {
+      content = <Explainer startSteps={this.startSteps} />;
+      showFooter = false;
     } else {
       // Antd definitions are missing `onClick` for step, even though it works.
       const Step = Steps.Step as any;
@@ -277,6 +297,10 @@ class CCRFlow extends React.Component<Props, State> {
 
   private cancelSubmit = () => {
     this.setState({ isSubmitting: false });
+  };
+
+  private startSteps = () => {
+    this.setState({ step: CCR_STEP.BASICS, isExplaining: false });
   };
 }
 
