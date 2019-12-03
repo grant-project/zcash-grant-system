@@ -14,7 +14,7 @@ import {
   isValidTAddress,
   isValidSproutAddress,
 } from 'utils/validators';
-import { Zat, toZat, toUsd } from 'utils/units';
+import { toUsd } from 'utils/units';
 import { PROPOSAL_STAGE, RFP_STATUS } from 'api/constants';
 import {
   ProposalDetail,
@@ -239,10 +239,10 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
     dateCreated: Date.now() / 1000,
     datePublished: Date.now() / 1000,
     dateApproved: Date.now() / 1000,
-    target: toZat(draft.target),
-    funded: Zat('0'),
+    target: toUsd(draft.target),
+    funded: toUsd('0'),
     contributionMatching: 0,
-    contributionBounty: Zat('0'),
+    contributionBounty: toUsd('0'),
     percentFunded: 0,
     stage: PROPOSAL_STAGE.PREVIEW,
     isStaked: true,
@@ -262,7 +262,7 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
       index: idx,
       title: m.title,
       content: m.content,
-      amount: toZat(target * (parseInt(m.payoutPercent, 10) / 100)),
+      amount: (target * (parseInt(m.payoutPercent, 10) / 100)).toFixed(2),
       daysEstimated: m.daysEstimated,
       immediatePayout: m.immediatePayout,
       payoutPercent: m.payoutPercent.toString(),
