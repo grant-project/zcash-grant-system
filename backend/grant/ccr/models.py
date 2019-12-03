@@ -158,12 +158,12 @@ class CCR(db.Model):
             db.session.commit()
 
             # TODO email notify that CCR was accepted
-            send_email(self.author.email_address, 'ccr_approved', {
-                'user': self.author,
-                'ccr': self,
-                'ccr_url': make_url(f'/ccrs/{self.id}'),
-                'admin_note': f'Congratulations! Your Request has been accepted. .'
-            })
+            # send_email(self.author.email_address, 'ccr_approved', {
+            #     'user': self.author,
+            #     'ccr': self,
+            #     'ccr_url': make_url(f'/ccrs/{self.id}'),
+            #     'admin_note': f'Congratulations! Your Request has been accepted. .'
+            # })
             return rfp.id
         else:
             if not reject_reason:
