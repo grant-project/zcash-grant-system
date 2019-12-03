@@ -144,6 +144,12 @@ const MilestoneFields = ({
         maxLength={255}
       />
     </div>
+    {index > 0 && (
+      <div style={{ marginBottom: '8px', opacity: 0.7, fontSize: '13px' }}>
+        (Note: This number represents the number of days past the previous milestone day
+        estimate)
+      </div>
+    )}
 
     <div style={{ display: 'flex' }}>
       <Input

@@ -252,8 +252,8 @@ export class ProposalDetail extends React.Component<Props, State> {
             </div>
           </div>
           <div className="Proposal-top-side">
-            <CampaignBlock proposal={proposal} isPreview={!isLive} />
             <TippingBlock proposal={proposal} />
+            <CampaignBlock proposal={proposal} isPreview={!isLive} />
             <TeamBlock proposal={proposal} />
             {proposal.rfp && <RFPBlock rfp={proposal.rfp} />}
           </div>
@@ -272,9 +272,11 @@ export class ProposalDetail extends React.Component<Props, State> {
             <Tabs.TabPane tab="Updates" key="updates" disabled={!isLive}>
               <UpdatesTab proposalId={proposal.proposalId} />
             </Tabs.TabPane>
-            <Tabs.TabPane tab="Contributors" key="contributors" disabled={!isLive}>
-              <ContributorsTab proposalId={proposal.proposalId} />
-            </Tabs.TabPane>
+            {!proposal.isVersionTwo && (
+              <Tabs.TabPane tab="Contributors" key="contributors" disabled={!isLive}>
+                <ContributorsTab proposalId={proposal.proposalId} />
+              </Tabs.TabPane>
+            )}
           </LinkableTabs>
         </div>
 
