@@ -11,6 +11,22 @@ from grant.utils.exceptions import ValidationException
 from grant.utils.misc import make_admin_url, gen_random_id, dt_to_unix, make_url
 
 
+def default_content():
+    return """# Overview
+
+What you think should be accomplished
+
+
+# Approach
+
+How you expect a proposing team to accomplish your request
+
+
+# Deliverable
+
+The end result of a proposal the fulfills this request
+"""
+
 class CCR(db.Model):
     __tablename__ = "ccr"
 
@@ -63,7 +79,7 @@ class CCR(db.Model):
             user_id: int,
             title: str = '',
             brief: str = '',
-            content: str = '',
+            content: str = default_content(),
             target: str = '0',
             status: str = CCRStatus.DRAFT,
     ):
