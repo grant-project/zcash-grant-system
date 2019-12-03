@@ -51,7 +51,7 @@ class Template extends React.Component<Props> {
                 <span className="nav-text">Proposals</span>
               </Link>
             </Menu.Item>
-             <Menu.Item key="ccrs">
+            <Menu.Item key="ccrs">
               <Link to="/ccrs">
                 <Icon type="solution" />
                 <span className="nav-text">CCRs</span>

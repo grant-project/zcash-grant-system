@@ -50,7 +50,7 @@ class Routes extends React.Component<Props> {
             <Route path="/proposals/:id" component={ProposalDetail} />
             <Route path="/proposals" component={Proposals} />
             <Route path="/ccrs/:id" component={CCRDetail} />
-            <Route path="/ccrs" component={CCRs}/>
+            <Route path="/ccrs" component={CCRs} />
             <Route path="/rfps/new" component={RFPForm} />
             <Route path="/rfps/:id/edit" component={RFPForm} />
             <Route path="/rfps/:id" component={RFPDetail} />

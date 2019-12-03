@@ -1,5 +1,5 @@
 import { CCRDraft } from 'types';
-import { getAmountError } from 'utils/validators';
+import { getAmountErrorUsd, getAmountErrorUsdFromString } from 'utils/validators';
 
 interface CCRFormErrors {
   title?: string;
@@ -52,8 +52,9 @@ export function getCCRErrors(
   // Amount to raise
   const targetFloat = target ? parseFloat(target) : 0;
   if (target && !Number.isNaN(targetFloat)) {
-    const limit = parseFloat(process.env.CCR_TARGET_MAX as string);
-    const targetErr = getAmountError(targetFloat, limit, 0.001);
+    const limit = parseFloat(process.env.PROPOSAL_TARGET_MAX as string);
+    const targetErr =
+      getAmountErrorUsd(targetFloat, limit) || getAmountErrorUsdFromString(target);
     if (targetErr) {
       errors.target = targetErr;
     }

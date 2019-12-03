@@ -5,7 +5,7 @@ import {
   PROPOSAL_ARBITER_STATUSES,
   MILESTONE_STAGES,
   PROPOSAL_STAGES,
-  CCR_STATUSES
+  CCR_STATUSES,
 } from './statuses';
 
 export interface Filter {
@@ -102,17 +102,20 @@ const CONTRIBUTION_FILTERS = CONTRIBUTION_STATUSES.map(s => ({
   display: `Status: ${s.tagDisplay}`,
   color: s.tagColor,
   group: 'Status',
-})).concat([{
-  id: 'REFUNDABLE',
-  display: 'Refundable',
-  color: '#afd500',
-  group: 'Refundable',
-}, {
-  id: 'DONATION',
-  display: 'Donations',
-  color: '#afd500',
-  group: 'Donations',
-}]);
+})).concat([
+  {
+    id: 'REFUNDABLE',
+    display: 'Refundable',
+    color: '#afd500',
+    group: 'Refundable',
+  },
+  {
+    id: 'DONATION',
+    display: 'Donations',
+    color: '#afd500',
+    group: 'Donations',
+  },
+]);
 
 export const contributionFilters: Filters = {
   list: CONTRIBUTION_FILTERS,

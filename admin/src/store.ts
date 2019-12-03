@@ -150,8 +150,8 @@ async function cancelProposal(id: number) {
 }
 
 async function changeProposalToAcceptedWithFunding(id: number) {
-  const { data } = await api.put(`/admin/proposals/${id}/accept/fund`)
-  return data
+  const { data } = await api.put(`/admin/proposals/${id}/accept/fund`);
+  return data;
 }
 
 async function fetchComments(params: Partial<PageQuery>) {
@@ -182,11 +182,7 @@ async function fetchCCRDetail(id: number) {
   return data;
 }
 
-async function approveCCR(
-  id: number,
-  isAccepted: boolean,
-  rejectReason?: string,
-) {
+async function approveCCR(id: number, isAccepted: boolean, rejectReason?: string) {
   const { data } = await api.put(`/admin/ccrs/${id}/accept`, {
     isAccepted,
     rejectReason,
@@ -195,7 +191,7 @@ async function approveCCR(
 }
 
 async function fetchCCRs(params: Partial<PageQuery>) {
-  const { data } = await api.get(`/admin/ccrs`, {params});
+  const { data } = await api.get(`/admin/ccrs`, { params });
   return data;
 }
 
@@ -322,7 +318,6 @@ const app = store({
   proposalDetailUpdating: false,
   proposalDetailUpdated: false,
   proposalDetailChangingToAcceptedWithFunding: false,
-
 
   ccrs: {
     page: createDefaultPageData<CCR>('CREATED:DESC'),
@@ -558,9 +553,7 @@ const app = store({
   async deleteCCR(id: number) {
     try {
       await deleteCCR(id);
-      app.ccrs.page.items = app.ccrs.page.items.filter(
-        c => c.ccrId === id,
-      );
+      app.ccrs.page.items = app.ccrs.page.items.filter(c => c.ccrId === id);
     } catch (e) {
       handleApiError(e);
     }
@@ -575,7 +568,6 @@ const app = store({
     }
     app.ccrDetailFetching = false;
   },
-
 
   async approveCCR(isAccepted: boolean, rejectReason?: string) {
     if (!app.ccrDetail) {
@@ -654,7 +646,11 @@ const app = store({
     }
   },
 
-  async approveProposal(isAccepted: boolean, withFunding: boolean, rejectReason?: string) {
+  async approveProposal(
+    isAccepted: boolean,
+    withFunding: boolean,
+    rejectReason?: string,
+  ) {
     if (!app.proposalDetail) {
       const m = 'store.approveProposal(): Expected proposalDetail to be populated!';
       app.generalError.push(m);
@@ -664,7 +660,12 @@ const app = store({
     app.proposalDetailApproving = true;
     try {
       const { proposalId } = app.proposalDetail;
-      const res = await approveProposal(proposalId, isAccepted, withFunding, rejectReason);
+      const res = await approveProposal(
+        proposalId,
+        isAccepted,
+        withFunding,
+        rejectReason,
+      );
       app.updateProposalInStore(res);
     } catch (e) {
       handleApiError(e);
@@ -684,16 +685,16 @@ const app = store({
   },
 
   async changeProposalToAcceptedWithFunding(id: number) {
-    app.proposalDetailChangingToAcceptedWithFunding = true
+    app.proposalDetailChangingToAcceptedWithFunding = true;
 
     try {
-      const res = await changeProposalToAcceptedWithFunding(id)
-      app.updateProposalInStore(res)
+      const res = await changeProposalToAcceptedWithFunding(id);
+      app.updateProposalInStore(res);
     } catch (e) {
-      handleApiError(e)
+      handleApiError(e);
     }
 
-    app.proposalDetailChangingToAcceptedWithFunding = false
+    app.proposalDetailChangingToAcceptedWithFunding = false;
   },
 
   async markMilestonePaid(proposalId: number, milestoneId: number, txId: string) {

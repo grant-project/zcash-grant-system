@@ -32,6 +32,7 @@ class RFP(db.Model):
     date_closes = db.Column(db.DateTime, nullable=True)
     date_opened = db.Column(db.DateTime, nullable=True)
     date_closed = db.Column(db.DateTime, nullable=True)
+    version = db.Column(db.String(255), nullable=True)
 
     ccr = db.relationship("CCR", uselist=False, back_populates="rfp")
 
@@ -112,6 +113,7 @@ class RFP(db.Model):
         self.date_closes = date_closes
         self.matching = matching
         self.status = status
+        self.version = '2'
 
 
 class RFPSchema(ma.Schema):
@@ -133,6 +135,7 @@ class RFPSchema(ma.Schema):
             "accepted_proposals",
             "authed_liked",
             "likes_count",
+            "is_version_two",
             "ccr"
         )
 
@@ -142,6 +145,7 @@ class RFPSchema(ma.Schema):
     date_opened = ma.Method("get_date_opened")
     date_closed = ma.Method("get_date_closed")
     accepted_proposals = ma.Nested("ProposalSchema", many=True, exclude=["rfp"])
+    is_version_two = ma.Method("get_is_version_two")
 
     def get_status(self, obj):
         # Force it into closed state if date_closes is in the past
@@ -157,6 +161,9 @@ class RFPSchema(ma.Schema):
 
     def get_date_closed(self, obj):
         return dt_to_unix(obj.date_closed) if obj.date_closed else None
+
+    def get_is_version_two(self, obj):
+        return True if obj.version == '2' else False
 
 
 rfp_schema = RFPSchema()
@@ -180,6 +187,7 @@ class AdminRFPSchema(ma.Schema):
             "date_opened",
             "date_closed",
             "proposals",
+            "is_version_two",
             "ccr"
         )
 
@@ -190,6 +198,7 @@ class AdminRFPSchema(ma.Schema):
     date_opened = ma.Method("get_date_opened")
     date_closed = ma.Method("get_date_closed")
     proposals = ma.Nested("ProposalSchema", many=True, exclude=["rfp"])
+    is_version_two = ma.Method("get_is_version_two")
 
     def get_status(self, obj):
         # Force it into closed state if date_closes is in the past
@@ -208,6 +217,9 @@ class AdminRFPSchema(ma.Schema):
 
     def get_date_closed(self, obj):
         return dt_to_unix(obj.date_closes) if obj.date_closes else None
+
+    def get_is_version_two(self, obj):
+        return True if obj.version == '2' else False
 
 
 admin_rfp_schema = AdminRFPSchema()

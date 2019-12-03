@@ -24,8 +24,8 @@ class Home extends React.Component {
     const actionItems = [
       !!ccrPendingCount && (
         <div>
-          <Icon type="exclamation-circle" /> There are <b>{ccrPendingCount}</b>{' '}
-          community created requests <b>waiting for review</b>.{' '}
+          <Icon type="exclamation-circle" /> There are <b>{ccrPendingCount}</b> community
+          created requests <b>waiting for review</b>.{' '}
           <Link to="/ccrs?filters[]=STATUS_PENDING">Click here</Link> to view them.
         </div>
       ),

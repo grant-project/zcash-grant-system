@@ -86,7 +86,7 @@ export const CCR_STATUSES: Array<StatusSoT<CCR_STATUS>> = [
     tagColor: '#eb4118',
     hint:
       'Admin has requested changes for this Request. User may adjust it and resubmit for approval.',
-  }
+  },
 ];
 
 export const PROPOSAL_STATUSES: Array<StatusSoT<PROPOSAL_STATUS>> = [
