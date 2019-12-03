@@ -16,12 +16,8 @@ type Props = WithNamespaces & CreateProps;
 const CCRExplainer: React.SFC<Props> = ({ t, startSteps }) => {
   const items = [
     {
-      text: (
-        <p>
-          Anyone can create a request for improvements to the Zcash ecosystem. Approved
-          requests are posted publicly to garner interest for proposals.
-        </p>
-      ),
+      text:
+        'Anyone can create a request for improvements to the Zcash ecosystem. Approved requests are posted publicly to garner interest for proposals.',
       icon: <SubmitIcon />,
     },
     {
