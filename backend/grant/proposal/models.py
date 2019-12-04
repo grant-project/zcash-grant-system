@@ -588,7 +588,9 @@ class Proposal(db.Model):
                     admin_note = 'Congratulations! Your proposal has been accepted with funding from the Zcash Foundation.'
                 else:
                     admin_note = '''
-                    We've chosen to list your proposal on ZF Grants, but we won't be funding your proposal at this time.
+                    We've chosen to list your proposal on ZF Grants, but we won't be funding your proposal at this time. 
+                    Your proposal can still receive funding from the community in the form of tips if you have set a tip address for your proposal. 
+                    If you have not yet done so, you can do this from the actions dropdown at your proposal.
                     '''
                 send_email(t.email_address, 'proposal_approved', {
                     'user': t,

@@ -69,9 +69,9 @@ def change_password_info(email_args):
 
 def proposal_approved(email_args):
     return {
-        'subject': 'Your proposal has been approved!',
-        'title': 'Your proposal has been approved',
-        'preview': '{} is now live on ZF Grants!'.format(email_args['proposal'].title),
+        'subject': 'Your proposal has been reviewed',
+        'title': 'Your proposal has been reviewed',
+        'preview': '{} is now live on ZF Grants.'.format(email_args['proposal'].title),
         'subscription': EmailSubscription.MY_PROPOSAL_APPROVAL
     }
 
