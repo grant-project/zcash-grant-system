@@ -60,7 +60,21 @@ const PROPOSAL_FILTERS = PROPOSAL_STATUSES.map(s => ({
       color: s.tagColor,
       group: 'Milestone',
     })),
-  );
+  )
+  .concat([
+    {
+      id: 'ACCEPTED_WITH_FUNDING',
+      display: 'Accepted With Funding',
+      color: '#2D2A26',
+      group: 'Funding',
+    },
+    {
+      id: 'ACCEPTED_WITHOUT_FUNDING',
+      display: 'Accepted Without Funding',
+      color: '#108ee9',
+      group: 'Funding',
+    },
+  ]);
 
 export const proposalFilters: Filters = {
   list: PROPOSAL_FILTERS,
