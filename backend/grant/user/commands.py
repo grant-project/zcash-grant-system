@@ -68,4 +68,4 @@ def mangle_users():
         for social in SocialMedia.query.all():
             db.session.delete(social)
 
-        db.ssession.commit()
+        db.session.commit()
