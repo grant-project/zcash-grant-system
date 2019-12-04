@@ -134,7 +134,14 @@ export class RFPDetail extends React.Component<Props> {
                 Proposal submissions end {moment(rfp.dateCloses * 1000).format('LL')}
               </li>
             )}
-            {rfp.ccr && <li>Submitted by {rfp.ccr.author.displayName}</li>}
+            {rfp.ccr && (
+              <li>
+                Submitted by{' '}
+                <Link to={`/profile/${rfp.ccr.author.userid}`}>
+                  {rfp.ccr.author.displayName}
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
 
