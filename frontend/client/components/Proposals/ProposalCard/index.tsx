@@ -1,10 +1,11 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import classnames from 'classnames';
+import { Progress } from 'antd';
 import { Proposal } from 'types';
 import Card from 'components/Card';
 import UserAvatar from 'components/UserAvatar';
 import UnitDisplay from 'components/UnitDisplay';
-import { formatUsd } from 'utils/formatters'
 import './style.less';
 
 export class ProposalCard extends React.Component<Proposal> {
@@ -22,7 +23,9 @@ export class ProposalCard extends React.Component<Proposal> {
       team,
       target,
       contributionMatching,
-      isVersionTwo
+      isVersionTwo,
+      funded,
+      percentFunded,
     } = this.props;
 
     return (
@@ -35,19 +38,40 @@ export class ProposalCard extends React.Component<Proposal> {
             </span>
           </div>
         )}
-        <div className="ProposalCard-funding">
-          <div className="ProposalCard-funding-raised">
-            {isVersionTwo && (
-              formatUsd(target.toString(10))
-            )}
-            {!isVersionTwo && (
+        {isVersionTwo && (
+          <div className="ProposalCard-funding">
+            <div className="ProposalCard-funding-raised">
               <UnitDisplay value={target} symbol="ZEC" />
-            )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {!isVersionTwo && (
+          <>
+            <div className="ProposalCard-funding-v1">
+              <div className="ProposalCard-funding-v1-raised">
+                <UnitDisplay value={funded} symbol="ZEC" /> <small>raised</small> of{' '}
+                <UnitDisplay value={target} symbol="ZEC" /> goal
+              </div>
+              <div
+                className={classnames({
+                  ['ProposalCard-funding-percent']: true,
+                  ['is-funded']: percentFunded >= 100,
+                })}
+              >
+                {percentFunded}%
+              </div>
+            </div>
+            <Progress
+              percent={percentFunded}
+              status={percentFunded >= 100 ? 'success' : 'active'}
+              showInfo={false}
+            />
+          </>
+        )}
 
         <div className="ProposalCard-team">
-          <div className="ProposalCard-team-name">
+          <div className={`ProposalCard-team-name${isVersionTwo ? '' : '-v1'}`}>
             {team[0].displayName}{' '}
             {team.length > 1 && <small>+{team.length - 1} other</small>}
           </div>
@@ -55,7 +79,7 @@ export class ProposalCard extends React.Component<Proposal> {
             {[...team].reverse().map((u, idx) => (
               <UserAvatar
                 key={idx}
-                className="ProposalCard-team-avatars-avatar"
+                className={`ProposalCard-team-avatars-avatar${isVersionTwo ? '' : '-v1'}`}
                 user={u}
               />
             ))}
