@@ -111,8 +111,9 @@ class Proposals extends React.Component<Props, State> {
                 <h2 className="Proposals-about-text-title">Zcash Foundation Proposals</h2>
                 <p className="Proposals-about-text-desc">
                   The Zcash Foundation accepts proposals from community members to improve
-                  the Zcash ecosystem. Proposals are either accepted with or without
-                  funding, should they be approved by the Zcash Foundation.
+                  the Zcash ecosystem. Proposals are either funded by the Zcash Foundation
+                  directly, or are opened for community donations should they be approved
+                  by the Zcash Foundation."
                 </p>
               </div>
             </div>
