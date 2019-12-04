@@ -2,7 +2,6 @@ import React from 'react';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import SubmitIcon from 'static/images/guide-submit.svg';
 import ReviewIcon from 'static/images/guide-review.svg';
-import CommunityIcon from 'static/images/guide-community.svg';
 import './CCRExplainer.less';
 import * as ls from 'local-storage';
 import { Button, Checkbox, Icon } from 'antd';
@@ -13,7 +12,7 @@ interface CreateProps {
 
 type Props = WithNamespaces & CreateProps;
 
-const CCRExplainer: React.SFC<Props> = ({ t, startSteps }) => {
+const CCRExplainer: React.SFC<Props> = ({ startSteps }) => {
   const items = [
     {
       text:
