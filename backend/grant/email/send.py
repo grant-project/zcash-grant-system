@@ -76,6 +76,22 @@ def proposal_approved(email_args):
     }
 
 
+def ccr_approved(email_args):
+    return {
+        'subject': 'Your request has been approved!',
+        'title': 'Your request has been approved',
+        'preview': '{} will soon be live on ZF Grants!'.format(email_args['ccr'].title),
+    }
+
+
+def ccr_rejected(email_args):
+    return {
+        'subject': 'Your request has changes requested',
+        'title': 'Your request has changes requested',
+        'preview': '{} has changes requested'.format(email_args['ccr'].title),
+    }
+
+
 def proposal_rejected(email_args):
     return {
         'subject': 'Your proposal has changes requested',
@@ -356,6 +372,8 @@ get_info_lookup = {
     'change_email': change_email_info,
     'change_email_old': change_email_old_info,
     'change_password': change_password_info,
+    'ccr_rejected': ccr_rejected,
+    'ccr_approved': ccr_approved,
     'proposal_approved': proposal_approved,
     'proposal_rejected': proposal_rejected,
     'proposal_contribution': proposal_contribution,

@@ -8,7 +8,7 @@ from grant.email.send import send_email
 from grant.extensions import ma, db
 from grant.utils.enums import CCRStatus
 from grant.utils.exceptions import ValidationException
-from grant.utils.misc import make_admin_url, gen_random_id, dt_to_unix, make_url
+from grant.utils.misc import make_admin_url, gen_random_id, dt_to_unix
 
 
 def default_content():
@@ -26,6 +26,7 @@ How you expect a proposing team to accomplish your request
 
 The end result of a proposal the fulfills this request
 """
+
 
 class CCR(db.Model):
     __tablename__ = "ccr"
@@ -173,13 +174,11 @@ class CCR(db.Model):
             # for emails
             db.session.commit()
 
-            # TODO email notify that CCR was accepted
-            # send_email(self.author.email_address, 'ccr_approved', {
-            #     'user': self.author,
-            #     'ccr': self,
-            #     'ccr_url': make_url(f'/ccrs/{self.id}'),
-            #     'admin_note': f'Congratulations! Your Request has been accepted. .'
-            # })
+            send_email(self.author.email_address, 'ccr_approved', {
+                'user': self.author,
+                'ccr': self,
+                'admin_note': f'Congratulations! Your Request has been accepted. There may be a delay between acceptance and final posting as required by the Zcash Foundation.'
+            })
             return rfp.id
         else:
             if not reject_reason:
@@ -189,13 +188,11 @@ class CCR(db.Model):
             # for emails
             db.session.add(self)
             db.session.commit()
-            # TODO email that CCR was rejected
-            # send_email(t.email_address, 'ccr_rejected', {
-            #     'user': t,
-            #     'ccr': self,
-            #     'ccr_url': make_url(f'/ccrs/{self.id}'),
-            #     'admin_note': reject_reason
-            # })
+            send_email(self.author.email_address, 'ccr_rejected', {
+                'user': self.author,
+                'ccr': self,
+                'admin_note': reject_reason
+            })
             return None
 
 
