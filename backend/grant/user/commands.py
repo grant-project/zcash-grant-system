@@ -47,9 +47,8 @@ def set_admin(identity):
 
 
 @click.command()
-@click.argument('identity')
 @with_appcontext
-def mangle_users(identity):
+def mangle_users():
     if STAGING_PASSWORD:
         print("Mangling all users")
         for i, user in enumerate(User.query.all()):
