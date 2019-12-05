@@ -126,7 +126,7 @@ class User(db.Model, UserMixin):
     # relations
     social_medias = db.relationship(SocialMedia, backref="user", lazy=True, cascade="all, delete-orphan")
     comments = db.relationship(Comment, backref="user", lazy=True)
-    ccrs = db.relationship(CCR, backref="user", lazy=True)
+    ccrs = db.relationship(CCR, back_populates="author", lazy=True, cascade="all, delete-orphan")
     avatar = db.relationship(Avatar, uselist=False, back_populates="user", cascade="all, delete-orphan")
     settings = db.relationship(UserSettings, uselist=False, back_populates="user",
                                lazy=True, cascade="all, delete-orphan")

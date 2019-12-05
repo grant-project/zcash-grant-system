@@ -413,7 +413,7 @@ export function postCCRDraft(): Promise<{ data: CCRDraft }> {
   return axios.post('/api/v1/ccrs/drafts');
 }
 
-export function deleteCCRDraft(ccrId: number): Promise<any> {
+export function deleteCCR(ccrId: number): Promise<any> {
   return axios.delete(`/api/v1/ccrs/${ccrId}`);
 }
 
@@ -423,7 +423,7 @@ export function putCCR(ccr: CCRDraft): Promise<{ data: CCRDraft }> {
   return axios.put(`/api/v1/ccrs/${ccrId}`, rest);
 }
 
-export function getCCR(ccrId: number | string): Promise<{ data: any }> {
+export function getCCR(ccrId: number | string): Promise<{ data: CCR }> {
   return axios.get(`/api/v1/ccrs/${ccrId}`).then(res => {
     return res;
   });

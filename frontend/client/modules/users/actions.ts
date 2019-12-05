@@ -8,7 +8,7 @@ import {
   deleteProposalContribution,
   deleteProposalDraft,
   putProposalPublish,
-  deleteCCRDraft,
+  deleteCCR,
 } from 'api/api';
 import { Dispatch } from 'redux';
 import { cleanClone } from 'utils/helpers';
@@ -135,7 +135,7 @@ export function deletePendingRequest(userId: number, requestId: number) {
   return async (dispatch: Dispatch<any>) => {
     await dispatch({
       type: types.USER_DELETE_REQUEST,
-      payload: deleteCCRDraft(requestId).then(_ => ({ userId, requestId })),
+      payload: deleteCCR(requestId).then(_ => ({ userId, requestId })),
     });
   };
 }

@@ -549,16 +549,7 @@ const app = store({
   resetCCRPageQuery() {
     resetPageParams(app.ccrs);
   },
-
-  async deleteCCR(id: number) {
-    try {
-      await deleteCCR(id);
-      app.ccrs.page.items = app.ccrs.page.items.filter(c => c.ccrId === id);
-    } catch (e) {
-      handleApiError(e);
-    }
-  },
-
+  
   async fetchCCRDetail(id: number) {
     app.ccrDetailFetching = true;
     try {

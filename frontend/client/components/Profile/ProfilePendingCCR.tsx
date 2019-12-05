@@ -23,20 +23,18 @@ type Props = OwnProps & StateProps & DispatchProps;
 
 interface State {
   isDeleting: boolean;
-  isPublishing: boolean;
 }
 
 class ProfilePendingCCR extends React.Component<Props, State> {
   state: State = {
     isDeleting: false,
-    isPublishing: false,
   };
 
   render() {
     const { status, title, ccrId, rejectReason } = this.props.ccr;
-    const { isDeleting, isPublishing } = this.state;
+    const { isDeleting } = this.state;
 
-    const isDisableActions = isDeleting || isPublishing;
+    const isDisableActions = isDeleting;
 
     const st = {
       [STATUS.REJECTED]: {
@@ -106,8 +104,8 @@ class ProfilePendingCCR extends React.Component<Props, State> {
       message.success('Request deleted.');
     } catch (e) {
       message.error(e.message || e.toString());
-      this.setState({ isDeleting: false });
     }
+    this.setState({ isDeleting: false });
   };
 }
 

@@ -186,12 +186,6 @@ class CCRDetailNaked extends React.Component<Props, State> {
               </div>
             </Card>
 
-            {/* TEAM */}
-            {/*<Card title="Team" size="small">*/}
-            {/*    <div key={c.author.userid}>*/}
-            {/*      <Link to={`/users/${c.author.userid}`}>{c.author.displayName}</Link>*/}
-            {/*    </div>*/}
-            {/*</Card>*/}
           </Col>
         </Row>
       </div>
