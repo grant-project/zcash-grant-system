@@ -450,6 +450,14 @@ class ProposalDetailNaked extends React.Component<Props, State> {
 
           {/* RIGHT SIDE */}
           <Col span={6}>
+            {p.isVersionTwo && !p.acceptedWithFunding && p.stage === PROPOSAL_STAGE.WIP && <Alert
+                message="Accepted without funding"
+                description="This proposal has been posted publicly, but isn't being funded by the Zcash Foundation."
+                type="info"
+                showIcon
+            />
+            }
+
             {/* ACTIONS */}
             <Card size="small" className="ProposalDetail-controls">
               {renderCancelControl()}
