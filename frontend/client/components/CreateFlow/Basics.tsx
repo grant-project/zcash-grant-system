@@ -60,6 +60,9 @@ class CreateFlowBasics extends React.Component<Props, State> {
   render() {
     const { isUnlinkingProposalRFP } = this.props;
     const { title, brief, target, rfp, rfpOptIn } = this.state;
+    if (rfp && rfp.bounty && (target === null || target === '0')) {
+      this.setState({ target: rfp.bounty.toString() });
+    }
     const errors = getCreateErrors(this.state, true);
 
     // Don't show target error at zero since it defaults to that
@@ -67,9 +70,6 @@ class CreateFlowBasics extends React.Component<Props, State> {
     if (target === '0') {
       errors.target = undefined;
     }
-
-    const rfpOptInRequired =
-      rfp && (rfp.matching || (rfp.bounty && parseFloat(rfp.bounty.toString()) > 0));
 
     return (
       <Form layout="vertical" style={{ maxWidth: 600, margin: '0 auto' }}>
