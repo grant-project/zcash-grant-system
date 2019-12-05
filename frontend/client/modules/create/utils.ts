@@ -275,10 +275,9 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
 export function makeRfpPreviewFromCcrDraft(draft: CCRDraft): RFP {
   const ccr: CCR = {
     ...draft,
-    noOp: true,
   };
   const now = new Date().getTime();
-  const { brief, content, title } = draft
+  const { brief, content, title } = draft;
 
   return {
     id: 0,
@@ -294,6 +293,6 @@ export function makeRfpPreviewFromCcrDraft(draft: CCRDraft): RFP {
     ccr,
     brief,
     content,
-    title
+    title,
   };
 }

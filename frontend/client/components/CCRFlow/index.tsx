@@ -226,7 +226,6 @@ class CCRFlow extends React.Component<Props, State> {
           )
         )}
         <CCRSubmitWarningModal
-          ccr={this.props.form}
           isVisible={isShowingSubmitWarning}
           handleClose={this.closePublishWarning}
           handleSubmit={this.startSubmit}
