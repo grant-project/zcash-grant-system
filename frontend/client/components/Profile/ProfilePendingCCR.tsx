@@ -65,7 +65,7 @@ class ProfilePendingCCR extends React.Component<Props, State> {
       <div className="ProfilePending">
         <div className="ProfilePending-block">
           <Link to={`/ccrs/${ccrId}`} className="ProfilePending-title">
-            {title} <Tag color={st[status].color}>{st[status].tag} Request</Tag>
+            {title} <Tag color={st[status].color}>{st[status].tag}</Tag>
           </Link>
           <div className={`ProfilePending-status is-${status.toLowerCase()}`}>
             {st[status].blurb}
