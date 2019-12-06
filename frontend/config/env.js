@@ -53,7 +53,6 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 module.exports = () => {
   const raw = {
     BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:5000',
-    CCR_STAKING_AMOUNT: process.env.CCR_STAKING_AMOUNT,
     EXPLORER_URL: process.env.EXPLORER_URL || 'https://chain.so/tx/ZECTEST/<txid>',
     NODE_ENV: process.env.NODE_ENV || 'development',
     PORT: process.env.PORT || 3000,
