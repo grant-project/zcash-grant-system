@@ -1,8 +1,8 @@
 import { User } from 'types/user';
+import { RFP } from 'types/rfp';
 
 export enum CCRSTATUS {
   DRAFT = 'DRAFT',
-  STAKING = 'STAKING',
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
@@ -19,12 +19,10 @@ export interface CCRDraft {
   target: string;
   dateCreated: number;
   content: string;
-  isStaked: boolean;
 }
 
 export interface CCR extends CCRDraft {
-  // TODO remove
-  noOp: boolean;
+  rfp?: RFP;
 }
 
 export interface UserCCR {

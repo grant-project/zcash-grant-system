@@ -8,9 +8,6 @@ import { formatDateSeconds } from 'util/time';
 import './CCRItem.less';
 
 class CCRItemNaked extends React.Component<CCR> {
-  state = {
-    showDelete: false,
-  };
   render() {
     const props = this.props;
     const status = getStatusById(CCR_STATUSES, props.status);

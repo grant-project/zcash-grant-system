@@ -35,7 +35,7 @@ interface CreateFormErrors {
 
 export type KeyOfForm = keyof CreateFormErrors;
 export const FIELD_NAME_MAP: { [key in KeyOfForm]: string } = {
-  rfpOptIn: 'KYC',
+  rfpOptIn: 'RFP KYC',
   title: 'Title',
   brief: 'Brief',
   target: 'Target amount',
@@ -61,6 +61,7 @@ export function getCreateErrors(
     target,
     payoutAddress,
     tipJarAddress,
+    rfp,
     rfpOptIn,
     brief,
   } = form;
@@ -82,7 +83,7 @@ export function getCreateErrors(
   }
 
   // RFP opt-in
-  if (rfpOptIn === null) {
+  if (rfp && (rfp.bounty || rfp.matching) && rfpOptIn === null) {
     errors.rfpOptIn = 'Please accept or decline KYC';
   }
 
@@ -274,7 +275,6 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): ProposalDeta
 export function makeRfpPreviewFromCcrDraft(draft: CCRDraft): RFP {
   const ccr: CCR = {
     ...draft,
-    noOp: true,
   };
   const now = new Date().getTime();
   const { brief, content, title } = draft;

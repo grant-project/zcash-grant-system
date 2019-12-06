@@ -10,14 +10,7 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-const STATE = {
-  proposalPublishedId: null as null | UserProposal['proposalId'],
-};
-
-type State = typeof STATE;
-
-class ProfilePendingList extends React.Component<Props, State> {
-  state = STATE;
+class ProfilePendingList extends React.Component<Props> {
   render() {
     const { proposals, requests } = this.props;
     return (

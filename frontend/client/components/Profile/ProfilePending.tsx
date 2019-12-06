@@ -81,7 +81,7 @@ class ProfilePending extends React.Component<Props, State> {
       <div className="ProfilePending">
         <div className="ProfilePending-block">
           <Link to={`/proposals/${proposalId}`} className="ProfilePending-title">
-            {title} <Tag color={st[status].color}>{st[status].tag}</Tag>
+            {title} <Tag color={st[status].color}>{st[status].tag} Proposal</Tag>
           </Link>
           <div className={`ProfilePending-status is-${status.toLowerCase()}`}>
             {st[status].blurb}

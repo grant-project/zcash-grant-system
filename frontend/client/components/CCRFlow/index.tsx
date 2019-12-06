@@ -55,8 +55,7 @@ const STEP_INFO: { [key in CCR_STEP]: StepInfo } = {
     short: 'Details',
     title: 'Dive into the details',
     subtitle: 'Here’s your chance to lay out the full request, in all its glory',
-    help:
-      'Make sure people know what you’re building, why you’re qualified, and where the money’s going',
+    help: `Make sure people know what you’re requesting, why it's needed, how they can accomplish it`,
     component: Details,
   },
   [CCR_STEP.REVIEW]: {
@@ -227,7 +226,6 @@ class CCRFlow extends React.Component<Props, State> {
           )
         )}
         <CCRSubmitWarningModal
-          ccr={this.props.form}
           isVisible={isShowingSubmitWarning}
           handleClose={this.closePublishWarning}
           handleSubmit={this.startSubmit}

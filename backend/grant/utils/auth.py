@@ -147,7 +147,7 @@ def requires_ccr_owner_auth(f):
 
         ccr = CCR.query.filter_by(id=ccr_id).first()
         if not ccr:
-            return jsonify(message="No CCR exists with id {}".format(ccr)), 404
+            return jsonify(message="No CCR exists with id {}".format(ccr_id)), 404
 
         if g.current_user.id != ccr.author.id:
             return jsonify(message="You are not authorized to modify this CCR"), 403

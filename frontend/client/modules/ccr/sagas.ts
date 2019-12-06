@@ -5,7 +5,7 @@ import {
   postCCRDraft,
   getCCRDrafts,
   putCCR,
-  deleteCCRDraft as RDeleteCCRDraft,
+  deleteCCR as RDeleteCCRDraft,
   getCCR,
 } from 'api/api';
 import { getDrafts, getDraftById, getFormState } from './selectors';

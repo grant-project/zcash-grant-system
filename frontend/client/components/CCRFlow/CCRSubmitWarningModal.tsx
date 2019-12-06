@@ -1,10 +1,8 @@
 import React from 'react';
 import { Modal } from 'antd';
-import { CCRDraft } from 'types';
 import './CCRSubmitWarningModal.less';
 
 interface Props {
-  ccr: CCRDraft | null;
   isVisible: boolean;
   handleClose(): void;
   handleSubmit(): void;
