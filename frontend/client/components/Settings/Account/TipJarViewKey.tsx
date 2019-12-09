@@ -87,7 +87,7 @@ export default class TipJarViewKey extends React.Component<Props, State> {
           loading={isSaving}
           block
         >
-          Change tip jar view key
+          Change tip view key
         </Button>
       </Form>
     );
