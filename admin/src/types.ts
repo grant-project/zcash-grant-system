@@ -71,6 +71,7 @@ export interface ProposalArbiter {
   status: PROPOSAL_ARBITER_STATUS;
 }
 // NOTE: sync with backend/grant/utils/enums.py ProposalStatus
+// NOTE: `ARCHIVED` is missing from the statuses below because the backend filters out archived proposals from the admin app
 export enum PROPOSAL_STATUS {
   DRAFT = 'DRAFT',
   LIVE_DRAFT = 'LIVE_DRAFT',

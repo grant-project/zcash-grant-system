@@ -57,10 +57,12 @@ export class ProposalRevision extends React.Component<Props> {
         content = revisions.map((revision, index) => (
           <div key={revision.revisionId} className="ProposalRevision-revision">
             <h3 className="ProposalRevision-revision-title">
-              {moment(revision.dateCreated * 1000).format('MMMM Do, YYYY')}
+              {revision.revisionIndex === 0
+                ? 'Original Proposal'
+                : moment(revision.dateCreated * 1000).format('MMMM Do, YYYY')}
             </h3>
             <div className="ProposalRevision-revision-date">
-              {`Revision ${revision.revisionIndex + 1}`}
+              {revision.revisionIndex === 0 ? '' : `Revision ${revision.revisionIndex}`}
             </div>
             <div className="ProposalRevision-revision-body">
               {this.renderRevisionBody(revision)}

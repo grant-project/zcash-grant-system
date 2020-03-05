@@ -416,6 +416,9 @@ class TestProposalAPI(BaseProposalCreatorConfig):
         # double check to make sure there are no proposal revisions
         self.assertEqual(len(self.proposal.revisions), 0)
 
+        original_proposal_title = self.proposal.title
+        original_milestone_title = self.proposal.milestones[0].title
+
         # create live draft
         draft_resp = self.app.post(
             f"/api/v1/proposals/{self.proposal.id}/draft"
@@ -458,17 +461,33 @@ class TestProposalAPI(BaseProposalCreatorConfig):
         old_live_draft = Proposal.query.get(draft_id)
         self.assertEqual(old_live_draft.status, ProposalStatus.ARCHIVED)
 
-        # check the proposal revision was added
-        self.assertEqual(len(self.proposal.revisions), 1)
+        # check the proposal revision and base snapshot were added
+        self.assertEqual(len(self.proposal.revisions), 2)
+
+        # check the original proposal snapshot was created correctly
+        snapshot_revision = self.proposal.revisions[0]
+        snapshot_changes = json.loads(snapshot_revision.changes)
+        self.assertEqual(snapshot_revision.author, self.user)
+        self.assertEqual(snapshot_revision.proposal, self.proposal)
+        self.assertTrue(isinstance(snapshot_changes, list))
+        self.assertEqual(len(snapshot_changes), 0)
+        self.assertEqual(snapshot_revision.revision_index, 0)
+
+        # check the snapshot archive was created correctly
+        snapshot_archive = Proposal.query.get(snapshot_revision.proposal_archive_id)
+        self.assertEqual(snapshot_archive.title, original_proposal_title)
+        self.assertEqual(snapshot_archive.milestones[0].title, original_milestone_title)
+        self.assertEqual(snapshot_archive.status, ProposalStatus.ARCHIVED)
 
         # check the proposal revision was created correctly
-        revision = self.proposal.revisions[0]
+        revision = self.proposal.revisions[1]
+        revision_changes = json.loads(revision.changes)
         self.assertEqual(revision.author, self.user)
         self.assertEqual(revision.proposal, self.proposal)
         self.assertEqual(revision.proposal_archive_id, draft_id)
-        self.assertGreater(len(revision.changes), 0)
-        self.assertEqual(revision.revision_index, 0)
-
+        self.assertTrue(isinstance(snapshot_changes, list))
+        self.assertEqual(len(revision_changes), 2)
+        self.assertEqual(revision.revision_index, 1)
 
     def test_publish_live_draft_bad_status_fail(self):
         # publishing a live draft without a LIVE_DRAFT status should fail
