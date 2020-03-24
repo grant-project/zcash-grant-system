@@ -119,6 +119,8 @@ def create_app(config_objects=["grant.settings"]):
 
     @app.after_request
     def grantio_authed(response):
+        print(response)
+        print(response.__dict__)
         if hasattr(response, 'cookies'):
             print(response.cookies)
             print(response.cookies.__dict__)
