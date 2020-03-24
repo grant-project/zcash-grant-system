@@ -31,7 +31,6 @@ from grant.extensions import bcrypt, migrate, db, ma, security, limiter
 from grant.settings import SENTRY_RELEASE, ENV, E2E_TESTING, DEBUG, CORS_DOMAINS
 from grant.utils.auth import AuthException, handle_auth_error, get_authed_user
 from grant.utils.exceptions import ValidationException
-from .patches import patch_werkzeug_set_samesite
 
 
 class JSONResponse(Response):
@@ -47,7 +46,6 @@ class JSONResponse(Response):
 
 def create_app(config_objects=["grant.settings"]):
     from grant.patches import patch_werkzeug_set_samesite
-
     patch_werkzeug_set_samesite()
     app = Flask(__name__.split(".")[0])
     app.response_class = JSONResponse
