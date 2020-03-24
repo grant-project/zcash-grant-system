@@ -1,9 +1,8 @@
-import inspect
-import textwrap
-
-from werkzeug.wrappers import base_response
-from .base_response_fork import BaseResponse
+from werkzeug import http, wrappers
+import flask
+from .werkzeug_http_fork import dump_cookie
 
 
 def patch_werkzeug_set_samesite():
-    base_response.BaseResponse = BaseResponse
+    http.dump_cookie = dump_cookie
+    wrappers.base_response.dump_cookie = dump_cookie
