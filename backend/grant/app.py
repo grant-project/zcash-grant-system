@@ -6,11 +6,13 @@ import traceback
 import sentry_sdk
 from animal_case import animalify
 from flask import Flask, Response, jsonify, request, current_app, g
+from .patches import patch_werkzeug_set_samesite
 from flask_cors import CORS
 from flask_security import SQLAlchemyUserDatastore
 from flask_sslify import SSLify
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+
 from grant import (
     commands,
     proposal,
@@ -44,8 +46,11 @@ class JSONResponse(Response):
 
 
 def create_app(config_objects=["grant.settings"]):
+    patch_werkzeug_set_samesite()
     app = Flask(__name__.split(".")[0])
     app.response_class = JSONResponse
+
+
 
     @app.after_request
     def send_emails(response):
@@ -117,13 +122,9 @@ def create_app(config_objects=["grant.settings"]):
     # NOTE: testing mode does not honor this handler, and instead returns the generic 500 response
     app.register_error_handler(AuthException, handle_auth_error)
 
+
     @app.after_request
     def grantio_authed(response):
-        print(response)
-        print(response.__dict__)
-        if hasattr(response, 'cookies'):
-            print(response.cookies)
-            print(response.cookies.__dict__)
         response.headers["X-Grantio-Authed"] = 'yes' if get_authed_user() else 'no'
         return response
 
