@@ -1,6 +1,6 @@
 from werkzeug import http, wrappers
 
-from .werkzeug_http_fork import dump_cookie
+from grant.werkzeug_http_fork import dump_cookie
 
 
 def patch_werkzeug_set_samesite():
