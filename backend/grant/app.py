@@ -119,6 +119,8 @@ def create_app(config_objects=["grant.settings"]):
 
     @app.after_request
     def grantio_authed(response):
+        print(response.cookies)
+        print(response.cookies.__dict__)
         response.headers["X-Grantio-Authed"] = 'yes' if get_authed_user() else 'no'
         return response
 
