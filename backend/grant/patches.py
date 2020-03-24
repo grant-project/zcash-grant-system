@@ -1,5 +1,5 @@
 from werkzeug import http, wrappers
-import flask
+
 from .werkzeug_http_fork import dump_cookie
 
 
