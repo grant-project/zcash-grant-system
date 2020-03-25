@@ -138,26 +138,6 @@ class CreateFlow extends React.Component<Props, State> {
   private debouncedUpdateForm: (form: Partial<ProposalDraft>) => void;
   private pollInterval: ReturnType<typeof setInterval> | undefined;
 
-  private pollForTeamChanges = async () => {
-    const { form } = this.props;
-
-    if (this.state.isPolling) return;
-    if (form) {
-      this.setState({ isPolling: true });
-      try {
-        const {
-          data: { invites, team },
-        } = await getProposalInvites(form.proposalId);
-
-        if (!isEqual(form.invites, invites) || !isEqual(form.team, team)) {
-          this.updateForm({ invites, team });
-        }
-        // tslint:disable-next-line:no-empty
-      } catch {}
-      this.setState({ isPolling: false });
-    }
-  };
-
   constructor(props: Props) {
     super(props);
     const searchValues = qs.parse(props.location.search);
@@ -395,6 +375,26 @@ class CreateFlow extends React.Component<Props, State> {
         step: CREATE_STEP.REVIEW,
       });
     }, 50);
+  };
+
+  private pollForTeamChanges = async () => {
+    const { form } = this.props;
+
+    if (this.state.isPolling) return;
+    if (form) {
+      this.setState({ isPolling: true });
+      try {
+        const {
+          data: { invites, team },
+        } = await getProposalInvites(form.proposalId);
+
+        if (!isEqual(form.invites, invites) || !isEqual(form.team, team)) {
+          this.updateForm({ invites, team });
+        }
+        // tslint:disable-next-line:no-empty
+      } catch {}
+      this.setState({ isPolling: false });
+    }
   };
 }
 
