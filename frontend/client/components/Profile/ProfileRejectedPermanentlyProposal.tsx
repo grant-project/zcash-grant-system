@@ -40,7 +40,7 @@ class ProfilePending extends React.Component<Props, State> {
       <div className="ProfilePending">
         <div className="ProfilePending-block">
           <Link to={`/proposals/${proposalId}`} className="ProfilePending-title">
-            {title} <Tag color="red">{'Rejected Permanently'}</Tag>
+            {title} 
           </Link>
           <div className={`ProfilePending-status is-${status.toLowerCase()}`}>
             <div>This proposal has been rejected permanently:</div>
