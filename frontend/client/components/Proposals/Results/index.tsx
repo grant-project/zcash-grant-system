@@ -10,7 +10,23 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default class ProposalResults extends React.Component<Props, {}> {
+interface State {
+  minCardHeight: number;
+}
+
+export default class ProposalResults extends React.Component<Props, State> {
+  state: State = {
+    minCardHeight: 0,
+  };
+
+  public setMinCardHeight = (height: number) => {
+    if (height > this.state.minCardHeight) {
+      this.setState({
+        minCardHeight: height,
+      });
+    }
+  };
+
   render() {
     const {
       items,
@@ -41,7 +57,11 @@ export default class ProposalResults extends React.Component<Props, {}> {
         {!!items.length &&
           items.map(proposal => (
             <Col xl={8} lg={12} md={24} key={proposal.proposalId}>
-              <ProposalCard {...proposal} />
+              <ProposalCard
+                {...proposal}
+                setMinCardHeight={this.setMinCardHeight}
+                minCardHeight={this.state.minCardHeight}
+              />
             </Col>
           ))}
         {!!items.length && (
