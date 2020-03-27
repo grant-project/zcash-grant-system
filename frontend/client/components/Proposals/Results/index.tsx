@@ -10,7 +10,7 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default class ProposalResults extends React.Component<Props> {
+export default class ProposalResults extends React.Component<Props, {}> {
   render() {
     const {
       items,
