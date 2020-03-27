@@ -21,10 +21,23 @@ export class ProposalCard extends React.Component<Props> {
 
   state = { redirect: '' };
 
-  componentDidMount() {
+  updateCardHeight = () => {
     if (this.innerDiv && this.props.isVersionTwo) {
       const { height } = this.innerDiv.getBoundingClientRect();
       this.props.setMinCardHeight(height);
+    }
+  };
+
+  componentDidMount() {
+    if (this.props.isVersionTwo) {
+      window.addEventListener('resize', this.updateCardHeight);
+      this.updateCardHeight();
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.props.isVersionTwo) {
+      window.removeEventListener('resize', this.updateCardHeight);
     }
   }
 
@@ -83,10 +96,7 @@ export class ProposalCard extends React.Component<Props> {
 
     return (
       <Card className="ProposalCard" to={`/proposals/${proposalUrlId}`} title={title}>
-        <div
-          ref={e => (this.innerDiv = e)}
-          style={wrapperStyle}
-        >
+        <div ref={e => (this.innerDiv = e)} style={wrapperStyle}>
           {contributionMatching > 0 && (
             <div className="ProposalCard-ribbon">
               <span>

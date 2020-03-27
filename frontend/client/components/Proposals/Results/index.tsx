@@ -20,7 +20,7 @@ export default class ProposalResults extends React.Component<Props, State> {
   };
 
   public setMinCardHeight = (height: number) => {
-    if (height > this.state.minCardHeight) {
+    if (height > 0 && height !== this.state.minCardHeight) {
       this.setState({
         minCardHeight: height,
       });
