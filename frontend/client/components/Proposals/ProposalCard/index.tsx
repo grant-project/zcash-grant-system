@@ -10,8 +10,8 @@ import { formatUsd } from 'utils/formatters';
 import './style.less';
 
 interface OwnProps {
-  minCardHeight: number;
-  setMinCardHeight: (height: number) => void;
+  minCardHeight?: number;
+  setMinCardHeight?: (height: number) => void;
 }
 
 type Props = OwnProps & Proposal;
@@ -22,21 +22,21 @@ export class ProposalCard extends React.Component<Props> {
   state = { redirect: '' };
 
   updateCardHeight = () => {
-    if (this.innerDiv && this.props.isVersionTwo) {
+    if (this.innerDiv && this.props.isVersionTwo && this.props.setMinCardHeight) {
       const { height } = this.innerDiv.getBoundingClientRect();
       this.props.setMinCardHeight(height);
     }
   };
 
   componentDidMount() {
-    if (this.props.isVersionTwo) {
+    if (this.props.isVersionTwo && this.props.setMinCardHeight) {
       window.addEventListener('resize', this.updateCardHeight);
       this.updateCardHeight();
     }
   }
 
   componentWillUnmount() {
-    if (this.props.isVersionTwo) {
+    if (this.props.isVersionTwo && this.props.setMinCardHeight) {
       window.removeEventListener('resize', this.updateCardHeight);
     }
   }
@@ -85,7 +85,7 @@ export class ProposalCard extends React.Component<Props> {
     }
 
     let wrapperStyle = {};
-    if (!isVersionTwo) {
+    if (!isVersionTwo && this.props.setMinCardHeight) {
       wrapperStyle = {
         minHeight: `${minCardHeight}px`,
         display: 'flex',
