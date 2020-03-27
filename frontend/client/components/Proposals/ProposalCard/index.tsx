@@ -9,12 +9,8 @@ import UnitDisplay from 'components/UnitDisplay';
 import { formatUsd } from 'utils/formatters';
 import './style.less';
 
-
 export class ProposalCard extends React.Component<Proposal> {
-  innerDiv: HTMLDivElement | null = null;
-
   state = { redirect: '' };
-
   render() {
     if (this.state.redirect) {
       return <Redirect push to={this.state.redirect} />;
@@ -66,12 +62,7 @@ export class ProposalCard extends React.Component<Proposal> {
     };
 
     const cardTitle = (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
+      <div className="ProposalCard-title">
         <div>{title}</div>
 
         <div className="ProposalCard-team-avatars">

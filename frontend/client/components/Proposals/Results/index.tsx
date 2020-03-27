@@ -10,11 +10,7 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-interface State {
-  minCardHeight: number;
-}
-
-export default class ProposalResults extends React.Component<Props, State> {
+export default class ProposalResults extends React.Component<Props> {
   render() {
     const {
       items,
