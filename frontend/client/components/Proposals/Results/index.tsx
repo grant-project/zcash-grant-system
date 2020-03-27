@@ -15,18 +15,6 @@ interface State {
 }
 
 export default class ProposalResults extends React.Component<Props, State> {
-  state: State = {
-    minCardHeight: 0,
-  };
-
-  public setMinCardHeight = (height: number) => {
-    if (height > 0 && height !== this.state.minCardHeight) {
-      this.setState({
-        minCardHeight: height,
-      });
-    }
-  };
-
   render() {
     const {
       items,
@@ -57,11 +45,7 @@ export default class ProposalResults extends React.Component<Props, State> {
         {!!items.length &&
           items.map(proposal => (
             <Col xl={8} lg={12} md={24} key={proposal.proposalId}>
-              <ProposalCard
-                {...proposal}
-                setMinCardHeight={this.setMinCardHeight}
-                minCardHeight={this.state.minCardHeight}
-              />
+              <ProposalCard {...proposal} />
             </Col>
           ))}
         {!!items.length && (

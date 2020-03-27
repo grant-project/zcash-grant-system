@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { Redirect } from 'react-router-dom';
 import classnames from 'classnames';
 import { Progress, Tag } from 'antd';
@@ -9,37 +9,11 @@ import UnitDisplay from 'components/UnitDisplay';
 import { formatUsd } from 'utils/formatters';
 import './style.less';
 
-interface OwnProps {
-  minCardHeight?: number;
-  setMinCardHeight?: (height: number) => void;
-}
 
-type Props = OwnProps & Proposal;
-
-export class ProposalCard extends React.Component<Props> {
+export class ProposalCard extends React.Component<Proposal> {
   innerDiv: HTMLDivElement | null = null;
 
   state = { redirect: '' };
-
-  updateCardHeight = () => {
-    if (this.innerDiv && this.props.isVersionTwo && this.props.setMinCardHeight) {
-      const { height } = this.innerDiv.getBoundingClientRect();
-      this.props.setMinCardHeight(height);
-    }
-  };
-
-  componentDidMount() {
-    if (this.props.isVersionTwo && this.props.setMinCardHeight) {
-      window.addEventListener('resize', this.updateCardHeight);
-      this.updateCardHeight();
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.props.isVersionTwo && this.props.setMinCardHeight) {
-      window.removeEventListener('resize', this.updateCardHeight);
-    }
-  }
 
   render() {
     if (this.state.redirect) {
@@ -59,7 +33,6 @@ export class ProposalCard extends React.Component<Props> {
       percentFunded,
       acceptedWithFunding,
       status,
-      minCardHeight,
     } = this.props;
 
     // pulled from `variables.less`
@@ -84,85 +57,90 @@ export class ProposalCard extends React.Component<Props> {
       }
     }
 
-    let wrapperStyle = {};
-    if (!isVersionTwo && this.props.setMinCardHeight) {
-      wrapperStyle = {
-        minHeight: `${minCardHeight}px`,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-      };
-    }
+    const tagStyle: CSSProperties = {
+      marginRight: 0,
+      lineHeight: '1.25rem',
+      height: '1.35rem',
+      fontSize: '0.75rem',
+      ...(!tagMessage ? { opacity: 0 } : {}),
+    };
+
+    const cardTitle = (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div>{title}</div>
+
+        <div className="ProposalCard-team-avatars">
+          {[...team].reverse().map((u, idx) => (
+            <UserAvatar
+              key={idx}
+              className={`ProposalCard-team-avatars-avatar${isVersionTwo ? '' : '-v1'}`}
+              user={u}
+            />
+          ))}
+        </div>
+      </div>
+    );
 
     return (
-      <Card className="ProposalCard" to={`/proposals/${proposalUrlId}`} title={title}>
-        <div ref={e => (this.innerDiv = e)} style={wrapperStyle}>
-          {contributionMatching > 0 && (
-            <div className="ProposalCard-ribbon">
-              <span>
-                x2
-                <small>matching</small>
-              </span>
-            </div>
-          )}
-          {isVersionTwo && (
-            <div className="ProposalCard-funding">
-              <div className="ProposalCard-funding-raised">
-                {formatUsd(target.toString(10))}
-              </div>
-              <div
-                className="ProposalCard-funding-tag"
-                style={!tagMessage ? { opacity: 0 } : {}}
-              >
-                <Tag color={tagColor}>{tagMessage}</Tag>
-              </div>
-            </div>
-          )}
-
-          {!isVersionTwo && (
-            <>
-              <div className="ProposalCard-funding-v1">
-                <div className="ProposalCard-funding-v1-raised">
-                  <UnitDisplay value={funded} symbol="ZEC" /> <small>raised</small> of{' '}
-                  <UnitDisplay value={target} symbol="ZEC" /> goal
-                </div>
-                <div
-                  className={classnames({
-                    ['ProposalCard-funding-percent']: true,
-                    ['is-funded']: percentFunded >= 100,
-                  })}
-                >
-                  {percentFunded}%
-                </div>
-              </div>
-              <Progress
-                percent={percentFunded}
-                status={percentFunded >= 100 ? 'success' : 'active'}
-                showInfo={false}
-              />
-            </>
-          )}
-
-          <div className="ProposalCard-team">
-            <div className={`ProposalCard-team-name${isVersionTwo ? '' : '-v1'}`}>
-              {team[0].displayName}{' '}
-              {team.length > 1 && <small>+{team.length - 1} other</small>}
-            </div>
-            <div className="ProposalCard-team-avatars">
-              {[...team].reverse().map((u, idx) => (
-                <UserAvatar
-                  key={idx}
-                  className={`ProposalCard-team-avatars-avatar${
-                    isVersionTwo ? '' : '-v1'
-                  }`}
-                  user={u}
-                />
-              ))}
+      <Card className="ProposalCard" to={`/proposals/${proposalUrlId}`} title={cardTitle}>
+        {contributionMatching > 0 && (
+          <div className="ProposalCard-ribbon">
+            <span>
+              x2
+              <small>matching</small>
+            </span>
+          </div>
+        )}
+        {isVersionTwo && (
+          <div className="ProposalCard-funding">
+            <div className="ProposalCard-funding-raised">
+              {formatUsd(target.toString(10))}
             </div>
           </div>
-          <div className="ProposalCard-address">{proposalAddress}</div>
-          <Card.Info proposal={this.props} time={(datePublished || dateCreated) * 1000} />
+        )}
+
+        {!isVersionTwo && (
+          <>
+            <div className="ProposalCard-funding-v1">
+              <div className="ProposalCard-funding-v1-raised">
+                <UnitDisplay value={funded} symbol="ZEC" /> <small>raised</small> of{' '}
+                <UnitDisplay value={target} symbol="ZEC" /> goal
+              </div>
+              <div
+                className={classnames({
+                  ['ProposalCard-funding-percent']: true,
+                  ['is-funded']: percentFunded >= 100,
+                })}
+              >
+                {percentFunded}%
+              </div>
+            </div>
+            <Progress
+              percent={percentFunded}
+              status={percentFunded >= 100 ? 'success' : 'active'}
+              showInfo={false}
+            />
+          </>
+        )}
+
+        <div className="ProposalCard-team">
+          <div className={`ProposalCard-team-name${isVersionTwo ? '' : '-v1'}`}>
+            {team[0].displayName}{' '}
+            {team.length > 1 && <small>+{team.length - 1} other</small>}
+          </div>
+          {isVersionTwo && (
+            <Tag color={tagColor} style={tagStyle}>
+              {tagMessage}
+            </Tag>
+          )}
         </div>
+        <div className="ProposalCard-address">{proposalAddress}</div>
+        <Card.Info proposal={this.props} time={(datePublished || dateCreated) * 1000} />
       </Card>
     );
   }
