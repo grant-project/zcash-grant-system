@@ -26,6 +26,7 @@ from grant.utils.enums import (
 )
 from grant.utils.exceptions import ValidationException
 from grant.utils.misc import dt_to_unix, make_url, make_admin_url, gen_random_id
+from grant.utils.requests import blockchain_get
 from grant.utils.stubs import anonymous_user
 from grant.utils.validate import is_z_address_valid
 
@@ -1289,8 +1290,9 @@ class ProposalContributionSchema(ma.Schema):
     def get_addresses(self, obj):
         # Omit 'memo' and 'sprout' for now
         # NOTE: Add back in 'sapling' when ready
+        addresses = blockchain_get('/contribution/addresses', {'contributionId': obj.id})
         return {
-            'transparent': ''
+            'transparent': addresses['transparent'],
         }
 
     def get_is_anonymous(self, obj):
@@ -1323,6 +1325,7 @@ class AdminProposalContributionSchema(ma.Schema):
             "tx_id",
             "amount",
             "date_created",
+            "addresses",
             "refund_address",
             "refund_tx_id",
             "staking",
@@ -1332,10 +1335,13 @@ class AdminProposalContributionSchema(ma.Schema):
     proposal = ma.Nested("ProposalSchema")
     user = ma.Nested("UserSchema")
     date_created = ma.Method("get_date_created")
+    addresses = ma.Method("get_addresses")
 
     def get_date_created(self, obj):
         return dt_to_unix(obj.date_created)
 
+    def get_addresses(self, obj):
+        return blockchain_get('/contribution/addresses', {'contributionId': obj.id})
 
 
 admin_proposal_contribution_schema = AdminProposalContributionSchema()
